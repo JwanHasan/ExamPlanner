@@ -7,7 +7,7 @@ on:
     branches: [develop, main]
 
 jobs:
-   api:
+  api:
     name: Build & test API (C#)
     runs-on: ubuntu-latest
     defaults:
