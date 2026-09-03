@@ -17,8 +17,10 @@ public class Class
 
 // relation class can have 1 course and course can have many classes 
 
-public Course Course {get;set;}
-// relation enrollment has 1 class and class has many enrollment
+public required Course Course {get;set;}
+// relation enrollment has 1 class and class has 0 or  many enrollment
 public ICollection<Enrollment> Enrollments {get;set;} = new List<Enrollment>();
+
+
 
 }
