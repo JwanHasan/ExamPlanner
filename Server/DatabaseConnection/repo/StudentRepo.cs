@@ -19,6 +19,12 @@ public class StudentRepo : IStudentRepo
          
     }
 
+    public async Task DeleteByIdAsync(int id)
+    {
+        var student = await  GetByIdAsync(id);
+        await _context.Remove
+    }
+
     public async Task<List<Student>> GetAllAsync()
     {
        return await _context.Student.ToListAsync();
@@ -34,5 +40,10 @@ public class StudentRepo : IStudentRepo
     public async Task SaveChangesAsync()
     {
        await  _context.SaveChangesAsync();
+    }
+
+    public Task UpdtadecByIdAsync(int id)
+    {
+        throw new NotImplementedException();
     }
 }

@@ -5,7 +5,11 @@ public interface IStudentRepo
 
     Task<List<Student>> GetAllAsync();
 
-    Task AddAsync(Student department);
+    Task AddAsync(Student student);
+
+    Task UpdtadecByIdAsync(int id);
+
+    Task DeleteByIdAsync (int id);
 
     Task SaveChangesAsync();
 }
