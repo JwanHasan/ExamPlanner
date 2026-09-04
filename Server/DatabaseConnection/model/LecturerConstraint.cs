@@ -2,7 +2,7 @@ namespace DatabaseConnection.model;
 
 public class LecturerConstraint
 {
-    public required int ConstraintId{get;set;} //PK
+    public required int Id{get;set;} //PK
     public required int LecturerId{get;set;} //FK
     public DateTime ConstraintDate{get;set;}
     public required string ConstraintType{get;set;}
