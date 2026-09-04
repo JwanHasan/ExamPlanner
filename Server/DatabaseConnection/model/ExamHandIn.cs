@@ -1,4 +1,4 @@
-using System.Dynamic;
+namespace DatabaseConnection.model;
 
 public class ExamHandIn
 {

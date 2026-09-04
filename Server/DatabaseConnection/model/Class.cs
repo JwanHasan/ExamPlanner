@@ -1,9 +1,8 @@
-using System.Dynamic;
-
+namespace DatabaseConnection.model;
 public class Class
 {
     public int ClassID{get;set;} //PK
-    public int CourseId{get;set;} //FK
+    public required int CourseId{get;set;} //FK
     public required string ClassCode{get;set;} //CK
 
     public required string NickName{get;set;}
@@ -21,6 +20,7 @@ public required Course Course {get;set;}
 // relation enrollment has 1 class and class has 0 or  many enrollment
 public ICollection<Enrollment> Enrollments {get;set;} = new List<Enrollment>();
 
+public ICollection<ExamClass> ExamClasses {get;set;} = new List<ExamClass>();
 
 
 }

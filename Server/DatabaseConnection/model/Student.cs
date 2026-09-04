@@ -1,5 +1,4 @@
-using System.Diagnostics.Contracts;
-
+namespace DatabaseConnection.model;
 public class Student
 {
     public int StudentId {get;set;} //Pk

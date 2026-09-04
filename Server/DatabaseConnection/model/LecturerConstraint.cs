@@ -1,3 +1,5 @@
+namespace DatabaseConnection.model;
+
 public class LecturerConstraint
 {
     public required int ConstraintId{get;set;} //PK

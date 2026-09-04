@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore.Update.Internal;
+namespace DatabaseConnection.model;
 
 public class Enrollment
 {
