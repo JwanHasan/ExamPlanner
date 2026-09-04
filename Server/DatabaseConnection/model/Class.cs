@@ -1,7 +1,7 @@
 namespace DatabaseConnection.model;
 public class Class
 {
-    public int ClassID{get;set;} //PK
+    public int Id{get;set;} //PK
     public required int CourseId{get;set;} //FK
     public required string ClassCode{get;set;} //CK
 

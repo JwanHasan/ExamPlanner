@@ -7,7 +7,7 @@ public class ExamSession
         Ordinary, ReExam
     }
 
-    public required int ExamSessionId{get;set;} //PK
+    public required int Id{get;set;} //PK
     public required int ExamId {get;set;}//FK
     public DateTime ExamDate{get;set;}
     public Sessions SessionType {get;set;}

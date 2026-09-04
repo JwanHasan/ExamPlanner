@@ -1,21 +1,16 @@
-
-
-using System.Dynamic;
 using Microsoft.EntityFrameworkCore;
+
 using DatabaseConnection.model;
 public class AppDbContext : DbContext
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options)
-        :base (options)
-    {
-
-    }
+    
+        
     public DbSet<Class> Class {get;set;}
     public DbSet<ExamClass> ExamClass{get;set;}
     public DbSet<Course> Course {get;set;}
     public DbSet<Enrollment> Enrollment {get;set;}
     public DbSet<Exam>Exam {get;set;}
-    public DbSet<ExamHandIn>examHandIn {get;set;}
+    public DbSet<ExamHandIn>ExamHandIn {get;set;}
     public DbSet<ExamLecturer>ExamLecturer {get;set;}
     public DbSet<ExamSession>ExamSession {get;set;}
     public DbSet<Lecturer>Lecturer {get;set;}
@@ -38,9 +33,16 @@ public class AppDbContext : DbContext
     {
         
         modelBuilder.Entity<Course>()
+        
         .HasMany(c=> c.Classes)
         .WithOne(o=> o.Course)
         .HasForeignKey(o=>o.CourseId);
+
+        modelBuilder.Entity<Enrollment>()
+        .HasKey(e => new { e.StudentId, e.ClassId });
+
+        modelBuilder.Entity<ExamClass>()
+        .HasKey(e => new { e.ClassId, e.ExamId });
 
         modelBuilder.Entity<ExamClass>()
         .HasOne(e=>e.Exam)
@@ -78,6 +80,9 @@ public class AppDbContext : DbContext
         .HasForeignKey(c=>c.ExamId)
         .IsRequired();
 
+modelBuilder.Entity<ExamLecturer>()
+        .HasKey(e => new { e.LecturerId, e.ExamId });
+
         modelBuilder.Entity<ExamLecturer>()
         .HasOne(e=>e.Exam)
         .WithMany(ec=>ec.ExamLecturers)
@@ -95,6 +100,9 @@ public class AppDbContext : DbContext
         .WithMany(ec=>ec.LecturerConstraints)
         .HasForeignKey(c=>c.LecturerId)
         .IsRequired();
+
+
+        
     }
 
     

@@ -2,7 +2,7 @@ namespace DatabaseConnection.model;
 
 public class Lecturer
 {
- public int LecturerId {get;set;} //PK
+ public int Id {get;set;} //PK
  public required string Initials {get;set;} //CK
 
      // Exam lecture assign 1 lecturer and lecture can be 0 or many exam lecturer

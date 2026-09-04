@@ -2,7 +2,7 @@ namespace DatabaseConnection.model;
 
 public class ExamHandIn
 {
-    public required int HandInId {get;set;}//PK
+    public required int Id {get;set;}//PK
     public required int ExamId   {get;set;}//FK
     public required DateTime HandInDate{get;set;}
     public required DateTime HandInTime{get;set;}

@@ -6,7 +6,7 @@ public class Exam
     {
         Internal,External
     }
-    public int ExamId {get;set;} //PK
+    public int Id {get;set;} //PK
     public int GradingScale{get;set;}
     public Examiner ExaminerType {get;set;}
 
