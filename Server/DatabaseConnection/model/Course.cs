@@ -1,3 +1,5 @@
+namespace DatabaseConnection.model;
+
 public class Course
 {
     public int CourseId {get;set;} //PK

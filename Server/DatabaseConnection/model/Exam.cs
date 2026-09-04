@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
+namespace DatabaseConnection.model;
 
 public class Exam
 {
@@ -20,7 +20,7 @@ public class Exam
     public string Remarks {get;set;} = "";
 
     // relation Exam Class has 1 Exam and exam has 1 or many exam classes
-    public ICollection<ExamClass> ExamClasses {get;set;} = new List<ExamClass>();
+    public required ICollection<ExamClass> ExamClasses {get;set;} = new List<ExamClass>();
 
     // exam scheduled as exam session and can have 0 or many and exam session can only have 1 exam
 
@@ -31,5 +31,7 @@ public class Exam
 
     public ICollection<ExamHandIn> ExamHandIns{get;set;}= new List<ExamHandIn>();
 
+    // exam lecture in has only 1 exam and exam can have 0 or many exam lecture
 
+    public ICollection<ExamLecturer> ExamLecturers{get;set;}= new List<ExamLecturer>();
 }
