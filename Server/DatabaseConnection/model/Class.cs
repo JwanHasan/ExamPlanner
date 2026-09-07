@@ -10,13 +10,13 @@ public class Class
     public required int Semester {get;set;}
     public DateTime StartDate{get;set;}
     public DateTime EndDate{get;set;}
-    public required string ClassOffering {get;set;}
+    public required string CourseOffering {get;set;}
 
 
 
 // relation class can have 1 course and course can have many classes 
 
-public required Course Course {get;set;}
+public  Course? Course {get;set;}
 // relation enrollment has 1 class and class has 0 or  many enrollment
 public ICollection<Enrollment> Enrollments {get;set;} = new List<Enrollment>();
 

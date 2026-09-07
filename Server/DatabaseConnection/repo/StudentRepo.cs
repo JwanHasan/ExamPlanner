@@ -22,7 +22,7 @@ public class StudentRepo : IStudentRepo
     public async Task DeleteByIdAsync(int id)
     {
         var student = await  GetByIdAsync(id);
-        await _context.Remove
+         _context.Student.Remove(student);
     }
 
     public async Task<List<Student>> GetAllAsync()
