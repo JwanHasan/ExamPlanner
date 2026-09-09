@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./Website
+        working-directory: ./Website/exam-planner-app
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
