@@ -5,6 +5,10 @@ public class AppDbContext : DbContext
 {
     
         
+    public AppDbContext(DbContextOptions<AppDbContext> options)
+        : base(options)
+    {
+    }
     public DbSet<Class> Class {get;set;}
     public DbSet<ExamClass> ExamClass{get;set;}
     public DbSet<Course> Course {get;set;}
@@ -16,6 +20,7 @@ public class AppDbContext : DbContext
     public DbSet<Lecturer>Lecturer {get;set;}
     public DbSet<LecturerConstraint>LecturerConstraint {get;set;}
     public DbSet<Student>Student {get;set;}
+
 
 
 
