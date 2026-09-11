@@ -4,7 +4,10 @@ using DatabaseConnection.model;
 public class AppDbContext : DbContext
 {
     
-    
+    public AppDbContext(DbContextOptions<AppDbContext> options)
+        : base(options)
+    { 
+    }
     
     public DbSet<Class> Class {get;set;}
     public DbSet<ExamClass> ExamClass{get;set;}
