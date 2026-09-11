@@ -22,6 +22,10 @@ public class StudentRepo : IStudentRepo
     public async Task DeleteByIdAsync(int id)
     {
         var student = await  GetByIdAsync(id);
+        if (student==null)
+            return;
+
+        else
          _context.Student.Remove(student);
     }
 

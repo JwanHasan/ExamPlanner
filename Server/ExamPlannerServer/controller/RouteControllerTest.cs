@@ -5,10 +5,18 @@ namespace ExamPlannerServer.controller;
 [ApiController]
 [Route("api/[controller]")]
 public class RouteControllerTest : ControllerBase
+
 {
-    [HttpGet]
-    public IActionResult Get()
+    private readonly  IStudentRepo studentRepo;
+
+public RouteControllerTest(IStudentRepo repo)
     {
-        return Ok("it is working");
+        studentRepo = repo;
+    }
+    [HttpGet]
+    public async Task<IActionResult> Get()
+    {
+        var student = await studentRepo.GetByIdAsync(1);
+        return Ok(student);
     }
 }
