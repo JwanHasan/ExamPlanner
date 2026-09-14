@@ -5,9 +5,10 @@ info:
   version: 1.0.0
   description: >
     API contract for the Exam Planner web application.
-    The API supports authentication, planning-data import, exam scheduling,
-    conflict detection, student and examiner assignments, lecturer constraints,
-    schedule approval, schedule history, and anonymized export.
+    The API supports authentication, planning-data import,
+    exam scheduling, conflict detection, student and examiner
+    assignments, lecturer constraints, schedule approval,
+    schedule history, and anonymized export.
 
 servers:
   - url: /api/v1
