@@ -1,5 +1,5 @@
 # Exam Planner API Contract
-
+ 
 **Version:** 1.0  
 **Status:** Draft / team-review baseline  
 **API base path:** `/api/v1`  
