@@ -1,6 +1,9 @@
+namespace DatabaseConnection.DBContext;
+
 using Microsoft.EntityFrameworkCore;
 
 using DatabaseConnection.model;
+
 public class AppDbContext : DbContext
 {
     
@@ -26,11 +29,7 @@ public class AppDbContext : DbContext
 
     //setting up connection to database 
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        
-        optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=ExamPlanner;Username=postgres;Password=viaviavia");
-    }
+    
 
 
     // setting up relation between tables 

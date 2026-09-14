@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DatabaseConnection.Migrations
 {
     /// <inheritdoc />
-    public partial class _1 : Migration
+    public partial class jodahgwgg : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -86,7 +86,7 @@ namespace DatabaseConnection.Migrations
                     Semester = table.Column<int>(type: "integer", nullable: false),
                     StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     EndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    ClassOffering = table.Column<string>(type: "text", nullable: false)
+                    CourseOffering = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -100,7 +100,7 @@ namespace DatabaseConnection.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "examHandIn",
+                name: "ExamHandIn",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -113,9 +113,9 @@ namespace DatabaseConnection.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_examHandIn", x => x.Id);
+                    table.PrimaryKey("PK_ExamHandIn", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_examHandIn_Exam_ExamId",
+                        name: "FK_ExamHandIn_Exam_ExamId",
                         column: x => x.ExamId,
                         principalTable: "Exam",
                         principalColumn: "Id",
@@ -256,8 +256,8 @@ namespace DatabaseConnection.Migrations
                 column: "ExamId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_examHandIn_ExamId",
-                table: "examHandIn",
+                name: "IX_ExamHandIn_ExamId",
+                table: "ExamHandIn",
                 column: "ExamId");
 
             migrationBuilder.CreateIndex(
@@ -286,7 +286,7 @@ namespace DatabaseConnection.Migrations
                 name: "ExamClass");
 
             migrationBuilder.DropTable(
-                name: "examHandIn");
+                name: "ExamHandIn");
 
             migrationBuilder.DropTable(
                 name: "ExamLecturer");

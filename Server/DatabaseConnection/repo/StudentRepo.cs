@@ -3,6 +3,7 @@ using System.Xml.Schema;
 using DatabaseConnection.model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
+using DatabaseConnection.DBContext;
 
 public class StudentRepo : IStudentRepo
 {
