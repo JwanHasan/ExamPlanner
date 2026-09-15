@@ -8,10 +8,12 @@ using DatabaseConnection.DBContext;
 public class StudentRepo : IStudentRepo
 {
     private readonly AppDbContext _context;
+    private readonly List<Student> students;
 
     public StudentRepo(AppDbContext context)
     {
         _context= context;
+        students= _context.Student.ToList();
     }
     public async Task AddAsync(Student student)
     {
@@ -38,7 +40,7 @@ public class StudentRepo : IStudentRepo
 
     public async Task<Student?> GetByIdAsync(int id)
     {
-        var result = await _context.Student.FirstOrDefaultAsync(x => x.Id == id);
+        var result = students.FirstOrDefault(x=> x.Id==id); //await _context.Student.FirstOrDefaultAsync(x => x.Id == id);
         return result;
     }
 

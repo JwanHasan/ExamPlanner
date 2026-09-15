@@ -32,22 +32,24 @@ services:
         condition: service_healthy
     environment:
       ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=ExamPlanner;Username=postgres;Password=viaviavia"
+
   api:
     build:
       context: ./Server
       dockerfile: ExamPlannerServer/Dockerfile
-
     container_name: exam_planner_api
     restart: unless-stopped
-
     ports:
       - "8080:8080"
-
     environment:
-      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=ExamPlanner;Username=postgres;Password=viaviavia"
-
+      ASPNETCORE_URLS: "http://+:8080"
+      ASPNETCORE_ENVIRONMENT: "Development"
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=ExamPlanner;Username=postgres;Password=viaviavia"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
 
 volumes:
   postgres_data:
