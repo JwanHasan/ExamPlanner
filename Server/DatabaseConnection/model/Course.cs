@@ -5,7 +5,7 @@ public class Course
     public int Id {get;set;} //PK
     public string SueCode {get;set;}="";
     public required string Name {get;set;}
-    public int Ects {get;set;}
+    public int ETCS {get;set;}
     
 
     //relation 1 to 0..* between course and class
