@@ -13,7 +13,6 @@ public class StudentRepo : IStudentRepo
     public StudentRepo(AppDbContext context)
     {
         _context= context;
-        students= _context.Student.ToList();
     }
     public async Task AddAsync(Student student)
     {
@@ -30,6 +29,7 @@ public class StudentRepo : IStudentRepo
 
         else
          _context.Student.Remove(student);
+         
     }
 
     public async Task<List<Student>> GetAllAsync()
@@ -40,8 +40,8 @@ public class StudentRepo : IStudentRepo
 
     public async Task<Student?> GetByIdAsync(int id)
     {
-        var result = students.FirstOrDefault(x=> x.Id==id); //await _context.Student.FirstOrDefaultAsync(x => x.Id == id);
-        return result;
+        var student = await _context.Student.FirstOrDefaultAsync(x=> x.Id==id);
+        return student;
     }
 
     public async Task SaveChangesAsync()
