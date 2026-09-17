@@ -8,8 +8,6 @@ using DatabaseConnection.DBContext;
 public class StudentRepo : IStudentRepo
 {
     private readonly AppDbContext _context;
-    private readonly List<Student> students;
-
     public StudentRepo(AppDbContext context)
     {
         _context= context;

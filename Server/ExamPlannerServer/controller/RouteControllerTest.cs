@@ -16,7 +16,7 @@ public RouteControllerTest(IStudentRepo repo)
     [HttpGet]
     public async Task<IActionResult> Get()
     {
-        var student = await studentRepo.GetByIdAsync(2);
+        var student = await studentRepo.GetByIdAsync(4);
         return Ok(student);
     }
 }
