@@ -3,7 +3,7 @@ public interface IStudentRepo
 {
     Task<Student?> GetByIdAsync(int id);
 
-    Task<IEnumerable<Student>> GetAllAsync();
+    Task<List<Student>> GetAllAsync();
 
     Task<Student> AddAsync(Student student);
 

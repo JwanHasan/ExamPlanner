@@ -1,5 +1,6 @@
 using DatabaseConnection.model;
 using Microsoft.AspNetCore.Mvc;
+using ExamPlannerServer.Dto;
 
 namespace ExamPlannerServer.controller;
 
@@ -26,17 +27,33 @@ public RouteControllerTest(IStudentRepo repo)
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateStudent([FromBody] string username)
+    public async Task<IActionResult> CreateStudent([FromBody] CreateNewStudentDto studentDto)
     {
-       await  studentRepo.AddAsync(new Student{ Name = username});
-       return Ok(username);
+        var student = new Student{ Name = studentDto.Name, ViaId = studentDto.ViaId};
+
+       var createdStudent = await  studentRepo.AddAsync(student);
+       return Ok(createdStudent);
     }
 
     [HttpGet]
     public async Task<IActionResult> GetStudents()
     {
-        var students = studentRepo.GetAllAsync();
+        var students = await  studentRepo.GetAllAsync();
         return Ok(students);
     }
-    
+
+    [HttpPut]
+    public async Task<IActionResult> UpdateStudentAsync([FromBody] UpdateStudentDto updateStudentDto)
+    {
+        var student =await studentRepo.UpdateByIdAsync(updateStudentDto.Id,updateStudentDto.Name,updateStudentDto.ViaId);
+        if(student!=null) return Ok(student);
+        else return NotFound();
+    }
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult>DeleteStudent(int id)
+    {
+        var status = await studentRepo.DeleteByIdAsync(id);
+        if(!status) return NotFound();
+        else return Ok(status);
+    }
 }

@@ -32,7 +32,7 @@ public class StudentRepo : IStudentRepo
         else return false;
     }
 
-    public   async Task<IEnumerable<Student>> GetAllAsync()
+    public   async Task<List<Student>> GetAllAsync()
     {
       var list= await  _context.Student.ToListAsync();
         return list;
