@@ -4,6 +4,7 @@ using DatabaseConnection.model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
 using DatabaseConnection.DBContext;
+using System.Net.Http.Headers;
 
 public class StudentRepo : IStudentRepo
 {
@@ -12,28 +13,29 @@ public class StudentRepo : IStudentRepo
     {
         _context= context;
     }
-    public async Task AddAsync(Student student)
+    public async Task<Student> AddAsync(Student student)
     {
          await _context.Student.AddAsync(student);
          await SaveChangesAsync();
+         return student;
          
     }
 
-    public async Task DeleteByIdAsync(int id)
+    public async Task<bool> DeleteByIdAsync(int id)
     {
         var student = await  GetByIdAsync(id);
-        if (student==null)
-            return;
-
-        else
-         _context.Student.Remove(student);
-         
+        if (student!=null)
+        {_context.Student.Remove(student);
+            await  SaveChangesAsync();
+            return true;
+        }
+        else return false;
     }
 
-    public async Task<List<Student>> GetAllAsync()
+    public   async Task<IEnumerable<Student>> GetAllAsync()
     {
-       return await _context.Student.ToListAsync();
-        
+      var list= await  _context.Student.ToListAsync();
+        return list;
     }
 
     public async Task<Student?> GetByIdAsync(int id)
@@ -47,8 +49,16 @@ public class StudentRepo : IStudentRepo
        await  _context.SaveChangesAsync();
     }
 
-    public Task UpdtadecByIdAsync(int id)
+    public async Task<Student> UpdateByIdAsync(int id, string name, int viaId)
     {
-        throw new NotImplementedException();
+        var student = await GetByIdAsync(id);
+        if(student!= null)
+        {
+            student.Name = name;
+            student.ViaId=viaId;
+             await SaveChangesAsync();
+             return student;
+        }
+         else return null;
     }
 }

@@ -3,13 +3,13 @@ public interface IStudentRepo
 {
     Task<Student?> GetByIdAsync(int id);
 
-    Task<List<Student>> GetAllAsync();
+    Task<IEnumerable<Student>> GetAllAsync();
 
-    Task AddAsync(Student student);
+    Task<Student> AddAsync(Student student);
 
-    Task UpdtadecByIdAsync(int id);
+    Task<Student> UpdateByIdAsync(int id, string name, int viaId);
 
-    Task DeleteByIdAsync (int id);
+    Task<bool> DeleteByIdAsync (int id);
 
     Task SaveChangesAsync();
 }

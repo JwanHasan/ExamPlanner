@@ -3,6 +3,7 @@ namespace DatabaseConnection.DBContext;
 using Microsoft.EntityFrameworkCore;
 
 using DatabaseConnection.model;
+using System.Reflection.Emit;
 
 public class AppDbContext : DbContext
 {
@@ -12,6 +13,7 @@ public class AppDbContext : DbContext
     { 
     }
     
+    public DbSet<Users> Users{get;set;}
     public DbSet<Class> Class {get;set;}
     public DbSet<ExamClass> ExamClass{get;set;}
     public DbSet<Course> Course {get;set;}
@@ -35,6 +37,7 @@ public class AppDbContext : DbContext
     // setting up relation between tables 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Users>().HasKey(e => new {e.Email});
         
         modelBuilder.Entity<Course>()
         
