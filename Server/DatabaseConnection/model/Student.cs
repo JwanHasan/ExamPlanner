@@ -4,6 +4,7 @@ namespace DatabaseConnection.model;
 public class Student
 {
     public int Id {get;set;} //Pk
+    public int ViaId{get;set;}
     public  string Name {get;set;} = "No name provided";
 
 

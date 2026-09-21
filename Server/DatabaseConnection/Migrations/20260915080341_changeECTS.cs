@@ -5,24 +5,24 @@
 namespace DatabaseConnection.Migrations
 {
     /// <inheritdoc />
-    public partial class changedNaming : Migration
+    public partial class changeECTS : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.RenameColumn(
-                name: "ClassOffering",
-                table: "Class",
-                newName: "CourseOffering");
+                name: "Ects",
+                table: "Course",
+                newName: "ETCS");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.RenameColumn(
-                name: "CourseOffering",
-                table: "Class",
-                newName: "ClassOffering");
+                name: "ETCS",
+                table: "Course",
+                newName: "Ects");
         }
     }
 }

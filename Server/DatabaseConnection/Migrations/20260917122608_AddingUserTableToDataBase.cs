@@ -5,7 +5,7 @@
 namespace DatabaseConnection.Migrations
 {
     /// <inheritdoc />
-    public partial class something : Migration
+    public partial class AddingUserTableToDataBase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

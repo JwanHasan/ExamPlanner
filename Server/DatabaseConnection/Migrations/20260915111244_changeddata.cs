@@ -5,7 +5,7 @@
 namespace DatabaseConnection.Migrations
 {
     /// <inheritdoc />
-    public partial class something2 : Migration
+    public partial class changeddata : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
