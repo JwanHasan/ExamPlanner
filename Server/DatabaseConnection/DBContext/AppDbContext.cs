@@ -13,31 +13,29 @@ public class AppDbContext : DbContext
     { 
     }
     
-    public DbSet<Users> Users{get;set;}
-    public DbSet<Class> Class {get;set;}
-    public DbSet<ExamClass> ExamClass{get;set;}
-    public DbSet<Course> Course {get;set;}
-    public DbSet<Enrollment> Enrollment {get;set;}
-    public DbSet<Exam>Exam {get;set;}
-    public DbSet<ExamHandIn>ExamHandIn {get;set;}
-    public DbSet<ExamLecturer>ExamLecturer {get;set;}
-    public DbSet<ExamSession>ExamSession {get;set;}
-    public DbSet<Lecturer>Lecturer {get;set;}
-    public DbSet<LecturerConstraint>LecturerConstraint {get;set;}
-    public DbSet<Student>Student {get;set;}
-
-
-
-
-    //setting up connection to database 
-
-    
-
+    public DbSet<UserAccount> UserAccount{get;set;}//*
+    public DbSet<Class> Class {get;set;} //
+    public DbSet<ExamClass> ExamClass{get;set;}//
+    public DbSet<Course> Course {get;set;}//
+    public DbSet<Enrollment> Enrollment {get;set;}//
+    public DbSet<Exam>Exam {get;set;}//
+    public DbSet<ExamDay> ExamDay{get;set;}//*
+    public DbSet<ExamHandIn>ExamHandIn {get;set;}//
+    public DbSet<ExamLecturer>ExamLecturer {get;set;}//
+    public DbSet<ExamSession>ExamSession {get;set;}//
+    public DbSet<ExamSessionRoom> ExamSessionRoom{get;set;}//*
+    public DbSet<Lecturer>Lecturer {get;set;}//
+    public DbSet<LecturerConstraint>LecturerConstraint {get;set;}//
+    public DbSet<Random> Room{get;set;}//*
+    public DbSet<Schedule> Schedule {get;set;}//*
+    public DbSet<ScheduleReview> ScheduleReview{get;set;}//*
+    public DbSet<Student>Student {get;set;}//
+    public DbSet<StudentExamAssignment> StudentExamAssignment {get;set;}//*
 
     // setting up relation between tables 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Users>().HasKey(e => new {e.Email});
+        modelBuilder.Entity<UserAccount>().HasKey(e => new {e.Id});
         
         modelBuilder.Entity<Course>()
         
