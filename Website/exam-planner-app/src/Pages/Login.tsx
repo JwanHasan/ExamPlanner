@@ -73,6 +73,10 @@ const Login = () => {
                     <a className="login-help" href="#/reset-password">
                         I don't remember my email or password
                     </a>
+                    <button className="temp-button" onClick={() => navigate("/Main")}>
+                        Temporary button to go to the main page while backend don't have shit
+                    </button>
+
                 </form>
             </section>
         </main>
