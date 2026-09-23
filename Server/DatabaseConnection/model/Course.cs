@@ -4,7 +4,7 @@ public class Course
 {
     public int Id {get;set;} //PK
     public string SueCode {get;set;}="";
-    public required string Name {get;set;}
+    public string Name {get;set;} ="";
     public int ETCS {get;set;}
     
 

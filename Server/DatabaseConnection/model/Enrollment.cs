@@ -8,7 +8,7 @@ public class Enrollment
 
     // relation Enrollment must have 1 Class and Class can have 0 or many Enrollment
 
-    public required Class Class{get;set;}
+    public  Class Class{get;set;} = new Class();
     // Enrollment has 1 student and student have many enrollment 
-    public required Student Student{get;set;}
+    public  Student Student{get;set;} = new Student();
 }
