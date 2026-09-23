@@ -7,6 +7,7 @@ public class ExamSession
 {
     public required int Id{get;set;} //PK
     public required int ExamId {get;set;}//FK
+    public required int ScheduleId{get;set;}
     public DateTime ExamDate{get;set;}
     public SessionType SessionType {get;set;}
 
@@ -17,5 +18,5 @@ public class ExamSession
     // exam session has 1 Exam and exam can have 0 or many Exam Session
     public required Exam Exam{get;set;}
     public required Schedule Schedule{get;set;}
-
+    public ICollection<ExamSessionRoom>? ExamSessionRooms{get;set;}
 }
