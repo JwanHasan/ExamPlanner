@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
 using DatabaseConnection.DBContext;
 using System.Net.Http.Headers;
+using DatabaseConnection.dto;
 
 public class StudentRepo : IStudentRepo
 {
@@ -13,12 +14,13 @@ public class StudentRepo : IStudentRepo
     {
         _context= context;
     }
-    public async Task<Student> AddAsync(Student student)
+    public async Task<Student> AddAsync(StudentDto student)
     {
-         await _context.Student.AddAsync(student);
-         await SaveChangesAsync();
-         return student;
-         
+        var newStudent= new Student{ Name= student.Name, UserAccountId = student.UserAccountId, ViaId = student.ViaId};
+        await _context.Student.AddAsync(newStudent);
+        await SaveChangesAsync();
+        return newStudent;
+        
     }
 
     public async Task<bool> DeleteByIdAsync(int id)
@@ -34,7 +36,7 @@ public class StudentRepo : IStudentRepo
 
     public   async Task<List<Student>> GetAllAsync()
     {
-      var list= await  _context.Student.ToListAsync();
+        var list= await  _context.Student.ToListAsync();
         return list;
     }
 
@@ -44,21 +46,28 @@ public class StudentRepo : IStudentRepo
         return student;
     }
 
-    public async Task SaveChangesAsync()
+    public async Task<Student?> GetByViaIdAsync(int viaId)
     {
-       await  _context.SaveChangesAsync();
+        var student = await _context.Student.FirstOrDefaultAsync(x=> x.ViaId==viaId);
+        return student;
     }
 
-    public async Task<Student> UpdateByIdAsync(int id, string name, int viaId)
+    public async Task SaveChangesAsync()
+    {
+        await  _context.SaveChangesAsync();
+    }
+
+    public async Task<Student?> UpdateByIdAsync(int id, StudentDto studentDto)
     {
         var student = await GetByIdAsync(id);
-        if(student!= null)
-        {
-            student.Name = name;
-            student.ViaId=viaId;
-             await SaveChangesAsync();
-             return student;
-        }
-         else return null;
+        if(student is null)
+            return null;
+        
+        student.Name = studentDto.Name;
+        student.ViaId= studentDto.ViaId;
+        student.UserAccountId = studentDto.UserAccountId;
+        await SaveChangesAsync();
+        return student;
+
     }
 }

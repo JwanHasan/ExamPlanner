@@ -52,7 +52,7 @@ public class EnrollmentRepo : IEnrollmentRepo
     public async Task<List<Student>> GetStudentsByClassId(int id)
     {
         var query =  _context.Enrollment.Where(e=> e.ClassId == id).Select(e=> e.Student);
-       return await query.ToListAsync();
+        return await query.ToListAsync();
     }
 
     public async Task<Enrollment?> UpdateEnrollmentAsync(int studentId, int classId,EnrollmentDto enrollmentDto)

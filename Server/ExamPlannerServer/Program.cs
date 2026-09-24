@@ -1,4 +1,6 @@
 using DatabaseConnection.DBContext;
+using DatabaseConnection.model;
+using DatabaseConnection.repo;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +12,12 @@ builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
 builder.Services.AddScoped<IStudentRepo,StudentRepo>();
+builder.Services.AddScoped<IClassRepo,ClassRepo>();
+builder.Services.AddScoped<ICourseRepo,CourseRepo>();
+builder.Services.AddScoped<IEnrollmentRepo,EnrollmentRepo>();
+
+
+
 
 builder.Services.AddDbContext<AppDbContext>(options=> options.UseNpgsql(
     builder.Configuration.GetConnectionString("DefaultConnection")
