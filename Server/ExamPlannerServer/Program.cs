@@ -1,4 +1,5 @@
 using DatabaseConnection.DBContext;
+using ExamPlannerServer.Service;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +11,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
 builder.Services.AddScoped<IStudentRepo,StudentRepo>();
+builder.Services.AddScoped<ICourseService, CourseService>();
 
 builder.Services.AddDbContext<AppDbContext>(options=> options.UseNpgsql(
     builder.Configuration.GetConnectionString("DefaultConnection")
