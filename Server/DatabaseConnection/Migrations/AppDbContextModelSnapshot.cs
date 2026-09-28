@@ -91,18 +91,15 @@ namespace DatabaseConnection.Migrations
 
             modelBuilder.Entity("DatabaseConnection.model.Enrollment", b =>
                 {
-                    b.Property<int>("StudentId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("ClassId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("Attempt")
+                    b.Property<int>("StudentId")
                         .HasColumnType("integer");
 
-                    b.HasKey("StudentId", "ClassId");
+                    b.HasKey("ClassId", "StudentId");
 
-                    b.HasIndex("ClassId");
+                    b.HasIndex("StudentId");
 
                     b.ToTable("Enrollment");
                 });
@@ -130,8 +127,9 @@ namespace DatabaseConnection.Migrations
                     b.Property<int>("ExaminerType")
                         .HasColumnType("integer");
 
-                    b.Property<int>("GradingScale")
-                        .HasColumnType("integer");
+                    b.Property<string>("GradingScale")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("PlanningResponsible")
                         .IsRequired()
@@ -152,17 +150,44 @@ namespace DatabaseConnection.Migrations
 
             modelBuilder.Entity("DatabaseConnection.model.ExamClass", b =>
                 {
-                    b.Property<int>("ClassId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("ExamId")
                         .HasColumnType("integer");
 
-                    b.HasKey("ClassId", "ExamId");
+                    b.Property<int>("ClassId")
+                        .HasColumnType("integer");
 
-                    b.HasIndex("ExamId");
+                    b.HasKey("ExamId", "ClassId");
+
+                    b.HasIndex("ClassId");
 
                     b.ToTable("ExamClass");
+                });
+
+            modelBuilder.Entity("DatabaseConnection.model.ExamDay", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ExaminerType")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ScheduleId")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("Useable")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ScheduleId");
+
+                    b.ToTable("ExamDay");
                 });
 
             modelBuilder.Entity("DatabaseConnection.model.ExamHandIn", b =>
@@ -198,19 +223,19 @@ namespace DatabaseConnection.Migrations
 
             modelBuilder.Entity("DatabaseConnection.model.ExamLecturer", b =>
                 {
-                    b.Property<int>("LecturerId")
+                    b.Property<int>("ExamId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("ExamId")
+                    b.Property<int>("LecturerId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Role")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("LecturerId", "ExamId");
+                    b.HasKey("ExamId", "LecturerId");
 
-                    b.HasIndex("ExamId");
+                    b.HasIndex("LecturerId");
 
                     b.ToTable("ExamLecturer");
                 });
@@ -229,8 +254,14 @@ namespace DatabaseConnection.Migrations
                     b.Property<int>("ExamId")
                         .HasColumnType("integer");
 
+                    b.Property<bool>("Locked")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Note")
                         .HasColumnType("text");
+
+                    b.Property<int>("ScheduleId")
+                        .HasColumnType("integer");
 
                     b.Property<int>("SessionType")
                         .HasColumnType("integer");
@@ -239,7 +270,24 @@ namespace DatabaseConnection.Migrations
 
                     b.HasIndex("ExamId");
 
+                    b.HasIndex("ScheduleId");
+
                     b.ToTable("ExamSession");
+                });
+
+            modelBuilder.Entity("DatabaseConnection.model.ExamSessionRoom", b =>
+                {
+                    b.Property<int>("ExamSessionId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RoomId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ExamSessionId", "RoomId");
+
+                    b.HasIndex("RoomId");
+
+                    b.ToTable("ExamSessionRoom");
                 });
 
             modelBuilder.Entity("DatabaseConnection.model.Lecturer", b =>
@@ -254,7 +302,13 @@ namespace DatabaseConnection.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("UserAccountId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserAccountId")
+                        .IsUnique();
 
                     b.ToTable("Lecturer");
                 });
@@ -270,9 +324,8 @@ namespace DatabaseConnection.Migrations
                     b.Property<DateTime>("ConstraintDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("ConstraintType")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("ConstraintType")
+                        .HasColumnType("integer");
 
                     b.Property<int>("LecturerId")
                         .HasColumnType("integer");
@@ -288,6 +341,55 @@ namespace DatabaseConnection.Migrations
                     b.ToTable("LecturerConstraint");
                 });
 
+            modelBuilder.Entity("DatabaseConnection.model.Room", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Campus")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Capacity")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("RoomCode")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Room");
+                });
+
+            modelBuilder.Entity("DatabaseConnection.model.ScheduleReview", b =>
+                {
+                    b.Property<int>("LecturerId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ScheduleId")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("Approved")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("Completed")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Remarks")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("LecturerId", "ScheduleId");
+
+                    b.HasIndex("ScheduleId");
+
+                    b.ToTable("ScheduleReview");
+                });
+
             modelBuilder.Entity("DatabaseConnection.model.Student", b =>
                 {
                     b.Property<int>("Id")
@@ -300,26 +402,83 @@ namespace DatabaseConnection.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("UserAccountId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("ViaId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("UserAccountId")
+                        .IsUnique();
+
                     b.ToTable("Student");
                 });
 
-            modelBuilder.Entity("DatabaseConnection.model.Users", b =>
+            modelBuilder.Entity("DatabaseConnection.model.StudentExamAssignment", b =>
                 {
-                    b.Property<string>("Email")
-                        .HasColumnType("text");
+                    b.Property<int>("StudentId")
+                        .HasColumnType("integer");
 
-                    b.Property<string>("Password")
+                    b.Property<int>("ExamId")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("ExtraTime")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("StudentId", "ExamId");
+
+                    b.HasIndex("ExamId");
+
+                    b.ToTable("StudentExamAssignment");
+                });
+
+            modelBuilder.Entity("DatabaseConnection.model.UserAccount", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("Email");
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                    b.ToTable("Users");
+                    b.Property<int>("userRole")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserAccount");
+                });
+
+            modelBuilder.Entity("Schedule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Approved")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("version")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Schedule");
                 });
 
             modelBuilder.Entity("DatabaseConnection.model.Class", b =>
@@ -371,6 +530,17 @@ namespace DatabaseConnection.Migrations
                     b.Navigation("Exam");
                 });
 
+            modelBuilder.Entity("DatabaseConnection.model.ExamDay", b =>
+                {
+                    b.HasOne("Schedule", "Schedule")
+                        .WithMany("ExamDays")
+                        .HasForeignKey("ScheduleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Schedule");
+                });
+
             modelBuilder.Entity("DatabaseConnection.model.ExamHandIn", b =>
                 {
                     b.HasOne("DatabaseConnection.model.Exam", "Exam")
@@ -409,7 +579,45 @@ namespace DatabaseConnection.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Schedule", "Schedule")
+                        .WithMany("ExamSessions")
+                        .HasForeignKey("ScheduleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Exam");
+
+                    b.Navigation("Schedule");
+                });
+
+            modelBuilder.Entity("DatabaseConnection.model.ExamSessionRoom", b =>
+                {
+                    b.HasOne("DatabaseConnection.model.ExamSession", "ExamSession")
+                        .WithMany("ExamSessionRooms")
+                        .HasForeignKey("ExamSessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DatabaseConnection.model.Room", "Room")
+                        .WithMany("ExamSessionRooms")
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ExamSession");
+
+                    b.Navigation("Room");
+                });
+
+            modelBuilder.Entity("DatabaseConnection.model.Lecturer", b =>
+                {
+                    b.HasOne("DatabaseConnection.model.UserAccount", "UserAccount")
+                        .WithOne("LecturerAccount")
+                        .HasForeignKey("DatabaseConnection.model.Lecturer", "UserAccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("UserAccount");
                 });
 
             modelBuilder.Entity("DatabaseConnection.model.LecturerConstraint", b =>
@@ -421,6 +629,55 @@ namespace DatabaseConnection.Migrations
                         .IsRequired();
 
                     b.Navigation("Lecturer");
+                });
+
+            modelBuilder.Entity("DatabaseConnection.model.ScheduleReview", b =>
+                {
+                    b.HasOne("DatabaseConnection.model.Lecturer", "Lecturer")
+                        .WithMany("ScheduleReviews")
+                        .HasForeignKey("LecturerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Schedule", "Schedule")
+                        .WithMany("ScheduleReviews")
+                        .HasForeignKey("ScheduleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lecturer");
+
+                    b.Navigation("Schedule");
+                });
+
+            modelBuilder.Entity("DatabaseConnection.model.Student", b =>
+                {
+                    b.HasOne("DatabaseConnection.model.UserAccount", "UserAccount")
+                        .WithOne("StudentAccount")
+                        .HasForeignKey("DatabaseConnection.model.Student", "UserAccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("UserAccount");
+                });
+
+            modelBuilder.Entity("DatabaseConnection.model.StudentExamAssignment", b =>
+                {
+                    b.HasOne("DatabaseConnection.model.Exam", "Exam")
+                        .WithMany("StudentExamAssignments")
+                        .HasForeignKey("ExamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DatabaseConnection.model.Student", "Student")
+                        .WithMany("ExamAssignments")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Exam");
+
+                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("DatabaseConnection.model.Class", b =>
@@ -444,6 +701,13 @@ namespace DatabaseConnection.Migrations
                     b.Navigation("ExamLecturers");
 
                     b.Navigation("ExamSessions");
+
+                    b.Navigation("StudentExamAssignments");
+                });
+
+            modelBuilder.Entity("DatabaseConnection.model.ExamSession", b =>
+                {
+                    b.Navigation("ExamSessionRooms");
                 });
 
             modelBuilder.Entity("DatabaseConnection.model.Lecturer", b =>
@@ -451,11 +715,36 @@ namespace DatabaseConnection.Migrations
                     b.Navigation("ExamLecturers");
 
                     b.Navigation("LecturerConstraints");
+
+                    b.Navigation("ScheduleReviews");
+                });
+
+            modelBuilder.Entity("DatabaseConnection.model.Room", b =>
+                {
+                    b.Navigation("ExamSessionRooms");
                 });
 
             modelBuilder.Entity("DatabaseConnection.model.Student", b =>
                 {
                     b.Navigation("Enrollments");
+
+                    b.Navigation("ExamAssignments");
+                });
+
+            modelBuilder.Entity("DatabaseConnection.model.UserAccount", b =>
+                {
+                    b.Navigation("LecturerAccount");
+
+                    b.Navigation("StudentAccount");
+                });
+
+            modelBuilder.Entity("Schedule", b =>
+                {
+                    b.Navigation("ExamDays");
+
+                    b.Navigation("ExamSessions");
+
+                    b.Navigation("ScheduleReviews");
                 });
 #pragma warning restore 612, 618
         }

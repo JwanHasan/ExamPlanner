@@ -1,15 +1,19 @@
+using DatabaseConnection.dto;
 using DatabaseConnection.model;
 public interface IStudentRepo
 {
     Task<Student?> GetByIdAsync(int id);
+    Task<Student?> GetByViaIdAsync(int viaId) ;
 
     Task<List<Student>> GetAllAsync();
 
-    Task<Student> AddAsync(Student student);
+    Task<Student> AddAsync(StudentDto student);
 
-    Task<Student> UpdateByIdAsync(int id, string name, int viaId);
+    Task<Student?> UpdateByIdAsync(int id, StudentDto studentDto);
 
-    Task<bool> DeleteByIdAsync (int id);
+    Task<bool> DeleteByIdAsync(int id);
+
+
 
     Task SaveChangesAsync();
 }

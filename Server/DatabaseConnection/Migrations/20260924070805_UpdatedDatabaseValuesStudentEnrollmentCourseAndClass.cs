@@ -5,7 +5,7 @@
 namespace DatabaseConnection.Migrations
 {
     /// <inheritdoc />
-    public partial class EnsuringMigrationAplliedToDocker : Migration
+    public partial class UpdatedDatabaseValuesStudentEnrollmentCourseAndClass : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

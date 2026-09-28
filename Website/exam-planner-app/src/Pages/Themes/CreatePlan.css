@@ -1,0 +1,22 @@
+.main-page {
+  min-height: 100dvh;
+  background: rgba(255, 255, 255, 0.2) center / cover no-repeat;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.main-header {
+  padding: .00001% 1% .00001%;
+}
+
+.main-logo {
+  width: 10%;
+  height: auto;
+  display: grid;
+}
+
+.tempHeader {
+  color: black;
+  font-weight: bold;
+}
