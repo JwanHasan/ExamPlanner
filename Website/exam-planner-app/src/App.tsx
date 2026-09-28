@@ -1,8 +1,8 @@
 import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./Pages/Login.tsx";
 import Main from "./Pages/Main.tsx";
-import { AuthProvider } from "./auth/AuthContext.tsx";
-import { RequireAuth } from "./auth/RequireAuth.tsx";
+import { AuthProvider } from "./api/features/auth/AuthContext.tsx";
+import { RequireAuth } from "./api/features/auth/RequireAuth.tsx";
 import "./App.css";
 import EditPlan from "./Pages/EditPlan.tsx";
 import CreatePlan from "./Pages/CreatePlan.tsx";
