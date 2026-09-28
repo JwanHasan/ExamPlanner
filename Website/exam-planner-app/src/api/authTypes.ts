@@ -1,3 +1,8 @@
+export type UserRole =
+    | "Admin"
+    | "Teacher"
+    | "Student";
+
 export interface LoginRequest {
     email: string;
     password: string;
@@ -6,7 +11,7 @@ export interface LoginRequest {
 export interface AuthUser {
     email: string;
     name: string;
-    role: string;
+    role: UserRole;
 }
 
 export interface JwtPayload {
@@ -15,5 +20,6 @@ export interface JwtPayload {
     name?: string;
     role?: string;
     exp?: number;
+
     [key: string]: unknown;
 }

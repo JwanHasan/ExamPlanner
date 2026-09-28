@@ -1,30 +1,88 @@
-import api, { TOKEN_COOKIE } from "./axiosInstance.ts";
 import Cookies from "js-cookie";
-import { decodeToken, isExpired } from "./jwtUtils";
-import type { AuthUser, LoginRequest } from "./authTypes";
 
-export { getErrorMessage } from "./errorHandler";
+import api, {
+    TOKEN_COOKIE
+} from "./axiosInstance";
 
+import {
+    decodeToken,
+    isExpired
+} from "./jwtUtils";
 
-export const login = async (credentials: LoginRequest): Promise<AuthUser> => {
-    const response = await api.post<string>("/auth/login", credentials);
-    const token = response.data;
+import type {
+    AuthUser,
+    LoginRequest,
+    UserRole
+} from "./authTypes";
 
-    const payload = decodeToken(token);
-    if (!payload) {
-        throw new Error("The server returned a token that could not be read.");
+export {
+    getErrorMessage
+} from "./errorHandler";
+
+const normalizeRole = (
+    role?: string
+): UserRole => {
+
+    const normalized =
+        role?.toLowerCase();
+
+    if (normalized === "teacher") {
+        return "Teacher";
     }
 
-    Cookies.set(TOKEN_COOKIE, token, {
-        sameSite: "Lax",
-        secure: window.location.protocol === "https:",
-        expires: 1
-    });
+    if (normalized === "student") {
+        return "Student";
+    }
+
+    return "Admin";
+};
+
+export const login = async (
+    credentials: LoginRequest
+): Promise<AuthUser> => {
+
+    const response =
+        await api.post<string>(
+            "/auth/login",
+            credentials
+        );
+
+    const token = response.data;
+
+    const payload =
+        decodeToken(token);
+
+    if (!payload) {
+        throw new Error(
+            "The server returned a token that could not be read."
+        );
+    }
+
+    Cookies.set(
+        TOKEN_COOKIE,
+        token,
+        {
+            sameSite: "Lax",
+            secure:
+                window.location.protocol ===
+                "https:",
+            expires: 1
+        }
+    );
 
     return {
-        email: payload.email ?? credentials.email,
-        name: payload.name ?? "",
-        role: payload.role ?? "planner"
+        email:
+            payload.email ??
+            credentials.email,
+
+        name:
+            payload.name ??
+            credentials.email.split("@")[0],
+
+        role:
+            normalizeRole(
+                payload.role
+            )
     };
 };
 
@@ -32,20 +90,40 @@ export const logout = (): void => {
     Cookies.remove(TOKEN_COOKIE);
 };
 
+export const getCurrentUser =
+    (): AuthUser | null => {
 
-export const getCurrentUser = (): AuthUser | null => {
-    const token = Cookies.get(TOKEN_COOKIE);
-    if (!token) return null;
+        const token =
+            Cookies.get(TOKEN_COOKIE);
 
-    const payload = decodeToken(token);
-    if (!payload || isExpired(payload)) {
-        Cookies.remove(TOKEN_COOKIE);
-        return null;
-    }
+        if (!token) {
+            return null;
+        }
 
-    return {
-        role: "",
-        email: payload.email ?? "",
-        name: payload.name ?? ""
+        const payload =
+            decodeToken(token);
+
+        if (
+            !payload ||
+            isExpired(payload)
+        ) {
+            Cookies.remove(
+                TOKEN_COOKIE
+            );
+
+            return null;
+        }
+
+        return {
+            email:
+                payload.email ?? "",
+
+            name:
+                payload.name ?? "",
+
+            role:
+                normalizeRole(
+                    payload.role
+                )
+        };
     };
-};
