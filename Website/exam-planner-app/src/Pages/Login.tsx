@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../auth/AuthContext.tsx";
+import { useAuth } from "../api/features/auth/AuthContext.tsx";
 import { getErrorMessage } from "../api/authApi";
 import viaLogo from "./Assets/via-logo.png";
 import "./Themes/Login.css";
