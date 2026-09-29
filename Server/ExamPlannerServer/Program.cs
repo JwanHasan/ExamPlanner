@@ -1,4 +1,5 @@
 using DatabaseConnection.DBContext;
+using ExamPlannerServer.Import;
 using ExamPlannerServer.Service;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,6 +13,9 @@ builder.Services.AddControllers();
 
 builder.Services.AddScoped<IStudentRepo,StudentRepo>();
 builder.Services.AddScoped<ICourseService, CourseService>();
+
+builder.Services.AddScoped<ICourseService, CourseService>();
+builder.Services.AddScoped<IExcelImportParser, ExcelImportParser>();
 
 builder.Services.AddDbContext<AppDbContext>(options=> options.UseNpgsql(
     builder.Configuration.GetConnectionString("DefaultConnection")
