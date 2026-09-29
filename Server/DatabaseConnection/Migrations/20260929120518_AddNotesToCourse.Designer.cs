@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DatabaseConnection.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260924070805_UpdatedDatabaseValuesStudentEnrollmentCourseAndClass")]
-    partial class UpdatedDatabaseValuesStudentEnrollmentCourseAndClass
+    [Migration("20260929120518_AddNotesToCourse")]
+    partial class AddNotesToCourse
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -81,6 +81,9 @@ namespace DatabaseConnection.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Notes")
                         .HasColumnType("text");
 
                     b.Property<string>("SueCode")

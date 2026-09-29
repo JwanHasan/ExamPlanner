@@ -18,7 +18,9 @@ public class CourseRepo : ICourseRepo
         
         var course = new Course
         { 
-            SueCode= courseDto.SueCode,ETCS=courseDto.ETCS,Name=courseDto.Name
+            SueCode= courseDto.SueCode,
+            ECTS=courseDto.ECTS,
+            Name=courseDto.Name
         };
         
         
@@ -42,13 +44,17 @@ public class CourseRepo : ICourseRepo
 
     public async Task<List<Course>> GetAllCourseAsync()
     {
-        return await _context.Course.ToListAsync();
+        return await _context.Course
+        .AsNoTracking()
+        .Include(c => c.Classes)
+        .ToListAsync();
     }
 
     public async Task<Course?> GetCourseAsyncById(int id)
     {
-        var course= await _context.Course.FirstOrDefaultAsync(c=> c.Id == id);
-        return course;
+        return await _context.Course
+        .Include(c => c.Classes)
+        .FirstOrDefaultAsync(c => c.Id == id);
     }
 
     public async Task<Course?> UpdateCourseAsync(int courseId, CourseDto courseDto)
@@ -58,12 +64,28 @@ public class CourseRepo : ICourseRepo
             return null;
 
         item.Name= courseDto.Name;
-        item.ETCS = courseDto.ETCS;
+        item.ECTS = courseDto.ECTS;
         item.SueCode = courseDto.SueCode;
         await _context.SaveChangesAsync();
         return item;
-        
     }
+
+    public async Task<Course?> UpdateNotesAsync(int courseId, string? notes)
+    {
+        var item = await GetCourseAsyncById(courseId);
+
+        if (item is null)
+            return null;
+
+        item.Notes = string.IsNullOrWhiteSpace(notes)
+            ? null
+            : notes.Trim();
+
+        await _context.SaveChangesAsync();
+
+        return item;
+    }
+
     public async Task<Course?> GetCourseBySueCodeAsync(string sueCode)
     {
         var course = await _context.Course.FirstOrDefaultAsync(s=> s.SueCode==sueCode);

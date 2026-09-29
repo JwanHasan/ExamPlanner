@@ -37,13 +37,8 @@ public class AppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<UserAccount>().HasKey(e => new {e.Id});
-        
 
-        
-
-        
         modelBuilder.Entity<Course>()
-        
         .HasMany(c=> c.Classes)
         .WithOne(o=> o.Course)
         .HasForeignKey(o=>o.CourseId);
@@ -121,6 +116,4 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<ExamSessionRoom>().HasKey(e=> new {e.ExamSessionId,e.RoomId});
     }
-
-    
 }

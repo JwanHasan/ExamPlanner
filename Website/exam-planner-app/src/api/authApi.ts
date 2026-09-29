@@ -44,7 +44,7 @@ export const getCurrentUser = (): AuthUser | null => {
     }
 
     return {
-        role: "",
+        role: payload.role ?? "",
         email: payload.email ?? "",
         name: payload.name ?? ""
     };

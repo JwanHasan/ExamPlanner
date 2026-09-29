@@ -76,7 +76,7 @@ namespace DatabaseConnection.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("ETCS")
+                    b.Property<int>("ECTS")
                         .HasColumnType("integer");
 
                     b.Property<string>("Name")
@@ -183,7 +183,7 @@ namespace DatabaseConnection.Migrations
                     b.Property<int>("ScheduleId")
                         .HasColumnType("integer");
 
-                    b.Property<bool>("Useable")
+                    b.Property<bool>("Usable")
                         .HasColumnType("boolean");
 
                     b.HasKey("Id");

@@ -1,41 +1,61 @@
+using DatabaseConnection.model;
+using DatabaseConnection.repo;
 using ExamPlannerServer.Dto;
 
 namespace ExamPlannerServer.Service;
 
 public class CourseService : ICourseService
 {
-    public Task<List<CourseDto>> GetAllAsync()
+    private readonly ICourseRepo _courseRepo;
+
+    public CourseService(ICourseRepo courseRepo)
     {
-        var fakeCourses = new List<CourseDto>
-        {
-            new()
-            {
-                Id = 1,
-                Name = "Programming 1",
-                Semester = "1",
-                Etcs = 10,
-                SueCode = "PRO1"
-            },
-            new()
-            {
-                Id = 2,
-                Name = "Programming 2",
-                Semester = "2",
-                Etcs = 10,
-                SueCode = "PRO2"
-            }
-        };
-        return Task.FromResult(fakeCourses);
+        _courseRepo = courseRepo;
+    }
+
+    public async Task<List<CourseDto>> GetAllAsync()
+    {
+        var courses = await _courseRepo.GetAllCourseAsync();
+        return courses.Select(ToDto).ToList();
     }
 
     public Task<ImportResultDto> ImportAsync(IFormFile file)
     {
-        var result = new ImportResultDto { ImportedCount = 0, Errors = new() { "... to be continued" } };
+        var result = new ImportResultDto
+        {
+            ImportedCount = 0,
+            Errors = new() { "... to be continued" }
+        };
+
         return Task.FromResult(result);
     }
 
-    public Task<CourseDto?> UpdateAsync(int id, UpdateCourseDto dto)
+    public async Task<CourseDto?> UpdateAsync(int id, UpdateCourseDto dto)
     {
-        return Task.FromResult<CourseDto?>(null);
+        var updatedCourse = await _courseRepo.UpdateNotesAsync(id, dto.Notes);
+
+        return updatedCourse is null
+            ? null
+            : ToDto(updatedCourse);
+    }
+
+    private static CourseDto ToDto(Course course)
+    {
+        var semesters = course.Classes
+            .Select(c => c.Semester)
+            .Distinct()
+            .OrderBy(semester => semester)
+            .ToList();
+
+        return new CourseDto
+        {
+            Id = course.Id,
+            Name = course.Name,
+            Semester = string.Join(", ", semesters),
+            SueCode = course.SueCode,
+            Ects = course.ECTS,
+            Notes = course.Notes,
+            ClassCount = course.Classes.Count
+        };
     }
 }

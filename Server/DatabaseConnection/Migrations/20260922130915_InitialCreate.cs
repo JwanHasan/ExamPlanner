@@ -20,7 +20,7 @@ namespace DatabaseConnection.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     SueCode = table.Column<string>(type: "text", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
-                    ETCS = table.Column<int>(type: "integer", nullable: false)
+                    ECTS = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {

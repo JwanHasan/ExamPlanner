@@ -1,4 +1,5 @@
 using DatabaseConnection.DBContext;
+using DatabaseConnection.repo;
 using ExamPlannerServer.Service;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,6 +11,7 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddControllers();
 
+builder.Services.AddScoped<ICourseRepo, CourseRepo>();
 builder.Services.AddScoped<IStudentRepo,StudentRepo>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 
