@@ -11,7 +11,6 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddControllers();
 
-builder.Services.AddScoped<IStudentRepo,StudentRepo>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 
 builder.Services.AddScoped<ICourseService, CourseService>();

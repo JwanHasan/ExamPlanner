@@ -1,9 +1,8 @@
-namespace DatabaseConnection.repo;
-
 using DatabaseConnection.DBContext;
-using DatabaseConnection.dto;
 using DatabaseConnection.model;
 using Microsoft.EntityFrameworkCore;
+
+namespace DatabaseConnection.repo;
 
 public class CourseRepo : ICourseRepo
 {
@@ -12,62 +11,44 @@ public class CourseRepo : ICourseRepo
     {
         _context= context;
     }
-
-    public async Task<Course> AddAsync(CourseDto courseDto)
+    public async Task<Course> AddCourseAsync(string SueCode, string Prefix, string name, int Semester, int ects, int PriorityTier)
     {
+        var course= new Course{SueCode = SueCode, Prefix = Prefix, Name= name,
+        Semester = Semester, ETCS= ects, PriorityTier = PriorityTier };
+        await _context.Course.AddAsync( course);
+        await SaveChangesAsync();
+        return course;
         
-        var course = new Course
-        { 
-            SueCode= courseDto.SueCode,ETCS=courseDto.ETCS,Name=courseDto.Name
-        };
-        
-        
-        await _context.Course.AddAsync(course);
+    }
+
+    public Task<bool> DeleteAsync()
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<List<Course>> GetAllAsync()
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<Course?> GetCourseByIdAsync(int id)
+    {
+        var course = await _context.Course.FindAsync(id);
+        return course;
+    }
+
+    public async Task<Course?> GetCourseBySueCodeAsync(string SueCode)
+    {
+        var course = await _context.Course.FirstOrDefaultAsync(x=> x.SueCode == SueCode);
+        return course;
+    }
+
+    public Task<Course> UpdateCourseAsync(string SueCode, string Prefix, string name, int Semester, int ects, int PriorityTier)
+    {
+        throw new NotImplementedException();
+    }
+    public async Task SaveChangesAsync()
+    {
         await _context.SaveChangesAsync();
-        return course;
     }
-
-    public async Task<bool> DeleteAsync(int id)
-    {
-       var course= await GetCourseAsyncById(id);
-       if (course != null)
-        {
-            _context.Course.Remove(course);
-            await _context.SaveChangesAsync();
-            return true;
-        } 
-        else return false;
-
-    }
-
-    public async Task<List<Course>> GetAllCourseAsync()
-    {
-        return await _context.Course.ToListAsync();
-    }
-
-    public async Task<Course?> GetCourseAsyncById(int id)
-    {
-        var course= await _context.Course.FirstOrDefaultAsync(c=> c.Id == id);
-        return course;
-    }
-
-    public async Task<Course?> UpdateCourseAsync(int courseId, CourseDto courseDto)
-    {
-        var item= await GetCourseAsyncById(courseId);
-        if (item is null) 
-            return null;
-
-        item.Name= courseDto.Name;
-        item.ETCS = courseDto.ETCS;
-        item.SueCode = courseDto.SueCode;
-        await _context.SaveChangesAsync();
-        return item;
-        
-    }
-    public async Task<Course?> GetCourseBySueCodeAsync(string sueCode)
-    {
-        var course = await _context.Course.FirstOrDefaultAsync(s=> s.SueCode==sueCode);
-        return course;
-    }
-
 }
