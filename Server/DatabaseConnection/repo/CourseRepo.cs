@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using DatabaseConnection.DBContext;
 using DatabaseConnection.model;
 using Microsoft.EntityFrameworkCore;
@@ -21,14 +22,19 @@ public class CourseRepo : ICourseRepo
         
     }
 
-    public Task<bool> DeleteAsync()
+    public async Task<bool> DeleteAsync(int id )
     {
-        throw new NotImplementedException();
+        var found =await  GetCourseByIdAsync(id);
+        if(found is null) return false;
+
+        _context.Course.Remove(found);
+        return true;
+
     }
 
-    public Task<List<Course>> GetAllAsync()
+    public async Task<List<Course>> GetAllAsync()
     {
-        throw new NotImplementedException();
+        return await _context.Course.ToListAsync();
     }
 
     public async Task<Course?> GetCourseByIdAsync(int id)
@@ -43,9 +49,34 @@ public class CourseRepo : ICourseRepo
         return course;
     }
 
-    public Task<Course> UpdateCourseAsync(string SueCode, string Prefix, string name, int Semester, int ects, int PriorityTier)
+    public async Task<Course> UpdateCourseBySuecodeAsync(string SueCode, string Prefix, string name,
+     int Semester, int ects, int PriorityTier)
     {
-        throw new NotImplementedException();
+        var found = await GetCourseBySueCodeAsync(SueCode);
+        if(found is null) return new Course{};
+        found.SueCode = SueCode;
+        found.Prefix = Prefix;
+        found.Name=name;
+        found.Semester = Semester;
+        found.ETCS =ects;
+        found.PriorityTier = PriorityTier;
+        await SaveChangesAsync();
+        return found;
+
+
+    }
+    public async Task<Course> UpdateCourseByIdAsync(int id,string SueCode, string Prefix, string name, int Semester, int ects, int PriorityTier)
+    {
+        var found = await GetCourseByIdAsync(id);
+        if(found is null) return new Course{};
+        found.SueCode = SueCode;
+        found.Prefix = Prefix;
+        found.Name=name;
+        found.Semester = Semester;
+        found.ETCS =ects;
+        found.PriorityTier = PriorityTier;
+        await SaveChangesAsync();
+        return found;
     }
     public async Task SaveChangesAsync()
     {
