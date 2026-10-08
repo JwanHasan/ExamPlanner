@@ -1,0 +1,1698 @@
+openapi: 3.0.3
+
+info:
+  title: Exam Planner API
+  version: 1.0.0
+  description: >
+    API contract for the Exam Planner web application.
+    The API supports authentication, planning-data import,
+    exam scheduling, conflict detection, student and examiner
+    assignments, lecturer constraints, schedule approval,
+    schedule history, and anonymized export.
+
+servers:
+  - url: /api/v1
+    description: Exam Planner API Version 1
+
+tags:
+  - name: Authentication
+  - name: Import
+  - name: Classes
+  - name: Students
+  - name: Exams
+  - name: Lecturers
+  - name: Schedules
+
+security:
+  - bearerAuth: []
+
+paths:
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Log in
+      description: Authenticates a user using VIA email and password credentials.
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /auth/me:
+    get:
+      tags:
+        - Authentication
+      summary: Get current authenticated user
+      operationId: getCurrentUser
+      responses:
+        "200":
+          description: Current authenticated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /imports:
+    post:
+      tags:
+        - Import
+      summary: Import planning data
+      description: >
+        Uploads an Excel file containing exam-planning data for validation
+        and import.
+      operationId: importPlanningData
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: Import completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImportResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaType"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /classes:
+    get:
+      tags:
+        - Classes
+      summary: Get classes
+      operationId: getClasses
+      parameters:
+        - name: courseId
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: semester
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: prefix
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: includeEnded
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: true
+      responses:
+        "200":
+          description: List of classes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CourseClass"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /classes/{classId}:
+    get:
+      tags:
+        - Classes
+      summary: Get one class
+      operationId: getClassById
+      parameters:
+        - $ref: "#/components/parameters/ClassId"
+      responses:
+        "200":
+          description: Class found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourseClass"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /students:
+    get:
+      tags:
+        - Students
+      summary: Get students
+      operationId: getStudents
+      parameters:
+        - name: classId
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: examId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of students
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Student"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /students/{studentId}:
+    get:
+      tags:
+        - Students
+      summary: Get one student
+      operationId: getStudentById
+      parameters:
+        - $ref: "#/components/parameters/StudentId"
+      responses:
+        "200":
+          description: Student found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Student"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /exams:
+    get:
+      tags:
+        - Exams
+      summary: Get exams
+      operationId: getExams
+      parameters:
+        - name: classId
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: priority
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: city
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of exams
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Exam"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /exams/{examId}:
+    get:
+      tags:
+        - Exams
+      summary: Get one exam
+      operationId: getExamById
+      parameters:
+        - $ref: "#/components/parameters/ExamId"
+      responses:
+        "200":
+          description: Exam found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Exam"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /exams/{examId}/students/{studentId}/eligibility:
+    get:
+      tags:
+        - Exams
+        - Students
+      summary: Check student exam eligibility
+      description: >
+        Checks whether the student has a remaining exam attempt and may
+        currently be assigned to the exam.
+      operationId: getStudentExamEligibility
+      parameters:
+        - $ref: "#/components/parameters/ExamId"
+        - $ref: "#/components/parameters/StudentId"
+      responses:
+        "200":
+          description: Eligibility result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExamEligibility"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /exams/{examId}/students/{studentId}:
+    put:
+      tags:
+        - Exams
+        - Students
+      summary: Assign student to exam
+      operationId: assignStudentToExam
+      parameters:
+        - $ref: "#/components/parameters/ExamId"
+        - $ref: "#/components/parameters/StudentId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StudentExamAssignmentRequest"
+      responses:
+        "200":
+          description: Student assigned to exam
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudentExamAssignment"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Student cannot be assigned because a business rule is violated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+    delete:
+      tags:
+        - Exams
+        - Students
+      summary: Remove student from exam
+      operationId: removeStudentFromExam
+      parameters:
+        - $ref: "#/components/parameters/ExamId"
+        - $ref: "#/components/parameters/StudentId"
+      responses:
+        "204":
+          description: Student removed from exam
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /exams/{examId}/hand-ins:
+    get:
+      tags:
+        - Exams
+      summary: Get exam hand-in deadlines
+      operationId: getExamHandIns
+      parameters:
+        - $ref: "#/components/parameters/ExamId"
+      responses:
+        "200":
+          description: Hand-in deadlines
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/HandIn"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /lecturers:
+    get:
+      tags:
+        - Lecturers
+      summary: Get lecturers
+      operationId: getLecturers
+      responses:
+        "200":
+          description: List of lecturers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Lecturer"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /lecturers/{lecturerId}:
+    get:
+      tags:
+        - Lecturers
+      summary: Get one lecturer
+      operationId: getLecturerById
+      parameters:
+        - $ref: "#/components/parameters/LecturerId"
+      responses:
+        "200":
+          description: Lecturer found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lecturer"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /exams/{examId}/examiners/{lecturerId}:
+    put:
+      tags:
+        - Exams
+        - Lecturers
+      summary: Assign examiner to exam
+      operationId: assignExaminer
+      parameters:
+        - $ref: "#/components/parameters/ExamId"
+        - $ref: "#/components/parameters/LecturerId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExaminerAssignmentRequest"
+      responses:
+        "200":
+          description: Examiner assigned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExaminerAssignment"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    delete:
+      tags:
+        - Exams
+        - Lecturers
+      summary: Remove examiner from exam
+      operationId: removeExaminer
+      parameters:
+        - $ref: "#/components/parameters/ExamId"
+        - $ref: "#/components/parameters/LecturerId"
+      responses:
+        "204":
+          description: Examiner removed
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /lecturers/{lecturerId}/constraints:
+    get:
+      tags:
+        - Lecturers
+      summary: Get lecturer constraints
+      operationId: getLecturerConstraints
+      parameters:
+        - $ref: "#/components/parameters/LecturerId"
+      responses:
+        "200":
+          description: Lecturer constraints
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LecturerConstraint"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    post:
+      tags:
+        - Lecturers
+      summary: Create lecturer constraint
+      operationId: createLecturerConstraint
+      parameters:
+        - $ref: "#/components/parameters/LecturerId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateLecturerConstraintRequest"
+      responses:
+        "201":
+          description: Lecturer constraint created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LecturerConstraint"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /lecturers/{lecturerId}/constraints/{constraintId}:
+    patch:
+      tags:
+        - Lecturers
+      summary: Update lecturer constraint
+      operationId: updateLecturerConstraint
+      parameters:
+        - $ref: "#/components/parameters/LecturerId"
+        - $ref: "#/components/parameters/ConstraintId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateLecturerConstraintRequest"
+      responses:
+        "200":
+          description: Constraint updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LecturerConstraint"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    delete:
+      tags:
+        - Lecturers
+      summary: Delete lecturer constraint
+      operationId: deleteLecturerConstraint
+      parameters:
+        - $ref: "#/components/parameters/LecturerId"
+        - $ref: "#/components/parameters/ConstraintId"
+      responses:
+        "204":
+          description: Constraint deleted
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /schedules:
+    get:
+      tags:
+        - Schedules
+      summary: List schedules
+      operationId: getSchedules
+      responses:
+        "200":
+          description: Schedule summaries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ScheduleSummary"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+    post:
+      tags:
+        - Schedules
+      summary: Create or generate schedule
+      operationId: createSchedule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateScheduleRequest"
+      responses:
+        "201":
+          description: Schedule created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Schedule"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /schedules/current:
+    get:
+      tags:
+        - Schedules
+      summary: Get current schedule
+      operationId: getCurrentSchedule
+      responses:
+        "200":
+          description: Current schedule
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Schedule"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: No current schedule exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /schedules/{scheduleId}:
+    get:
+      tags:
+        - Schedules
+      summary: Get schedule
+      operationId: getScheduleById
+      parameters:
+        - $ref: "#/components/parameters/ScheduleId"
+      responses:
+        "200":
+          description: Schedule found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Schedule"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /schedules/{scheduleId}/conflicts:
+    get:
+      tags:
+        - Schedules
+      summary: Scan schedule for conflicts
+      operationId: scanScheduleConflicts
+      parameters:
+        - $ref: "#/components/parameters/ScheduleId"
+      responses:
+        "200":
+          description: Conflict scan result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConflictResult"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /schedules/{scheduleId}/sessions/{sessionId}:
+    patch:
+      tags:
+        - Schedules
+      summary: Reschedule exam session
+      operationId: rescheduleExamSession
+      parameters:
+        - $ref: "#/components/parameters/ScheduleId"
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RescheduleExamRequest"
+      responses:
+        "200":
+          description: Exam session updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExamSession"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: New date violates a scheduling rule
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /schedules/{scheduleId}/sessions/{sessionId}/lock:
+    patch:
+      tags:
+        - Schedules
+      summary: Lock or unlock exam session
+      operationId: setExamSessionLock
+      parameters:
+        - $ref: "#/components/parameters/ScheduleId"
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SessionLockRequest"
+      responses:
+        "200":
+          description: Lock state updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionLockResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /schedules/{scheduleId}/rebuild:
+    post:
+      tags:
+        - Schedules
+      summary: Rebuild affected schedule
+      operationId: rebuildSchedule
+      parameters:
+        - $ref: "#/components/parameters/ScheduleId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RebuildScheduleRequest"
+      responses:
+        "200":
+          description: Schedule rebuilt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScheduleRebuildResult"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /schedules/{scheduleId}/approve:
+    post:
+      tags:
+        - Schedules
+      summary: Approve schedule
+      operationId: approveSchedule
+      parameters:
+        - $ref: "#/components/parameters/ScheduleId"
+      responses:
+        "200":
+          description: Schedule approved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScheduleApprovalResult"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Schedule cannot be approved while blocking conflicts remain
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /schedules/{scheduleId}/versions:
+    get:
+      tags:
+        - Schedules
+      summary: Get schedule versions
+      operationId: getScheduleVersions
+      parameters:
+        - $ref: "#/components/parameters/ScheduleId"
+      responses:
+        "200":
+          description: Schedule versions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ScheduleVersionSummary"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /schedules/{scheduleId}/versions/{version}:
+    get:
+      tags:
+        - Schedules
+      summary: Get specific schedule version
+      operationId: getScheduleVersion
+      parameters:
+        - $ref: "#/components/parameters/ScheduleId"
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: Schedule version
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Schedule"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /schedules/{scheduleId}/export:
+    get:
+      tags:
+        - Schedules
+      summary: Export anonymized schedule
+      operationId: exportSchedule
+      parameters:
+        - $ref: "#/components/parameters/ScheduleId"
+        - name: format
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - xlsx
+            default: xlsx
+      responses:
+        "200":
+          description: Anonymized schedule file
+          headers:
+            Content-Disposition:
+              description: Suggested downloaded filename
+              schema:
+                type: string
+                example: attachment; filename="exam-schedule-anonymized.xlsx"
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Schedule could not be safely anonymized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+
+    ClassId:
+      name: classId
+      in: path
+      required: true
+      schema:
+        type: integer
+
+    StudentId:
+      name: studentId
+      in: path
+      required: true
+      schema:
+        type: integer
+
+    ExamId:
+      name: examId
+      in: path
+      required: true
+      schema:
+        type: integer
+
+    LecturerId:
+      name: lecturerId
+      in: path
+      required: true
+      schema:
+        type: integer
+
+    ConstraintId:
+      name: constraintId
+      in: path
+      required: true
+      schema:
+        type: integer
+
+    ScheduleId:
+      name: scheduleId
+      in: path
+      required: true
+      schema:
+        type: integer
+
+    SessionId:
+      name: sessionId
+      in: path
+      required: true
+      schema:
+        type: integer
+
+  responses:
+
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+
+    Unauthorized:
+      description: Missing or invalid authentication
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+
+    Forbidden:
+      description: Authenticated user does not have permission
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+
+    NotFound:
+      description: Requested resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+
+    Conflict:
+      description: Request conflicts with a business or scheduling rule
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+
+    UnsupportedMediaType:
+      description: Unsupported media or file type
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+
+    UnprocessableEntity:
+      description: Request structure is valid but its data cannot be processed
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+
+    InternalServerError:
+      description: Unexpected server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+
+  schemas:
+
+    ApiError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          example: STUDENT_OVERLAP
+        message:
+          type: string
+          example: The selected date creates a student exam conflict.
+        details:
+          type: object
+          additionalProperties: true
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: admin@via.dk
+        password:
+          type: string
+          format: password
+          example: example-password
+
+    LoginResponse:
+      type: object
+      required:
+        - accessToken
+        - expiresAt
+        - user
+      properties:
+        accessToken:
+          type: string
+          example: jwt-token
+        expiresAt:
+          type: string
+          format: date-time
+          example: "2026-09-14T16:00:00Z"
+        user:
+          $ref: "#/components/schemas/AuthUser"
+
+    AuthUser:
+      type: object
+      required:
+        - id
+        - email
+        - role
+      properties:
+        id:
+          type: integer
+          example: 1
+        email:
+          type: string
+          format: email
+          example: admin@via.dk
+        role:
+          type: string
+          example: Admin
+
+    ImportResult:
+      type: object
+      required:
+        - importId
+        - success
+        - classesImported
+        - studentsImported
+        - examsImported
+        - warnings
+      properties:
+        importId:
+          type: integer
+          example: 12
+        success:
+          type: boolean
+          example: true
+        classesImported:
+          type: integer
+          minimum: 0
+          example: 223
+        studentsImported:
+          type: integer
+          minimum: 0
+          example: 814
+        examsImported:
+          type: integer
+          minimum: 0
+          example: 223
+        warnings:
+          type: array
+          items:
+            type: string
+          example:
+            - 2 rows contained missing lecturer information.
+
+    CourseClass:
+      type: object
+      required:
+        - id
+        - courseId
+        - classCode
+      properties:
+        id:
+          type: integer
+          example: 18
+        courseId:
+          type: integer
+          example: 4
+        classCode:
+          type: string
+          example: IT-BPR2-A25
+        nickname:
+          type: string
+          nullable: true
+          example: BPR2
+        prefix:
+          type: string
+          nullable: true
+          example: IT
+        semester:
+          type: string
+          nullable: true
+          example: "7"
+        startDate:
+          type: string
+          format: date
+          nullable: true
+          example: "2025-08-18"
+        endDate:
+          type: string
+          format: date
+          nullable: true
+          example: "2026-01-30"
+        courseOffering:
+          type: string
+          nullable: true
+          example: Software Technology Engineering - Horsens
+
+    Student:
+      type: object
+      required:
+        - id
+        - viaId
+        - name
+      properties:
+        id:
+          type: integer
+          example: 15
+        viaId:
+          type: string
+          example: "123456"
+        name:
+          type: string
+          example: Example Student
+
+    ExamClassReference:
+      type: object
+      required:
+        - id
+        - classCode
+      properties:
+        id:
+          type: integer
+          example: 18
+        classCode:
+          type: string
+          example: IT-BPR2-A25
+
+    Exam:
+      type: object
+      required:
+        - id
+        - priority
+      properties:
+        id:
+          type: integer
+          example: 42
+        gradingScale:
+          type: string
+          nullable: true
+          example: 7-point scale
+        examinerType:
+          type: string
+          nullable: true
+          example: External
+        examFormat:
+          type: string
+          nullable: true
+          example: Oral
+        prerequisites:
+          type: string
+          nullable: true
+          example: Project submitted
+        duration:
+          type: string
+          nullable: true
+          example: 20 min. per student
+        planningResponsible:
+          type: string
+          nullable: true
+          example: ABC
+        city:
+          type: string
+          nullable: true
+          example: Horsens
+        remarks:
+          type: string
+          nullable: true
+          example: ""
+        priority:
+          type: integer
+          minimum: 1
+          example: 3
+        classes:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExamClassReference"
+
+    ExamEligibility:
+      type: object
+      required:
+        - studentId
+        - examId
+        - eligible
+        - attemptsUsed
+        - maxAttempts
+        - remainingAttempts
+      properties:
+        studentId:
+          type: integer
+          example: 15
+        examId:
+          type: integer
+          example: 42
+        eligible:
+          type: boolean
+          example: true
+        attemptsUsed:
+          type: integer
+          minimum: 0
+          example: 2
+        maxAttempts:
+          type: integer
+          minimum: 1
+          example: 3
+        remainingAttempts:
+          type: integer
+          minimum: 0
+          example: 1
+        reason:
+          type: string
+          nullable: true
+          example: null
+
+    StudentExamAssignmentRequest:
+      type: object
+      required:
+        - extraTime
+      properties:
+        extraTime:
+          type: boolean
+          example: true
+
+    StudentExamAssignment:
+      type: object
+      required:
+        - studentId
+        - examId
+        - extraTime
+        - attemptsUsed
+        - maxAttempts
+        - remainingAttempts
+        - eligible
+      properties:
+        studentId:
+          type: integer
+          example: 15
+        examId:
+          type: integer
+          example: 42
+        extraTime:
+          type: boolean
+          example: true
+        attemptsUsed:
+          type: integer
+          minimum: 0
+          example: 2
+        maxAttempts:
+          type: integer
+          minimum: 1
+          example: 3
+        remainingAttempts:
+          type: integer
+          minimum: 0
+          example: 1
+        eligible:
+          type: boolean
+          example: true
+
+    Lecturer:
+      type: object
+      required:
+        - id
+        - initials
+      properties:
+        id:
+          type: integer
+          example: 8
+        initials:
+          type: string
+          example: ABC
+
+    ExaminerAssignmentRequest:
+      type: object
+      required:
+        - role
+      properties:
+        role:
+          type: string
+          example: InternalExaminer
+
+    ExaminerAssignment:
+      type: object
+      required:
+        - examId
+        - lecturerId
+        - role
+      properties:
+        examId:
+          type: integer
+          example: 42
+        lecturerId:
+          type: integer
+          example: 8
+        role:
+          type: string
+          example: InternalExaminer
+
+    LecturerConstraint:
+      type: object
+      required:
+        - id
+        - lecturerId
+        - constraintDate
+        - constraintType
+      properties:
+        id:
+          type: integer
+          example: 73
+        lecturerId:
+          type: integer
+          example: 8
+        constraintDate:
+          type: string
+          format: date
+          example: "2027-01-14"
+        constraintType:
+          type: string
+          example: Unavailable
+        note:
+          type: string
+          nullable: true
+          example: Unavailable this day
+
+    CreateLecturerConstraintRequest:
+      type: object
+      required:
+        - constraintDate
+        - constraintType
+      properties:
+        constraintDate:
+          type: string
+          format: date
+          example: "2027-01-14"
+        constraintType:
+          type: string
+          example: Unavailable
+        note:
+          type: string
+          nullable: true
+          example: Unavailable this day
+
+    UpdateLecturerConstraintRequest:
+      type: object
+      properties:
+        constraintDate:
+          type: string
+          format: date
+        constraintType:
+          type: string
+        note:
+          type: string
+          nullable: true
+
+    ExamDayInput:
+      type: object
+      required:
+        - date
+        - type
+        - usable
+      properties:
+        date:
+          type: string
+          format: date
+          example: "2027-01-04"
+        type:
+          type: string
+          example: Ordinary
+        usable:
+          type: boolean
+          example: true
+
+    CreateScheduleRequest:
+      type: object
+      required:
+        - name
+        - examDays
+      properties:
+        name:
+          type: string
+          example: January 2027 Exam Plan
+        examDays:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/ExamDayInput"
+
+    ExamSession:
+      type: object
+      required:
+        - id
+        - examId
+        - examDate
+        - sessionType
+        - locked
+      properties:
+        id:
+          type: integer
+          example: 31
+        examId:
+          type: integer
+          example: 42
+        examDate:
+          type: string
+          format: date
+          example: "2027-01-14"
+        sessionType:
+          type: string
+          example: Ordinary
+        locked:
+          type: boolean
+          example: false
+        note:
+          type: string
+          nullable: true
+          example: ""
+
+    ScheduleSummary:
+      type: object
+      required:
+        - id
+        - name
+        - approved
+        - version
+      properties:
+        id:
+          type: integer
+          example: 7
+        name:
+          type: string
+          example: January 2027 Exam Plan
+        approved:
+          type: boolean
+          example: false
+        version:
+          type: integer
+          minimum: 1
+          example: 1
+
+    Schedule:
+      allOf:
+        - $ref: "#/components/schemas/ScheduleSummary"
+        - type: object
+          required:
+            - sessions
+            - unplacedExams
+          properties:
+            sessions:
+              type: array
+              items:
+                $ref: "#/components/schemas/ExamSession"
+            unplacedExams:
+              type: array
+              items:
+                type: object
+                additionalProperties: true
+
+    Conflict:
+      type: object
+      required:
+        - type
+        - date
+        - examIds
+        - affectedCount
+      properties:
+        type:
+          type: string
+          example: STUDENT_OVERLAP
+        date:
+          type: string
+          format: date
+          example: "2027-01-14"
+        examIds:
+          type: array
+          items:
+            type: integer
+          example:
+            - 42
+            - 67
+        affectedStudentIds:
+          type: array
+          items:
+            type: integer
+          example:
+            - 15
+            - 91
+        lecturerIds:
+          type: array
+          items:
+            type: integer
+          example:
+            - 8
+        affectedCount:
+          type: integer
+          minimum: 0
+          example: 2
+
+    ConflictResult:
+      type: object
+      required:
+        - hasConflicts
+        - conflicts
+      properties:
+        hasConflicts:
+          type: boolean
+          example: true
+        conflicts:
+          type: array
+          items:
+            $ref: "#/components/schemas/Conflict"
+
+    RescheduleExamRequest:
+      type: object
+      required:
+        - examDate
+      properties:
+        examDate:
+          type: string
+          format: date
+          example: "2027-01-18"
+
+    SessionLockRequest:
+      type: object
+      required:
+        - locked
+      properties:
+        locked:
+          type: boolean
+          example: true
+
+    SessionLockResult:
+      type: object
+      required:
+        - sessionId
+        - locked
+      properties:
+        sessionId:
+          type: integer
+          example: 31
+        locked:
+          type: boolean
+          example: true
+
+    RebuildScheduleRequest:
+      type: object
+      properties:
+        affectedExamIds:
+          type: array
+          items:
+            type: integer
+          example:
+            - 42
+            - 67
+
+    ScheduleRebuildResult:
+      type: object
+      required:
+        - scheduleId
+        - previousVersion
+        - newVersion
+        - movedSessions
+        - unplacedExams
+      properties:
+        scheduleId:
+          type: integer
+          example: 7
+        previousVersion:
+          type: integer
+          example: 1
+        newVersion:
+          type: integer
+          example: 2
+        movedSessions:
+          type: array
+          items:
+            type: integer
+          example:
+            - 31
+        unplacedExams:
+          type: array
+          items:
+            type: integer
+
+    ScheduleApprovalResult:
+      type: object
+      required:
+        - id
+        - approved
+        - approvedAt
+      properties:
+        id:
+          type: integer
+          example: 7
+        approved:
+          type: boolean
+          example: true
+        approvedAt:
+          type: string
+          format: date-time
+          example: "2027-01-02T12:00:00Z"
+
+    ScheduleVersionSummary:
+      type: object
+      required:
+        - version
+        - createdAt
+      properties:
+        version:
+          type: integer
+          minimum: 1
+          example: 1
+        createdAt:
+          type: string
+          format: date-time
+          example: "2027-01-02T09:00:00Z"
+
+    HandIn:
+      type: object
+      required:
+        - id
+        - handInDate
+      properties:
+        id:
+          type: integer
+          example: 91
+        handInDate:
+          type: string
+          format: date
+          example: "2026-12-19"
+        handInTime:
+          type: string
+          nullable: true
+          pattern: "^([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$"
+          example: "13:00:00"
+        part:
+          type: string
+          nullable: true
+          example: Part 1
+        note:
+          type: string
+          nullable: true
+          example: ""
