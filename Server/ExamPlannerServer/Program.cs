@@ -1,4 +1,5 @@
 using DatabaseConnection.DBContext;
+using ExamPlannerServer.Auth;
 using ExamPlannerServer.Import;
 using ExamPlannerServer.Service;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,9 @@ builder.Services.AddControllers();
 
 builder.Services.AddScoped<IStudentRepo,StudentRepo>();
 builder.Services.AddScoped<ICourseService, CourseService>();
+
+//builder.Services.AddScoped<IAuthService, AuthService>();
+//builder.Services.AddScoped<IImportService, ImportService>();
 
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IExcelImportParser, ExcelImportParser>();
