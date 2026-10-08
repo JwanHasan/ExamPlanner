@@ -8,5 +8,7 @@ public class Student
 
     public ICollection<Enrollment>? Enrollments {get;set;}
     
-    public User User {get;set;} = new User{};
+    public User User {get;set;} = new User();
+    public ICollection<StudentExamAssignment>? StudentExamAssignment {get;set;}
+
 }

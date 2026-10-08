@@ -10,4 +10,6 @@ public class TeacherConstraint
     public DateOnly ConstraintDate{get;set;}
     public ConstraintType ConstraintType {get;set;}
     public string Note{get;set;} = "";
+
+    public Teacher Teacher{get;set;} = new();
 }

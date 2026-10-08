@@ -13,7 +13,7 @@ public class Class
 
 public Course Course {get;set;} = new Course();
 // relation enrollment has 1 class and class has 0 or  many enrollment
-public ICollection<Enrollment>? Enrollments {get;set;}
+
 
 
 
