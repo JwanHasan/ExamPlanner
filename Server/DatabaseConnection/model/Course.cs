@@ -15,4 +15,6 @@ public class Course
 
     public ICollection<Class>? Classes {get;set;}
     public ICollection<Enrollment>? Enrollments {get;set;}
+    ICollection<AssessmentEvent>? AssessmentEvents {get;set;}
+    
 }

@@ -9,4 +9,11 @@ public class ExamSession
     public bool LockDate{get;set;}
 
     public Room Room {get;set;} = new Room{}; 
+    public ICollection<StudentExamAssignment>? StudentExamAssignments{get;set;}
+    public ICollection<TeacherAssignment>? TeacherAssignments{get;set;}
+    public AssessmentEvent AssessmentEvent{get;set;}= new();
+    public Schedule Schedule {get;set;} = new();
+    
+
+
 }
