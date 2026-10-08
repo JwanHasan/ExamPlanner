@@ -7,7 +7,7 @@ public class Course
     public string Prefix {get;set;} = "";
     public string Name {get;set;} ="";
     public int Semester {get;set;}
-    public int ETCS {get;set;}
+    public int ECTS {get;set;}
     public int PriorityTier{get;set;}
     
 
