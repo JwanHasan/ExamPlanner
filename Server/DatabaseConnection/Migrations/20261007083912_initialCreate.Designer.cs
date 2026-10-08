@@ -3,6 +3,7 @@ using System;
 using DatabaseConnection.DBContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DatabaseConnection.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261007083912_initialCreate")]
+    partial class initialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -121,38 +124,7 @@ namespace DatabaseConnection.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
                     b.ToTable("Student");
-                });
-
-            modelBuilder.Entity("User", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("HashedPassword")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("Role")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("User");
                 });
 
             modelBuilder.Entity("DatabaseConnection.model.Class", b =>
@@ -189,17 +161,6 @@ namespace DatabaseConnection.Migrations
                     b.Navigation("Student");
                 });
 
-            modelBuilder.Entity("DatabaseConnection.model.Student", b =>
-                {
-                    b.HasOne("User", "User")
-                        .WithOne("Student")
-                        .HasForeignKey("DatabaseConnection.model.Student", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("DatabaseConnection.model.Class", b =>
                 {
                     b.Navigation("Enrollments");
@@ -215,11 +176,6 @@ namespace DatabaseConnection.Migrations
             modelBuilder.Entity("DatabaseConnection.model.Student", b =>
                 {
                     b.Navigation("Enrollments");
-                });
-
-            modelBuilder.Entity("User", b =>
-                {
-                    b.Navigation("Student");
                 });
 #pragma warning restore 612, 618
         }

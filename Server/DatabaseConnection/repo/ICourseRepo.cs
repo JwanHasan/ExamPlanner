@@ -1,16 +1,19 @@
 using DatabaseConnection.model;
-using DatabaseConnection.dto;
 
 namespace DatabaseConnection.repo;
 public interface ICourseRepo
 {
-    public Task<Course?> GetCourseBySueCodeAsync(string sueCode);
+    Task<List<Course>> GetAllAsync();
+    Task<Course> AddCourseAsync(string SueCode,string Prefix,string name, int Semester,int ects, int PriorityTier);
+    Task<Course> UpdateCourseByIdAsync(int id,string SueCode,string Prefix,string name, int Semester,int ects, int PriorityTier);
+    Task<Course> UpdateCourseBySuecodeAsync(string SueCode,string Prefix,string name, int Semester,int ects, int PriorityTier);
 
-    public Task<Course> AddAsync(CourseDto courseDto );
+    Task<Course?> GetCourseByIdAsync(int id );
+    Task<Course?> GetCourseBySueCodeAsync(string SueCode );
 
-    public Task<Course?> GetCourseAsyncById(int id );
-    public Task<List<Course>> GetAllCourseAsync();
-    public Task<Course?> UpdateCourseAsync(int courseId,CourseDto courseDto);
-    public Task<bool> DeleteAsync(int id);
+    Task<bool> DeleteAsync(int id);
+    Task SaveChangesAsync();
+
+
 
 }
