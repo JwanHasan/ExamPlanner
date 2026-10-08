@@ -1,9 +1,10 @@
-namespace DatabaseConnection.repo;
-
+using System.Runtime.CompilerServices;
 using DatabaseConnection.DBContext;
 using DatabaseConnection.dto;
 using DatabaseConnection.model;
 using Microsoft.EntityFrameworkCore;
+
+namespace DatabaseConnection.repo;
 
 public class CourseRepo : ICourseRepo
 {
@@ -12,80 +13,78 @@ public class CourseRepo : ICourseRepo
     {
         _context= context;
     }
-
-    public async Task<Course> AddAsync(CourseDto courseDto)
+    public async Task<Course> AddCourseAsync(string SueCode, string Prefix, string name, int Semester, int ects, int PriorityTier)
     {
-        
-        var course = new Course
-        { 
-            SueCode= courseDto.SueCode,
-            ECTS=courseDto.ECTS,
-            Name=courseDto.Name
-        };
-        
-        
-        await _context.Course.AddAsync(course);
-        await _context.SaveChangesAsync();
+        var course= new Course{SueCode = SueCode, Prefix = Prefix, Name= name,
+        Semester = Semester, ETCS= ects, PriorityTier = PriorityTier };
+        await _context.Course.AddAsync( course);
+        await SaveChangesAsync();
+        return course;
+
+    }
+
+    public async Task<bool> DeleteAsync(int id )
+    {
+        var found =await  GetCourseByIdAsync(id);
+        if(found is null) return false;
+
+        _context.Course.Remove(found);
+        return true;
+
+    }
+
+    public async Task<List<Course>> GetAllAsync()
+    {
+        return await _context.Course.ToListAsync();
+    }
+
+    public async Task<Course?> GetCourseByIdAsync(int id)
+    {
+        var course = await _context.Course.FindAsync(id);
         return course;
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public async Task<Course?> GetCourseBySueCodeAsync(string SueCode)
     {
-       var course= await GetCourseAsyncById(id);
-       if (course != null)
-        {
-            _context.Course.Remove(course);
-            await _context.SaveChangesAsync();
-            return true;
-        } 
-        else return false;
-
+        var course = await _context.Course.FirstOrDefaultAsync(x=> x.SueCode == SueCode);
+        return course;
     }
 
-    public async Task<List<Course>> GetAllCourseAsync()
+    public async Task<Course> UpdateCourseBySuecodeAsync(string SueCode, string Prefix, string name,
+     int Semester, int ects, int PriorityTier)
     {
-        return await _context.Course
-        .AsNoTracking()
-        .Include(c => c.Classes)
-        .ToListAsync();
+        var found = await GetCourseBySueCodeAsync(SueCode);
+        if(found is null) return new Course{};
+        found.SueCode = SueCode;
+        found.Prefix = Prefix;
+        found.Name=name;
+        found.Semester = Semester;
+        found.ETCS =ects;
+        found.PriorityTier = PriorityTier;
+        await SaveChangesAsync();
+        return found;
+
+
     }
-
-    public async Task<Course?> GetCourseAsyncById(int id)
+    public async Task<Course> UpdateCourseByIdAsync(int id,string SueCode, string Prefix, string name, int Semester, int ects, int PriorityTier)
     {
-        return await _context.Course
-        .Include(c => c.Classes)
-        .FirstOrDefaultAsync(c => c.Id == id);
+        var found = await GetCourseByIdAsync(id);
+        if(found is null) return new Course{};
+        found.SueCode = SueCode;
+        found.Prefix = Prefix;
+        found.Name=name;
+        found.Semester = Semester;
+        found.ETCS =ects;
+        found.PriorityTier = PriorityTier;
+        await SaveChangesAsync();
+        return found;
     }
-
-    public async Task<Course?> UpdateCourseAsync(int courseId, CourseDto courseDto)
+    public async Task SaveChangesAsync()
     {
-        var item= await GetCourseAsyncById(courseId);
-        if (item is null) 
-            return null;
-
-        item.Name= courseDto.Name;
-        item.ECTS = courseDto.ECTS;
-        item.SueCode = courseDto.SueCode;
         await _context.SaveChangesAsync();
         return item;
+        
     }
-
-    public async Task<Course?> UpdateNotesAsync(int courseId, string? notes)
-    {
-        var item = await GetCourseAsyncById(courseId);
-
-        if (item is null)
-            return null;
-
-        item.Notes = string.IsNullOrWhiteSpace(notes)
-            ? null
-            : notes.Trim();
-
-        await _context.SaveChangesAsync();
-
-        return item;
-    }
-
     public async Task<Course?> GetCourseBySueCodeAsync(string sueCode)
     {
         var course = await _context.Course.FirstOrDefaultAsync(s=> s.SueCode==sueCode);

@@ -1,17 +1,14 @@
-using System.Dynamic;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal;
 
 namespace DatabaseConnection.model;
 public class Student
 {
-    public int Id {get;set;} //Pk
-    public int UserAccountId{get;set;}
-    public int ViaId{get;set;}
-    public  string Name {get;set;} = "No name provided";
+    public int Id {get;set;}
+    public int UserId{get;set;}
 
-
-    // student has 0 or many enrollment and enrollment can have only 1 student
     public ICollection<Enrollment>? Enrollments {get;set;}
+    
+    public User User {get;set;} = new User();
+    public ICollection<StudentExamAssignment>? StudentExamAssignment {get;set;}
 
-    public UserAccount? UserAccount{get;set;}
-    public ICollection<StudentExamAssignment>? ExamAssignments {get;set;}
 }

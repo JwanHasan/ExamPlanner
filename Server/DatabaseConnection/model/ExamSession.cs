@@ -1,22 +1,12 @@
 namespace DatabaseConnection.model;
-public enum SessionType
-    {
-        Ordinary, ReExam
-    };
 public class ExamSession
 {
-    public required int Id{get;set;} //PK
-    public required int ExamId {get;set;}//FK
-    public required int ScheduleId{get;set;}
-    public DateTime ExamDate{get;set;}
-    public SessionType SessionType {get;set;}
+    public int Id{get;set;}
+    public int AsseessmentId{get;set;}
+    public int ScheduleId{get;set;}
+    public int RoomId{get;set;}
+    public DateOnly Date{get;set;}
+    public bool LockDate{get;set;}
 
-    public string? Note {get;set;}
-
-    public bool Locked{get;set;} = false;
-
-    // exam session has 1 Exam and exam can have 0 or many Exam Session
-    public required Exam Exam{get;set;}
-    public required Schedule Schedule{get;set;}
-    public ICollection<ExamSessionRoom>? ExamSessionRooms{get;set;}
+    public Room Room {get;set;} = new Room{}; 
 }

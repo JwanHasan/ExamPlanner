@@ -1,16 +1,10 @@
-using System.Dynamic;
-using DatabaseConnection.model;
-using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
-
+namespace DatabaseConnection.model;
 public class Schedule
 {
-    public int Id{get;set;}
-    public bool Approved{get;set;}
-    public string version {get;set;}= "";
-    public DateTime CreatedAt {get;set;}
+    public int Id {get;set;}
+    public bool Approved {get;set;} = false;
+    public string Version {get;set;}= "";
+    public DateTime CreatedAt = DateTime.Now;
 
-    public required ICollection<ExamDay> ExamDays{get;set;}
-    public ICollection<ExamSession>? ExamSessions{get;set;}
-
-    public ICollection<ScheduleReview>? ScheduleReviews{get;set;}
+    
 }
