@@ -1,6 +1,5 @@
 using System.Runtime.CompilerServices;
 using DatabaseConnection.DBContext;
-using DatabaseConnection.dto;
 using DatabaseConnection.model;
 using Microsoft.EntityFrameworkCore;
 
@@ -84,11 +83,6 @@ public class CourseRepo : ICourseRepo
         await _context.SaveChangesAsync();
         return item;
         
-    }
-    public async Task<Course?> GetCourseBySueCodeAsync(string sueCode)
-    {
-        var course = await _context.Course.FirstOrDefaultAsync(s=> s.SueCode==sueCode);
-        return course;
     }
 
 }
