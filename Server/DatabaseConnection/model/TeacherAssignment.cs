@@ -6,7 +6,7 @@ public enum TeacherRole
 }
 public class TeacherAssignment
 {
-    public int Id {get;set;}
+    public int ExamSessionId {get;set;}
     public int TeacherId{get;set;}
     public TeacherRole Role{get;set;}
 
