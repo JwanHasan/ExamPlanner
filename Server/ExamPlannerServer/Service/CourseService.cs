@@ -65,5 +65,5 @@ public class CourseService : ICourseService
 
         return Task.FromResult(result);
     }
-    
+
 }

@@ -13,14 +13,14 @@ public class AppDbContext : DbContext
         : base(options)
     { 
     }
-    
+
     public DbSet<Class> Class {get;set;} //
     public DbSet<Course> Course {get;set;}//
     public DbSet<Enrollment> Enrollment {get;set;}//
     public DbSet<Student> Student {get;set;}//
     public DbSet<User> User {get;set;}//
 
-    
+
 
     // setting up relation between tables 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -41,9 +41,9 @@ public class AppDbContext : DbContext
         .WithMany(e=> e.Enrollments).HasForeignKey(e=> e.CourseId);
 
 
-        
-        
-        
+
+
+
     }
 
     
