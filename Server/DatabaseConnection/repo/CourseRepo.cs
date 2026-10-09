@@ -15,7 +15,7 @@ public class CourseRepo : ICourseRepo
     public async Task<Course> AddCourseAsync(string SueCode, string Prefix, string name, int Semester, int ects, int PriorityTier)
     {
         var course= new Course{SueCode = SueCode, Prefix = Prefix, Name= name,
-        Semester = Semester, ETCS= ects, PriorityTier = PriorityTier };
+        Semester = Semester, ECTS= ects, PriorityTier = PriorityTier };
         await _context.Course.AddAsync( course);
         await SaveChangesAsync();
         return course;
@@ -58,7 +58,7 @@ public class CourseRepo : ICourseRepo
         found.Prefix = Prefix;
         found.Name=name;
         found.Semester = Semester;
-        found.ETCS =ects;
+        found.ECTS =ects;
         found.PriorityTier = PriorityTier;
         await SaveChangesAsync();
         return found;
@@ -73,7 +73,7 @@ public class CourseRepo : ICourseRepo
         found.Prefix = Prefix;
         found.Name=name;
         found.Semester = Semester;
-        found.ETCS =ects;
+        found.ECTS =ects;
         found.PriorityTier = PriorityTier;
         await SaveChangesAsync();
         return found;
