@@ -14,5 +14,7 @@ public class AssessmentEvent
     public ICollection<ExamSession>? ExamSessions{get;set;}
     public ICollection<AssessmentHandIn>? AssessmentHandIns{get;set;}
     public Course? Course {get;set;}
+    public PlanningEducationElement PlanningEducationElement {get;set;} = new();
+    
 
 }
