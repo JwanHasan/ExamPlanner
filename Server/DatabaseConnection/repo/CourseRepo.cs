@@ -19,7 +19,7 @@ public class CourseRepo : ICourseRepo
         await _context.Course.AddAsync( course);
         await SaveChangesAsync();
         return course;
-        
+
     }
 
     public async Task<bool> DeleteAsync(int id )
@@ -81,5 +81,7 @@ public class CourseRepo : ICourseRepo
     public async Task SaveChangesAsync()
     {
         await _context.SaveChangesAsync();
+        
     }
+
 }
