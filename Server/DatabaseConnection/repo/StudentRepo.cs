@@ -1,4 +1,3 @@
-using System.IO.Compression;
 using DatabaseConnection.DBContext;
 using DatabaseConnection.model;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +6,7 @@ namespace DatabaseConnection.repo;
 public class StudentRepo : IStudentRepo
 {
     private readonly AppDbContext _context;
-    public StudentRepo(AppDbContext context)
+     public StudentRepo(AppDbContext context)
     {
         _context=context;
     }
@@ -29,9 +28,15 @@ public class StudentRepo : IStudentRepo
         return deleted>0;
     }
 
-    public Task<List<Enrollment>> GetEnrollmentByStudentIdAsync(int id)
+    public async Task<List<Enrollment>?> GetEnrollmentByStudentIdAsync(int id)
     {
-        throw new NotImplementedException();
+        var list = await  _context.Student
+        .Where(x=> x.Id==id).Select(x=> x.Enrollments)
+        .FirstOrDefaultAsync();
+        
+        return list?.ToList();
+            
+        
     }
 
     public async Task<List<StudentExamAssignment>?> GetStudentExamAsssignmentByIdAsync(int id)
@@ -39,8 +44,8 @@ public class StudentRepo : IStudentRepo
         var collection = await _context.Student
         .Where(x=> x.Id==id).Select(x=> x.StudentExamAssignment)
         .FirstOrDefaultAsync();
-        if(collection is null) return null;
-        return collection.ToList();
+        
+        return collection?.ToList();
 
     }
 
@@ -50,11 +55,10 @@ public class StudentRepo : IStudentRepo
         return user;
     }
 
-    public async Task<Student?> UpdateStudentAsync(int oldId,int id, int userId)
+    public async Task<Student?> UpdateStudentAsync(int id, int userId)
     {
-        var find = await  _context.Student.FindAsync(oldId);
+        var find = await  _context.Student.FindAsync(id);
         if(find is null) return null;
-        find.Id= id;
         find.UserId = userId;
         await _context.SaveChangesAsync();
         return find;
