@@ -1,5 +1,6 @@
 using DatabaseConnection.DBContext;
 using DatabaseConnection.model;
+using Microsoft.EntityFrameworkCore;
 
 namespace DatabaseConnection.repo;
 
@@ -11,38 +12,58 @@ public class EnrollmentRepo : IEnrollmentRepo
         _context=context;
     }
 
-    public Task<Enrollment> AddEnrollmentAsync(int studentId, int courseId)
+    public async Task<Enrollment> AddEnrollmentAsync(int studentId, int courseId)
     {
-        throw new NotImplementedException();
+        var created = new Enrollment
+        {
+            StudentId = studentId, CourseId=courseId
+        };
+        await _context.Enrollment.AddAsync(created);
+        await _context.SaveChangesAsync();
+        return created;
     }
 
-    public Task<bool> DeleteEnrollmentAsync(int studentId, int courseId)
+    public async Task<bool> DeleteEnrollmentAsync(int studentId, int courseId)
     {
-        throw new NotImplementedException();
+         var isDeleted = await _context.Enrollment
+         .Where(x=> x.StudentId==studentId && x.CourseId == courseId)
+        .ExecuteDeleteAsync();
+        return isDeleted>0;
     }
 
-    public Task<List<Student>> GetCoursesByStudentIdAsync(int studentId)
+    public async Task<List<Course>> GetCoursesByStudentIdAsync(int studentId)
     {
-        throw new NotImplementedException();
+        var result = await _context.Enrollment
+        .Where(x=> x.StudentId == studentId)
+        .Select(x=> x.Course).ToListAsync();
+        return result;
     }
 
-    public Task<List<Course>> GetCoursesByVIAIdAsync(int viaId)
+    public async Task<List<Student>> GetStudentsByCourseIdAsync(int courseId)
     {
-        throw new NotImplementedException();
+        var result = await _context.Enrollment
+        .Where(x=> x.CourseId == courseId)
+        .Select(x=> x.Student).ToListAsync();
+        return result;
     }
 
-    public Task<List<Student>> GetStudentsByCourseIdAsync(int courseId)
+    public async Task<List<Student>> GetStudentsBySuecodeAsync(string sueCode)
     {
-        throw new NotImplementedException();
+        var result = await _context.Enrollment
+        .Where(x=> x.Course.SueCode == sueCode)
+        .Select(x=> x.Student).ToListAsync();
+        return result;
     }
 
-    public Task<List<Student>> GetStudentsBySuecodeAsync(string sueCode)
+    public  async Task<Enrollment?> UpdateEnrollmentAsync(int currentStudentId, int currentCourseId, int newStudentId, int newCouseId)
     {
-        throw new NotImplementedException();
-    }
-
-    public Task<Enrollment> UpdateEnrollmentAsync(int currentStudentId, int currentCourseId, int newStudentId, int newCouseId)
-    {
-        throw new NotImplementedException();
+        
+        var changed= await _context.Enrollment.FirstOrDefaultAsync(x=> x.CourseId==currentCourseId
+        && x.StudentId==currentStudentId);
+        if(changed is null) return null;
+        changed.StudentId= newStudentId;
+        changed.CourseId = newCouseId;
+        await _context.SaveChangesAsync();
+        return changed;
     }
 }

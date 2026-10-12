@@ -29,31 +29,34 @@ public class ClassRepo : IClassRepo
         return await _context.Class.Where(p=> p.CourseId==courseId).ToListAsync();
     }
 
-    public async Task<Class> UpdateEndDateById(int id, DateTime endDate)
+    public async Task<Class?> UpdateEndDateById(int id, DateTime endDate)
     {
         var update = await GetClassAsyncById(id);
+        if(update is null) return null;
         update.EndDate = endDate;
         await _context.SaveChangesAsync();
         return update;
     }
 
-    public async Task<Class> UpdateNicknameById(int id, string nickname)
+    public async Task<Class?> UpdateNicknameById(int id, string nickname)
     {
         var update = await GetClassAsyncById(id);
+        if(update is null) return null;
         update.NickName = nickname;
         await _context.SaveChangesAsync();
         return update;
     }
 
-    public async Task<Class> UpdateStartDateById(int id, DateTime startDate)
+    public async Task<Class?> UpdateStartDateById(int id, DateTime startDate)
     {
         var update = await GetClassAsyncById(id);
+        if(update is null) return null;
         update.StartDate = startDate;
         await _context.SaveChangesAsync();
         return update;
     }
 
-    public async Task<Class> UpdateClasscodeById(int id, string classCode)
+    public async Task<Class?> UpdateClasscodeById(int id, string classCode)
     {
         var update = await GetClassAsyncById(id);
         if(update is null) return null;
@@ -79,9 +82,9 @@ public class ClassRepo : IClassRepo
 
     public async Task<bool> DeleteClassAsyncById(int id)
     {
-       await _context.Class.Where(x=> x.Id ==id).ExecuteDeleteAsync();
-       await _context.SaveChangesAsync();
-       return true;
+       var isDeleted =await _context.Class.Where(x=> x.Id ==id).ExecuteDeleteAsync();
+       
+       return isDeleted>0;
 
     }
 }
