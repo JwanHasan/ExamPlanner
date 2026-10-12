@@ -13,18 +13,32 @@ public class AppDbContext : DbContext
         : base(options)
     { 
     }
-
+    public DbSet<AssessmentEvent> AssessmentEvent{get;set;}
+    public DbSet<AssessmentHandIn> AssessmentHandIn{get;set;}
     public DbSet<Class> Class {get;set;} //
     public DbSet<Course> Course {get;set;}//
     public DbSet<Enrollment> Enrollment {get;set;}//
+    public DbSet<ExamDay> ExamDay{get;set;}
+    public DbSet<ExamSession> ExamSession{get;set;}
+    public DbSet<PlanningEducationElement> PlanningEducationElement{get;set;}
+    public DbSet<Room> Room{get;set;}
+    public DbSet<Schedule> Schedule{get;set;}
+    public DbSet<ScheduleReview> ScheduleReview{get;set;}
     public DbSet<Student> Student {get;set;}//
+    public DbSet<StudentExamAssignment> StudentExamAssignment {get;set;}//
+    public DbSet<Teacher> Teacher {get;set;}//
+    public DbSet<TeacherAssignment> TeacherAssignment {get;set;}//
+    public DbSet<TeacherConstraint> TeacherConstraint {get;set;}//
     public DbSet<User> User {get;set;}//
+    
 
 
 
     // setting up relation between tables 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Student>().HasKey(k=> k.Id);
+        modelBuilder.Entity<Student>().Property(s=>s.Id).ValueGeneratedNever();
         modelBuilder.Entity<Enrollment>().HasKey(e=> new{e.StudentId,e.CourseId});
         modelBuilder.Entity<StudentExamAssignment>().HasKey(s=> new{s.StudentId,s.ExamSessionId});
         modelBuilder.Entity<TeacherAssignment>().HasKey(s=> new{s.ExamSessionId,s.TeacherId});
