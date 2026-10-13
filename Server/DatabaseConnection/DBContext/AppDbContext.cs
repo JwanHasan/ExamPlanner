@@ -24,12 +24,12 @@ public class AppDbContext : DbContext
     public DbSet<Room> Room{get;set;}
     public DbSet<Schedule> Schedule{get;set;}
     public DbSet<ScheduleReview> ScheduleReview{get;set;}
-    public DbSet<Student> Student {get;set;}//
-    public DbSet<StudentExamAssignment> StudentExamAssignment {get;set;}//
-    public DbSet<Teacher> Teacher {get;set;}//
-    public DbSet<TeacherAssignment> TeacherAssignment {get;set;}//
-    public DbSet<TeacherConstraint> TeacherConstraint {get;set;}//
-    public DbSet<User> User {get;set;}//
+    public DbSet<Student> Student {get;set;}
+    public DbSet<StudentExamAssignment> StudentExamAssignment {get;set;}
+    public DbSet<Teacher> Teacher {get;set;}
+    public DbSet<TeacherAssignment> TeacherAssignment {get;set;}
+    public DbSet<TeacherConstraint> TeacherConstraint {get;set;}
+    public DbSet<User> User {get;set;}
     
 
 
