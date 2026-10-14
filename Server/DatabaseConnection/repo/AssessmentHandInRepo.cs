@@ -33,9 +33,16 @@ public class AssessmentHandInRepo : IAssessmentHandInRepo
         return deleted>0;
     }
 
-    public async Task<List<AssessmentHandIn>> GetAllEventAsync()
+    public async Task<List<AssessmentHandIn>> GetAllHandInAsync()
     {
         return await _context.AssessmentHandIn.ToListAsync();
+    }
+    
+    // get list of AssessmentHandIn based on AssessmentEventId
+    public async Task<List<AssessmentHandIn>> GetAllHandInByEventId(int assessmentEvenId)
+    {
+        return await _context.AssessmentHandIn
+        .Where(x=> x.AssessmentEventId==assessmentEvenId).ToListAsync();
     }
 
     public async Task<AssessmentEvent> GetAssessmentEventByIdAsync(int assessmentEvenId)

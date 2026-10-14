@@ -4,7 +4,7 @@ namespace DatabaseConnection.repo;
 public interface IAssessmentHandInRepo
 {
     Task<AssessmentHandIn?> GetHandInByIdAsync(int id);
-    Task<List<AssessmentHandIn>> GetAllEventAsync();
+    Task<List<AssessmentHandIn>> GetAllHandInAsync();
     Task<AssessmentEvent> GetAssessmentEventByIdAsync(int assessmentEvenId);
     Task<AssessmentHandIn> AddHandInAsync(int assessmentEvenId,
         DateTime handInDateTime,int part, string note);
@@ -12,5 +12,6 @@ public interface IAssessmentHandInRepo
         int assessmentEvenId,DateTime handInDateTime,
         int part,string note);
     Task<bool> DeleteHandInAsync(int id);
+    Task<List<AssessmentHandIn>> GetAllHandInByEventId(int assessmentEvenId);
 
 }
