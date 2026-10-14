@@ -14,10 +14,11 @@ public class PlanningEducationElementRepo:IPlanningEducationElementRepo
         _context=context;
     }
 
-    public async Task<PlanningEducationElement> AddAsync(string sourceChecksum, DateTime sourceModifiedAt, string name, string nickname, int ects, int executionElementCount, DateOnly startDate, DateOnly endDate, string activityOffering, string prefix, PlanningEducationElement.Assessment assessmentType, bool completionAssessment, string gradingScale, bool combinedWrittenOral, bool oral, bool practicalExam, bool project, bool written, AssessmentEvent assessmentEvent)
+    public async Task<PlanningEducationElement> AddAsync(Guid id,string sourceChecksum, DateTime sourceModifiedAt, string name, string nickname, int ects, int executionElementCount, DateOnly startDate, DateOnly endDate, string activityOffering, string prefix, PlanningEducationElement.Assessment assessmentType, bool completionAssessment, string gradingScale, bool combinedWrittenOral, bool oral, bool practicalExam, bool project, bool written, AssessmentEvent assessmentEvent)
     {
         var element = new PlanningEducationElement
     {
+        Id= id,
         SourceChecksum = sourceChecksum,
         SourceModifiedAt = sourceModifiedAt,
         Name = name,
@@ -43,7 +44,7 @@ public class PlanningEducationElementRepo:IPlanningEducationElementRepo
     return element;
     }
 
-    public async Task<bool> DeleteAsyncById(int id)
+    public async Task<bool> DeleteAsyncById(Guid id)
     {
        var d= await _context.PlanningEducationElement
         .Where(x=> x.Id == id).ExecuteDeleteAsync();

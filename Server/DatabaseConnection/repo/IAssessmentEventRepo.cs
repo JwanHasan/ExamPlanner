@@ -5,7 +5,7 @@ namespace DatabaseConnection.repo;
 public interface IAssessmentEventRepo
 {
     Task<AssessmentEvent?> GetByIdAsync (int id );
-    Task<AssessmentEvent?> GetEventByPlanningElementIdAsync (int planningEducationElementId );
+    Task<AssessmentEvent?> GetEventByPlanningElementIdAsync (Guid planningEducationElementId );
     Task<List<AssessmentEvent>> GetAllAsync();
     Task<List<AssessmentEvent>> GetAllByCourseIdAsync(int id);
     Task<Course?> GetCourseAsync(int id);

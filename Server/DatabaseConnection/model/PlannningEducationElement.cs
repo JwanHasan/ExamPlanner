@@ -5,7 +5,7 @@ public class PlanningEducationElement
     {
         Internal,External
     }
-    public int Id{get;set;}
+    public Guid Id{get;set;}
     public string SourceChecksum{get;set;}= "";
     public DateTime SourceModifiedAt{get;set;}
     public string Name{get;set;}= "";
