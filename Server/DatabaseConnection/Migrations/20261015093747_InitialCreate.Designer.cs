@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DatabaseConnection.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20261015091503_UpdatedDatabaseRelationv1")]
-    partial class UpdatedDatabaseRelationv1
+    [Migration("20261015093747_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
