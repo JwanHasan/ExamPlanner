@@ -7,7 +7,7 @@ public class AssessmentEvent
 {
     public int Id{get;set;}
     public int CourseId{get;set;}
-    public int PlanningElementId{get;set;}
+    public Guid PlanningElementId{get;set;}
     public ExamType ExamType {get;set;}
     public string Note {get;set;}= "";
 

@@ -100,7 +100,7 @@ public class AppDbContext : DbContext
         .WithOne(x=> x.ExamSession).HasForeignKey(x=> x.ExamSessionId);
 
         modelBuilder.Entity<ExamSession>().HasOne(x=> x.AssessmentEvent)
-        .WithMany(x=> x.ExamSessions).HasForeignKey(x=> x.AsseessmentId);
+        .WithMany(x=> x.ExamSessions).HasForeignKey(x=> x.AsseessmenEventId);
 
         modelBuilder.Entity<ExamSession>().HasOne(x=> x.Schedule)
         .WithMany(x=> x.ExamSessions).HasForeignKey(x=> x.ScheduleId);

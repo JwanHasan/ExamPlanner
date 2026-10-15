@@ -83,9 +83,10 @@ public class CourseRepo : ICourseRepo
         
     }
 
-    public async Task<int> GetCourseIdBySuecodeAsync(string suecode)
+    public async Task<int?> GetCourseIdBySuecodeAsync(string suecode)
     {
-        var found = GetCourseBySueCodeAsync(suecode);
+        var found = await GetCourseBySueCodeAsync(suecode);
+            if(found is null) return null;
         return found.Id;
     }
 }

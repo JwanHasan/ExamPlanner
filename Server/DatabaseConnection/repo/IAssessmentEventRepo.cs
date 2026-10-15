@@ -15,7 +15,7 @@ public interface IAssessmentEventRepo
     Task<AssessmentEvent?> UpdateExamTypeById(int id, ExamType type);
     Task<AssessmentEvent?> UpdateNoteById(int id, string note);
     Task<AssessmentEvent?> UpdateByIdAsync(int id,
-        int courseId,int planningEducationElementId, ExamType examType, string note );
+        int courseId,Guid planningEducationElementId, ExamType examType, string note );
     Task<bool> DeleteByIdAsync(int id);
 
 }

@@ -49,7 +49,7 @@ public class AssessmentEventRepo:IAssessmentEventRepo
             .Where(x=> x.Id==id).Select(x=> x.PlanningEducationElement).FirstAsync();
     }
 
-    public async Task<AssessmentEvent?> GetEventByPlanningElementIdAsync(int planningEducationElementId)
+    public async Task<AssessmentEvent?> GetEventByPlanningElementIdAsync(Guid planningEducationElementId)
     {
         return await _context.AssessmentEvent
             .Where(x=> x.PlanningElementId==planningEducationElementId).FirstAsync();
@@ -70,7 +70,7 @@ public class AssessmentEventRepo:IAssessmentEventRepo
     }
 
     public async Task<AssessmentEvent?> UpdateByIdAsync(int id,
-     int courseId, int planningEducationElementId, ExamType examType, string note)
+     int courseId, Guid planningEducationElementId, ExamType examType, string note)
     {
         var upt= await GetByIdAsync(id);
         if(upt is null) return null;
