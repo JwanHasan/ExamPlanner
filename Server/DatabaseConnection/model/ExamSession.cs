@@ -2,7 +2,7 @@ namespace DatabaseConnection.model;
 public class ExamSession
 {
     public int Id{get;set;}
-    public int AsseessmentId{get;set;}
+    public int AsseessmenEventId{get;set;}
     public int ScheduleId{get;set;}
     public int RoomId{get;set;}
     public DateOnly Date{get;set;}

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DatabaseConnection.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20261008121615_updatedDatabaseRelation")]
-    partial class updatedDatabaseRelation
+    [Migration("20261015093747_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -43,8 +43,8 @@ namespace DatabaseConnection.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("PlanningElementId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("PlanningElementId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -124,7 +124,7 @@ namespace DatabaseConnection.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("ETCS")
+                    b.Property<int>("ECTS")
                         .HasColumnType("integer");
 
                     b.Property<string>("Name")
@@ -200,7 +200,7 @@ namespace DatabaseConnection.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AsseessmentId")
+                    b.Property<int>("AsseessmenEventId")
                         .HasColumnType("integer");
 
                     b.Property<DateOnly>("Date")
@@ -217,7 +217,7 @@ namespace DatabaseConnection.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AsseessmentId");
+                    b.HasIndex("AsseessmenEventId");
 
                     b.HasIndex("RoomId");
 
@@ -228,11 +228,9 @@ namespace DatabaseConnection.Migrations
 
             modelBuilder.Entity("DatabaseConnection.model.PlanningEducationElement", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<string>("ActivityOffering")
                         .IsRequired()
@@ -367,10 +365,7 @@ namespace DatabaseConnection.Migrations
             modelBuilder.Entity("DatabaseConnection.model.Student", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
@@ -569,7 +564,7 @@ namespace DatabaseConnection.Migrations
                 {
                     b.HasOne("DatabaseConnection.model.AssessmentEvent", "AssessmentEvent")
                         .WithMany("ExamSessions")
-                        .HasForeignKey("AsseessmentId")
+                        .HasForeignKey("AsseessmenEventId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

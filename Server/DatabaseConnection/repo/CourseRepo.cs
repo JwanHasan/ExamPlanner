@@ -24,11 +24,10 @@ public class CourseRepo : ICourseRepo
 
     public async Task<bool> DeleteAsync(int id )
     {
-        var found =await  GetCourseByIdAsync(id);
-        if(found is null) return false;
-
-        _context.Course.Remove(found);
-        return true;
+         var isDeleted =await _context.Course.Where(x=> x.Id==id)
+        .ExecuteDeleteAsync();
+        
+        return isDeleted>0;
 
     }
 
@@ -84,4 +83,10 @@ public class CourseRepo : ICourseRepo
         
     }
 
+    public async Task<int?> GetCourseIdBySuecodeAsync(string suecode)
+    {
+        var found = await GetCourseBySueCodeAsync(suecode);
+            if(found is null) return null;
+        return found.Id;
+    }
 }

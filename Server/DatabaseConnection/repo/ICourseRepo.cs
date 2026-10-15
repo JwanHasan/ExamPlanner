@@ -7,7 +7,7 @@ public interface ICourseRepo
     Task<Course> AddCourseAsync(string SueCode,string Prefix,string name, int Semester,int ects, int PriorityTier);
     Task<Course> UpdateCourseByIdAsync(int id,string SueCode,string Prefix,string name, int Semester,int ects, int PriorityTier);
     Task<Course> UpdateCourseBySuecodeAsync(string SueCode,string Prefix,string name, int Semester,int ects, int PriorityTier);
-
+    Task<int?> GetCourseIdBySuecodeAsync(string suecode);
     Task<Course?> GetCourseByIdAsync(int id );
     Task<Course?> GetCourseBySueCodeAsync(string SueCode );
 

@@ -11,5 +11,5 @@ public class TeacherConstraint
     public ConstraintType ConstraintType {get;set;}
     public string Note{get;set;} = "";
 
-    public Teacher Teacher{get;set;} = new();
+    public Teacher Teacher{get;set;} = null!;
 }
