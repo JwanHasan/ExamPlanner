@@ -1,46 +1,49 @@
-import viaLogo from "./Assets/via-logo-small.png";
-import campusBackground from "./Assets/campus-background-transparent.png";
-import "./Themes/CalendarPages.css";
 import { useState } from "react";
 import type { CSSProperties, FormEvent } from "react";
-import DropdownExam from "../api/features/DropdownExam.tsx";
-import DropdownMonth from "../api/features/DropdownMonth.tsx";
 import { useNavigate } from "react-router-dom";
+import viaLogo from "./Assets/via-logo-small.png";
+import Dropdown from "../api/features/DropdownExam";
+import "./Themes/CalendarPages.css";
+import campusBackground from "./Assets/campus-background-transparent.png";
 
-const MONTHS = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
+const EXAM_MONTHS = [
+    { name: "January", index: 0 },
+    { name: "February", index: 1 },
+    { name: "June", index: 5 },
+    { name: "August", index: 7 }
 ];
 
-const YEAR = new Date().getFullYear();
+// We might change this when backend gets stuff
+const START_YEAR = new Date().getFullYear();
 
-//Since backend don't exist this is our temp data to show how exams are gonna look in final calendar
+// This will also be replaced with the actual exam data
 const PLACEHOLDER_COURSES = ["WEB1", "DNP1", "PRO1", "PRO3"];
 const PLACEHOLDER_EXAMS: Record<string, string[]> = {
     "0-5": ["WEB1"],
     "0-9": ["DNP1", "PRO1"],
-    "0-12": ["PRO3"]
+    "0-13": ["PRO3"]
 };
 
-const MONTH_OPTIONS = MONTHS.map((name, index) => ({ value: String(index), label: name }));
 const COURSE_OPTIONS = PLACEHOLDER_COURSES.map(name => ({ value: name, label: name }));
 
 const CreatePlan = () => {
-
     const navigate = useNavigate();
 
-    const [month, setMonth] = useState(0);
+    const [monthPosition, setMonthPosition] = useState(0); // position inside EXAM_MONTHS
+    const [year, setYear] = useState(START_YEAR);
     const [selectedDay, setSelectedDay] = useState<number | null>(null);
     const [course, setCourse] = useState("");
     const [duration, setDuration] = useState("");
     const [room, setRoom] = useState("");
+    const [isReExam, setIsReExam] = useState(false);
 
+    const { name: monthName, index: month } = EXAM_MONTHS[monthPosition];
     const panelOpen = selectedDay !== null;
 
     const cols = panelOpen ? 5 : 7;
 
-    const daysInMonth = new Date(YEAR, month + 1, 0).getDate();
-    const firstWeekday = (new Date(YEAR, month, 1).getDay() + 6) % 7; // Monday = 0 ... Sunday = 6
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstWeekday = (new Date(year, month, 1).getDay() + 6) % 7; // Monday = 0 ... Sunday = 6
 
     const days = Array.from({ length: daysInMonth }, (_, i) => ({
         day: i + 1,
@@ -58,16 +61,32 @@ const CreatePlan = () => {
         setCourse("");
         setDuration("");
         setRoom("");
+        setIsReExam(false);
     };
 
-    const handleMonthChange = (value: string) => {
-        setMonth(Number(value));
+    const goToPreviousMonth = () => {
+        if (monthPosition === 0) {
+            setMonthPosition(EXAM_MONTHS.length - 1);
+            setYear(year - 1);
+        } else {
+            setMonthPosition(monthPosition - 1);
+        }
+        closePanel();
+    };
+
+    const goToNextMonth = () => {
+        if (monthPosition === EXAM_MONTHS.length - 1) {
+            setMonthPosition(0);
+            setYear(year + 1);
+        } else {
+            setMonthPosition(monthPosition + 1);
+        }
         closePanel();
     };
 
     const handleSubmit = (event: FormEvent) => {
         event.preventDefault();
-        //This is gonna be sent to backend when it exists
+        // Send this to backend when it's made
         closePanel();
     };
 
@@ -82,13 +101,28 @@ const CreatePlan = () => {
                             <span aria-hidden="true">←</span> Return to main page
                         </button>
 
-                        <DropdownMonth
-                            className="calendar-month"
-                            ariaLabel="Month"
-                            value={String(month)}
-                            options={MONTH_OPTIONS}
-                            onChange={handleMonthChange}
-                        />
+                        <div className="calendar-nav" aria-live="polite">
+                            <div className="calendar-nav-row">
+                                <button
+                                    type="button"
+                                    className="calendar-nav-arrow"
+                                    aria-label="Previous month"
+                                    onClick={goToPreviousMonth}
+                                >
+                                    &lt;
+                                </button>
+                                <h1 className="calendar-nav-month">{monthName}</h1>
+                                <button
+                                    type="button"
+                                    className="calendar-nav-arrow"
+                                    aria-label="Next month"
+                                    onClick={goToNextMonth}
+                                >
+                                    &gt;
+                                </button>
+                            </div>
+                            <p className="calendar-nav-year">{year}</p>
+                        </div>
                     </header>
 
                     <div className="calendar-grid">
@@ -124,7 +158,7 @@ const CreatePlan = () => {
                                     key={day}
                                     type="button"
                                     className={`calendar-day${day === selectedDay ? " calendar-day-selected" : ""}`}
-                                    aria-label={`${MONTHS[month]} ${day}`}
+                                    aria-label={`${monthName} ${day}`}
                                     aria-pressed={day === selectedDay}
                                     onClick={() => openDay(day)}
                                 >
@@ -138,7 +172,7 @@ const CreatePlan = () => {
                         )}
                     </div>
 
-                    {/*Link to backend after it's created*/}
+                    {/* Sync this to backend when it exists (I'm tired of writing this shit ngl) */}
                     <button type="button" className="calendar-footer">
                         Create Calendar
                     </button>
@@ -150,19 +184,19 @@ const CreatePlan = () => {
                             <button type="button" className="exam-panel-cancel" onClick={closePanel}>
                                 Cancel
                             </button>
-                            <h2 className="exam-panel-title">{MONTHS[month]} {selectedDay}</h2>
+                            <h2 className="exam-panel-title">{monthName} {selectedDay}</h2>
                         </div>
 
                         <div className="exam-panel-body">
-                            <label className="exam-field">
-                                <span className="exam-label">Select the course</span>
-                                <DropdownExam
+                            <div className="exam-field">
+                                <span className="exam-label" id="exam-course-label">Select the course</span>
+                                <Dropdown
                                     ariaLabelledBy="exam-course-label"
                                     value={course}
                                     options={COURSE_OPTIONS}
                                     onChange={setCourse}
                                 />
-                            </label>
+                            </div>
 
                             <label className="exam-field">
                                 <span className="exam-label">Enter the duration of the exam</span>
@@ -181,6 +215,15 @@ const CreatePlan = () => {
                                     type="text"
                                     value={room}
                                     onChange={e => setRoom(e.target.value)}
+                                />
+                            </label>
+
+                            <label className="exam-checkbox">
+                                <span className="exam-label">Re-exam</span>
+                                <input
+                                    type="checkbox"
+                                    checked={isReExam}
+                                    onChange={e => setIsReExam(e.target.checked)}
                                 />
                             </label>
                         </div>
