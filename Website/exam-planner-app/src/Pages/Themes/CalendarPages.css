@@ -13,16 +13,14 @@
   padding: 24px;
   box-sizing: border-box;
   color: var(--line);
-  background:
-      linear-gradient(rgba(246, 245, 240, 0.6), rgba(246, 245, 240, 0.6)),
-      #2f3a33 url("../Assets/campus-background.jpg") center / cover no-repeat;
+  background: rgba(255, 255, 255, 0.2) center / cover no-repeat;
 }
 
 .calendar-logo {
   position: absolute;
   top: 24px;
   left: 24px;
-  width: 110px;
+  width: 150px;
   height: auto;
 }
 
@@ -42,10 +40,11 @@
 }
 
 .calendar-header {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  gap: 24px;
-  padding: 24px;
+  gap: 16px;
+  padding: 16px 24px;
   background: var(--grey);
   border-bottom: 3px solid var(--line);
 }
@@ -56,7 +55,7 @@
   gap: 8px;
   padding: 10px 14px;
   font: inherit;
-  font-size: 0.95rem;
+  font-size: 20px;
   font-weight: bold;
   color: #ffffff;
   background: var(--line);
@@ -66,11 +65,16 @@
   white-space: nowrap;
 }
 
+.calendar-return {
+  justify-self: start;
+}
+
 .calendar-return:hover {
   background: #3b423c;
 }
 
 .calendar-return:focus-visible,
+.calendar-nav-arrow:focus-visible,
 .exam-panel-cancel:focus-visible,
 .calendar-footer:focus-visible,
 .exam-panel-submit:focus-visible,
@@ -83,52 +87,52 @@
   outline-offset: -3px;
 }
 
-.select-wrap {
-  position: relative;
-  display: block;
-  color: black;
+.calendar-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: #ffffff;
 }
 
-.select-wrap select {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 100%;
-  padding: 10px 48px 10px 16px;
+.calendar-nav-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.calendar-nav-arrow {
+  padding: 0 10px;
   font: inherit;
-  color: var(--line);
-  background: #ffffff;
-  border: 3px solid var(--line);
+  font-size: 50px;
+  font-weight: bold;
+  line-height: 1.1;
+  color: #ffffff;
+  background: transparent;
+  border: none;
   border-radius: 8px;
   cursor: pointer;
 }
 
-.select-wrap::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  right: 16px;
-  width: 0;
-  height: 0;
-  border-left: 9px solid transparent;
-  border-right: 9px solid transparent;
-  border-top: 12px solid var(--line);
-  transform: translateY(-50%);
-  pointer-events: none;
+.calendar-nav-arrow:hover {
+  background: rgba(255, 255, 255, 0.25);
 }
 
-.select-wrap select:focus-visible {
-  outline: 3px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.calendar-month {
-  min-width: 15rem;
-}
-
-.calendar-month select {
-  font-size: 2rem;
+.calendar-nav-month {
+  min-width: 225px;
+  margin: 0;
+  font-size: 50px;
   font-weight: bold;
-  line-height: 1.2;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.calendar-nav-year {
+  margin: 0;
+  font-size: 30px;
+  font-weight: bold;
+  line-height: 1.1;
 }
 
 .calendar-grid {
@@ -160,7 +164,7 @@ button.calendar-day {
 }
 
 button.calendar-day:hover {
-  background: #ececec;
+  background: lightgrey;
 }
 
 .calendar-day-selected,
@@ -176,14 +180,14 @@ button.calendar-day-selected:hover {
 }
 
 .calendar-day-number {
-  font-size: 1.5rem;
+  font-size: 25px;
   font-weight: bold;
   line-height: 1.1;
 }
 
 .calendar-exam {
-  font-size: 1.35rem;
-  font-weight: bold;
+  font-size: 25px;
+  font-weight: bolder;
   line-height: 1.15;
   letter-spacing: 0.02em;
   color: #ffffff;
@@ -201,7 +205,7 @@ button.calendar-day-selected:hover {
   width: 100%;
   padding: 6px 12px 10px;
   font: inherit;
-  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  font-size: 40px;
   font-weight: bold;
   color: #ffffff;
   background: var(--grey);
@@ -237,7 +241,7 @@ button.calendar-day-selected:hover {
 .exam-panel-cancel {
   padding: 12px 18px;
   font: inherit;
-  font-size: 1.3rem;
+  font-size: 20px;
   font-weight: bold;
   color: #ffffff;
   background: var(--line);
@@ -252,10 +256,11 @@ button.calendar-day-selected:hover {
 
 .exam-panel-title {
   margin: 0;
-  font-size: clamp(1.5rem, 2.4vw, 2.2rem);
+  font-size: 40px;
   font-weight: bold;
   line-height: 1.1;
   color: #ffffff;
+  padding-left: 25px;
 }
 
 .exam-panel-body {
@@ -272,18 +277,18 @@ button.calendar-day-selected:hover {
 }
 
 .exam-label {
-  font-size: 1.1rem;
+  font-size: 20px;
   font-weight: bold;
   text-align: left;
 }
 
 .exam-field input {
-  width: 50%;
-  max-width: 340px;
+  width: 100%;
+  max-width: 200px;
   padding: 10px 14px;
   box-sizing: border-box;
   font: inherit;
-  font-size: 1rem;
+  font-size: 20px;
   color: var(--line);
   background: #ffffff;
   border: 3px solid var(--line);
@@ -295,15 +300,41 @@ button.calendar-day-selected:hover {
   outline-offset: 2px;
 }
 
-.exam-field .select-wrap select {
-  font-size: 1rem;
-  min-height: 3rem;
+.exam-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: fit-content;
+  cursor: pointer;
+}
+
+.exam-checkbox input {
+  appearance: none;
+  -webkit-appearance: none;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  margin: 0;
+  background: #ffffff center / 70% no-repeat;
+  border: 3px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.exam-checkbox input:checked {
+  background-color: var(--line);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.5l3.2 3.2L13 4.8' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.exam-checkbox input:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .exam-panel-submit {
   padding: 6px 12px 10px;
   font: inherit;
-  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  font-size: 35px;
   font-weight: bold;
   color: #ffffff;
   background: var(--grey);
@@ -328,6 +359,16 @@ button.calendar-day-selected:hover {
   }
 }
 
+@media (max-width: 860px) {
+  .calendar-header {
+    grid-template-columns: 1fr;
+  }
+
+  .calendar-nav {
+    justify-self: center;
+  }
+}
+
 @media (max-width: 640px) {
   .calendar-page {
     --cell-height: 72px;
@@ -335,17 +376,16 @@ button.calendar-day-selected:hover {
   }
 
   .calendar-header {
-    flex-wrap: wrap;
     gap: 12px;
     padding: 14px;
   }
 
-  .calendar-month {
-    min-width: 11rem;
+  .calendar-nav-arrow {
+    padding: 0 6px;
   }
 
-  .calendar-month select {
-    font-size: 1.4rem;
+  .calendar-nav-month {
+    min-width: 20px;
   }
 
   .calendar-day {
@@ -353,10 +393,11 @@ button.calendar-day-selected:hover {
   }
 
   .calendar-day-number {
-    font-size: 1rem;
+    font-size: 15px;
   }
 
   .calendar-exam {
-    font-size: 0.7rem;
+    font-size: 15px;
+    font-weight: bolder;
   }
 }
