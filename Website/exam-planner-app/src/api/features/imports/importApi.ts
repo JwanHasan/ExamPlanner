@@ -9,7 +9,8 @@ export const uploadImport = async (
     const form = new FormData();
     form.append("file", file);
 
-    const response = await api.post<ImportResult>("/import", form, {
+    // POST /imports (API_CONTRACT.md 6.1)
+    const response = await api.post<ImportResult>("/imports", form, {
         headers: { "Content-Type": "multipart/form-data" },
         onUploadProgress: event => {
             if (onProgress && event.total) {
