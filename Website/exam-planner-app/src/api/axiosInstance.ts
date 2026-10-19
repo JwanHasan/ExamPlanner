@@ -4,7 +4,8 @@ import Cookies from "js-cookie";
 export const TOKEN_COOKIE = "examplan_token";
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL ?? "/api",
+    // API_CONTRACT.md 3.1: every endpoint is under /api/v1
+    baseURL: import.meta.env.VITE_API_URL ?? "/api/v1",
     headers: { "Content-Type": "application/json" }
 });
 
