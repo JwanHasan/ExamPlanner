@@ -1,40 +1,51 @@
-﻿using System.Text;
+﻿using DatabaseConnection.model;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
 namespace ExamPlannerServer.Auth;
 
-/// <summary>Creates the signed token the browser keeps after logging in.</summary>
-public class TokenService
+/// <summary>Creates the signed JWT that login returns as accessToken.</summary>
+public sealed class TokenService
 {
-    private readonly IConfiguration _config;
+    private readonly JwtSettings _settings;
 
-    public TokenService(IConfiguration config)
+    public TokenService(JwtSettings settings)
     {
-        _config = config;
+        _settings = settings;
     }
 
-    public string CreateToken(string id, string email, string name, string role)
+    /// <param name="user">The account that logged in.</param>
+    /// <param name="role">The API role (see <see cref="AdminSettings.RoleOf"/>): "Admin", "Teacher" or "Student".</param>
+    public IssuedToken CreateToken(User user, string role)
     {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
+        var expiresAt = DateTime.UtcNow.AddHours(_settings.ExpiresHours);
 
         var descriptor = new SecurityTokenDescriptor
         {
-            Issuer = _config["Jwt:Issuer"],
-            Audience = _config["Jwt:Audience"],
-            Expires = DateTime.UtcNow.AddHours(8),
-            SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256),
-
-            // The React app reads exactly these names (jwtUtils.ts / authApi.ts).
+            Issuer = _settings.Issuer,
+            Audience = _settings.Audience,
+            Expires = expiresAt,
+            SigningCredentials = new SigningCredentials(_settings.SigningKey(), SecurityAlgorithms.HmacSha256),
             Claims = new Dictionary<string, object>
             {
-                ["sub"] = id,
-                ["email"] = email,
-                ["name"] = name,
-                ["role"] = role
+                [AuthClaims.UserId] = user.Id.ToString(),
+                [AuthClaims.Email] = user.Email,
+                [AuthClaims.Name] = user.Name,
+                [AuthClaims.Role] = role
             }
         };
 
-        return new JsonWebTokenHandler().CreateToken(descriptor);
+        return new IssuedToken(new JsonWebTokenHandler().CreateToken(descriptor), expiresAt);
     }
+}
+
+/// <summary>A signed token and the moment it stops being valid (UTC).</summary>
+public record IssuedToken(string Token, DateTime ExpiresAt);
+
+public static class AuthClaims
+{
+    public const string UserId = "sub";
+    public const string Email = "email";
+    public const string Name = "name";
+    public const string Role = "role";
 }
