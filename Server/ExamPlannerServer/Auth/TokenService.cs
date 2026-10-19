@@ -42,10 +42,6 @@ public sealed class TokenService
 /// <summary>A signed token and the moment it stops being valid (UTC).</summary>
 public record IssuedToken(string Token, DateTime ExpiresAt);
 
-/// <summary>
-/// Claim names inside the token. The website reads email, name and role from the token itself,
-/// and Program.cs tells the JWT handler to use "name" and "role".
-/// </summary>
 public static class AuthClaims
 {
     public const string UserId = "sub";

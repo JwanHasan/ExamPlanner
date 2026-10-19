@@ -2,13 +2,7 @@ using DatabaseConnection.model;
 
 namespace ExamPlannerServer.Auth;
 
-/// <summary>
-/// The "Auth" section of appsettings: which accounts are exam planners (role "Admin" in the API).
-///
-/// The database only has the roles Teacher and Student, so "Admin" is not stored there.
-/// An account is Admin when its email is listed in AdminEmails; its User row keeps a database
-/// role (Teacher for the planner account that AdminSeeder creates).
-/// </summary>
+
 public sealed class AdminSettings
 {
     public const string Section = "Auth";
