@@ -14,5 +14,4 @@ ENV PATH="$PATH:/root/.dotnet/tools"
 
 ENTRYPOINT ["dotnet", "ef", "database", "update", \
   "--project", "/Server/DatabaseConnection/DatabaseConnection.csproj", \
-  "--startup-project", "/Server/ExamPlannerServer/ExamPlannerServer.csproj", \
-  "--connection", "Host=postgres;Port=5432;Database=ExamPlanner;Username=postgres;Password=viaviavia"]
+  "--startup-project", "/Server/ExamPlannerServer/ExamPlannerServer.csproj"]

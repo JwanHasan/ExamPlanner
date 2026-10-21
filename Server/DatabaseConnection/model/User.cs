@@ -1,7 +1,7 @@
 using System.Dynamic;
 namespace DatabaseConnection.model;
 public enum Role{
-    Teacher,Student
+    Teacher,Student,Admin
 }
 public class User
 {
