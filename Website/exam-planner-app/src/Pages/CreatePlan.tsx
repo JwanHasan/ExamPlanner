@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import viaLogo from "./Assets/via-logo-small.png";
 import Dropdown from "../api/features/DropdownExam";
 import "./Themes/CalendarPages.css";
+import "./Themes/PageSelect.css"
 import campusBackground from "./Assets/campus-background-transparent.png";
 
 const EXAM_MONTHS = [
@@ -92,15 +93,17 @@ const CreatePlan = () => {
 
     return (
         <main className="calendar-page" style={{ backgroundImage: `url(${campusBackground})` }}>
-            <img className="calendar-logo" src={viaLogo} alt="VIA University College" />
+            <header className="calendar-topbar">
+                <img className="calendar-logo" src={viaLogo} alt="VIA University College" />
+                <nav className="page-nav">
+                    <button type="button" className="page-name" onClick={() => navigate("/Main")}>Pages overview &gt; </button>
+                    <button className="page-name-selected">Create calendar</button>
+                </nav>
+            </header>
 
             <div className="calendar-workspace">
                 <section className="calendar-card" style={{ "--cols": cols } as CSSProperties}>
                     <header className="calendar-header">
-                        <button type="button" className="calendar-return" onClick={() => navigate("/Main")}>
-                            <span aria-hidden="true">←</span> Return to main page
-                        </button>
-
                         <div className="calendar-nav" aria-live="polite">
                             <div className="calendar-nav-row">
                                 <button

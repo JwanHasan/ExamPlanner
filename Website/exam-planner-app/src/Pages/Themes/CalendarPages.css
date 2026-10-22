@@ -6,30 +6,30 @@
   --weekend: #4d4d4d;
   --accent: #7a1f3d;
 
-  position: relative;
   min-height: 100dvh;
+  background: rgba(255, 255, 255, 0.2) center / cover no-repeat;
   display: flex;
   flex-direction: column;
-  padding: 24px;
   box-sizing: border-box;
-  color: var(--line);
-  background: rgba(255, 255, 255, 0.2) center / cover no-repeat;
+  font-family: sans-serif;
 }
 
 .calendar-logo {
-  position: absolute;
-  top: 24px;
-  left: 24px;
+  position: static;
+  display: block;
   width: 150px;
   height: auto;
+  margin: 0;
 }
 
 .calendar-workspace {
   flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 32px;
+  margin-bottom: 10px;
 }
 
 .calendar-card {
@@ -40,7 +40,8 @@
 }
 
 .calendar-header {
-  display: grid;
+  display: flex;
+  justify-content: center;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 16px;
@@ -54,7 +55,7 @@
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
-  font: inherit;
+  font-family: sans-serif;
   font-size: 20px;
   font-weight: bold;
   color: #ffffff;
@@ -104,7 +105,7 @@
 
 .calendar-nav-arrow {
   padding: 0 10px;
-  font: inherit;
+  font-family: sans-serif;
   font-size: 50px;
   font-weight: bold;
   line-height: 1.1;
@@ -126,6 +127,7 @@
   font-weight: bold;
   line-height: 1.1;
   text-align: center;
+  font-family: sans-serif;
 }
 
 .calendar-nav-year {
@@ -151,7 +153,7 @@
   min-height: var(--cell-height);
   padding: 8px 10px;
   box-sizing: border-box;
-  font: inherit;
+  font-family: sans-serif;
   text-align: left;
   color: var(--line);
   background: #ffffff;
@@ -204,7 +206,7 @@ button.calendar-day-selected:hover {
   display: block;
   width: 100%;
   padding: 6px 12px 10px;
-  font: inherit;
+  font-family: sans-serif;
   font-size: 40px;
   font-weight: bold;
   color: #ffffff;
@@ -240,7 +242,7 @@ button.calendar-day-selected:hover {
 
 .exam-panel-cancel {
   padding: 12px 18px;
-  font: inherit;
+  font-family: sans-serif;
   font-size: 20px;
   font-weight: bold;
   color: #ffffff;
@@ -287,7 +289,7 @@ button.calendar-day-selected:hover {
   max-width: 200px;
   padding: 10px 14px;
   box-sizing: border-box;
-  font: inherit;
+  font-family: sans-serif;
   font-size: 20px;
   color: var(--line);
   background: #ffffff;
@@ -333,7 +335,7 @@ button.calendar-day-selected:hover {
 
 .exam-panel-submit {
   padding: 6px 12px 10px;
-  font: inherit;
+  font-family: sans-serif;
   font-size: 35px;
   font-weight: bold;
   color: #ffffff;

@@ -7,6 +7,7 @@ import ImportDialog from "./ImportDialog.tsx";
 import viaLogo from "./Assets/via-logo-small.png";
 import campusBackground from "./Assets/campus-background-transparent.png";
 import "./Themes/Main.css";
+import "./Themes/PageSelect.css";
 
 const Main = () => {
     const { user } = useAuth();
@@ -25,10 +26,12 @@ const Main = () => {
 
     return (
         <main className="main-page" style={{ backgroundImage: `url(${campusBackground})` }}>
-            <header className="main-header">
+            <header className="calendar-topbar">
                 <img className="main-logo" src={viaLogo} alt="VIA University College" />
+                <nav className="page-nav">
+                    <button className="page-name-selected">Pages overview</button>
+                </nav>
             </header>
-
             <section className="main-panel">
                 <div className="main-actions">
                     <button className="main-button" onClick={() => navigate("/CreatePlan")}>
