@@ -6,6 +6,7 @@ import { RequireAuth } from "./api/features/auth/RequireAuth.tsx";
 import "./App.css";
 import EditPlan from "./Pages/EditPlan.tsx";
 import CreatePlan from "./Pages/CreatePlan.tsx";
+import ImportPage from "./Pages/Import/ImportPage.tsx";
 
 function App() {
     return (
@@ -19,6 +20,8 @@ function App() {
                     <Route path="/EditPlan" element={<EditPlan />} />
 
                     <Route path="/CreatePlan" element={<CreatePlan />} />
+
+                    <Route path="/import" element={<RequireAuth><ImportPage /></RequireAuth>} />
 
                     <Route
                         path="/plan"

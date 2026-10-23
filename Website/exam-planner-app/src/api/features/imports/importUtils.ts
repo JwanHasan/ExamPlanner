@@ -69,3 +69,24 @@ export const downloadIssuesCsv = (result: ImportResult): void => {
     link.click();
     URL.revokeObjectURL(url);
 };
+
+// ---------- File rules ----------
+
+export const ALLOWED_EXTENSIONS = [".xlsx", ".xlsm"];
+export const MAX_FILE_SIZE = 25_000_000;
+
+export const formatSize = (bytes: number): string =>
+    bytes < 1_000_000
+        ? `${Math.max(1, Math.round(bytes / 1000))} KB`
+        : `${(bytes / 1_000_000).toFixed(1)} MB`;
+
+export const checkFile = (file: File): string | null => {
+    const name = file.name.toLowerCase();
+    if (!ALLOWED_EXTENSIONS.some(extension => name.endsWith(extension))) {
+        return `"${file.name}" is not an Excel workbook. Choose an .xlsx or .xlsm file.`;
+    }
+    if (file.size > MAX_FILE_SIZE) {
+        return `"${file.name}" is larger than 25 MB.`;
+    }
+    return null;
+};
