@@ -11,7 +11,12 @@ export const getErrorMessage = (error: unknown): string => {
 
         if (status === 401) return "Email or password is incorrect.";
         if (status === 403) return "This account does not have access to Exam Plan.";
-        if (status >= 500) return "The server ran into a problem. Try again in a moment.";
+        if (status >= 500) {
+            if (data && typeof data === "object" && "message" in data) {
+                return String((data as { message: unknown }).message);
+            }
+            return "The server ran into a problem. Try again in a moment.";
+        }
 
         if (typeof data === "string" && data.trim()) return data;
         if (data && typeof data === "object" && "message" in data) {

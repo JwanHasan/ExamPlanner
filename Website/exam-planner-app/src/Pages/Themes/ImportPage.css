@@ -1,0 +1,555 @@
+/* ---------- Colours and page ---------- */
+
+.via-page {
+  --via-green: #177d27;
+  --via-green-dark: #11621e;
+  --via-topbar: #afafaf;
+  --via-bg: #edeff1;
+  --via-surface: #ffffff;
+  --via-line: #d1d4d6;
+  --via-grey: #8e959e;
+  --via-muted: #6b737b;
+  --via-text: #5b636a;
+  --via-heading: #3f4246;
+  --via-title: #5f6470;
+  --ep-dark: #1c211d;
+  --ep-wine: #7a1f3d;
+  --via-gutter: max(48px, calc((100vw - 1500px) / 2));
+
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--via-bg);
+  color: var(--via-text);
+  font-family: "Source Sans 3", "Source Sans Pro", "Segoe UI", system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+  letter-spacing: normal;
+  text-align: left;
+  color-scheme: light;
+}
+
+.via-page *,
+.via-page *::before,
+.via-page *::after {
+  box-sizing: border-box;
+}
+
+/* ---------- Top bar ---------- */
+
+.via-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 64px;
+  padding: 8px var(--via-gutter);
+  background: var(--via-topbar);
+}
+
+.via-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--ep-dark);
+  font-size: 20px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.via-brand img {
+  width: 44px;
+  height: 44px;
+}
+
+.via-user {
+  max-width: 40vw;
+  padding: 3px 10px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--via-green);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* ---------- Title bar ---------- */
+
+.via-titlebar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 32px;
+  padding: 18px var(--via-gutter);
+  background: var(--via-surface);
+}
+
+.via-titlebar h1 {
+  margin: 0;
+  font-family: inherit;
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: normal;
+  color: var(--via-title);
+}
+
+/* ---------- Step indicator ---------- */
+
+.via-steps {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.via-step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 112px;
+  font-size: 15px;
+  color: var(--via-grey);
+  text-align: center;
+}
+
+.via-step + .via-step::before {
+  content: "";
+  position: absolute;
+  top: 12px;
+  right: 50%;
+  width: 100%;
+  height: 2px;
+  background: var(--via-line);
+}
+
+.via-step-dot {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 2px solid var(--via-line);
+  border-radius: 50%;
+  background: var(--via-surface);
+  color: #ffffff;
+}
+
+.via-step-dot svg {
+  width: 14px;
+  height: 14px;
+}
+
+.via-step.done .via-step-dot {
+  border-color: var(--via-grey);
+  background: var(--via-grey);
+}
+
+.via-step.done .via-step-label {
+  color: var(--via-muted);
+}
+
+.via-step.active .via-step-dot {
+  border-color: var(--via-green);
+  background: var(--via-green);
+}
+
+.via-step.active .via-step-label {
+  color: var(--via-green);
+}
+
+/* ---------- Content ---------- */
+
+.via-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 40px var(--via-gutter) 32px;
+}
+
+.via-columns {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(0, 1.5fr);
+  align-items: start;
+  gap: 32px 48px;
+}
+
+.via-intro h2 {
+  margin: 0 0 12px;
+  font-family: inherit;
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: normal;
+  color: var(--via-heading);
+}
+
+.via-intro p {
+  margin: 0;
+  font-size: 17px;
+}
+
+.via-caption {
+  margin: 12px 0 0;
+  font-size: 15px;
+  color: var(--via-muted);
+}
+
+/* ---------- Step 1: choose file ---------- */
+
+.via-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 280px;
+  padding: 32px;
+  border: 2px dashed var(--via-line);
+  background: var(--via-surface);
+  text-align: center;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.via-dropzone.dragging {
+  border-color: var(--via-green);
+  background: #f1f8f2;
+}
+
+.via-dropzone-icon {
+  width: 36px;
+  height: 36px;
+  color: #767676;
+}
+
+.via-dropzone-text {
+  margin: 0;
+  font-size: 18px;
+  color: var(--via-grey);
+}
+
+.via-file {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: min(460px, 100%);
+  padding: 12px 14px;
+  border: 1px solid var(--via-line);
+  background: #fafbfb;
+  text-align: left;
+}
+
+.via-file.plain {
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+.via-file svg {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  color: var(--via-green);
+}
+
+.via-file-name {
+  display: block;
+  font-weight: 600;
+  color: var(--via-heading);
+  word-break: break-all;
+}
+
+.via-file-size {
+  display: block;
+  font-size: 14px;
+  color: var(--via-muted);
+}
+
+.via-file-remove {
+  margin-left: auto;
+  padding: 0 6px;
+  border: none;
+  background: none;
+  color: var(--via-muted);
+  font: inherit;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.via-file-remove:hover {
+  color: var(--ep-wine);
+}
+
+.via-field-error {
+  margin: 12px 0 0;
+  padding: 10px 14px;
+  border-left: 4px solid var(--ep-wine);
+  background: #f6e8ec;
+  color: #5d1730;
+}
+
+/* ---------- Step 2: upload ---------- */
+
+.via-progress-card {
+  padding: 24px;
+  border: 1px solid var(--via-line);
+  background: var(--via-surface);
+}
+
+.via-progress {
+  height: 10px;
+  margin-top: 18px;
+  overflow: hidden;
+  border-radius: 5px;
+  background: #e3e6e8;
+}
+
+.via-progress-bar {
+  height: 100%;
+  background: var(--via-green);
+  transition: width 0.2s;
+}
+
+/* ---------- Step 3: result ---------- */
+
+.via-result {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.via-status {
+  margin: 0;
+  padding: 14px 16px;
+  border-left: 4px solid;
+  color: var(--via-heading);
+}
+
+.via-status.success {
+  border-color: var(--via-green);
+  background: #e7f2e9;
+}
+
+.via-status.partial {
+  border-color: #b7791f;
+  background: #fbf3e4;
+}
+
+.via-status.failed {
+  border-color: var(--ep-wine);
+  background: #f6e8ec;
+  color: #5d1730;
+}
+
+.via-subheading {
+  margin: 4px 0 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--via-heading);
+}
+
+.via-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.via-stats div {
+  padding: 12px 14px;
+  border: 1px solid var(--via-line);
+  background: var(--via-surface);
+}
+
+.via-stats dt {
+  font-size: 14px;
+  color: var(--via-muted);
+}
+
+.via-stats dd {
+  margin: 2px 0 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--via-heading);
+}
+
+/* ---------- Problems table ---------- */
+
+.via-issues {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.via-issues-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.via-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.via-chip {
+  padding: 5px 12px;
+  border: 1px solid #b9bdc1;
+  border-radius: 999px;
+  background: var(--via-surface);
+  color: var(--via-text);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.via-chip.active {
+  border-color: var(--via-heading);
+  background: var(--via-heading);
+  color: #ffffff;
+}
+
+.via-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--via-line);
+  background: var(--via-surface);
+}
+
+.via-table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.via-table-wrap th,
+.via-table-wrap td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--via-line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.via-table-wrap th {
+  background: #f6f7f8;
+  font-weight: 600;
+  color: var(--via-heading);
+}
+
+.via-table-wrap tr.error td:first-child {
+  color: var(--ep-wine);
+  font-weight: 600;
+}
+
+.via-table-wrap tr.warning td:first-child {
+  color: #8a5a12;
+  font-weight: 600;
+}
+
+/* ---------- Buttons ---------- */
+
+.via-button,
+.via-button-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 18px;
+  border-radius: 2px;
+  font: inherit;
+  font-size: 17px;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.via-button {
+  border: 1px solid var(--via-green);
+  background: var(--via-green);
+  color: #ffffff;
+}
+
+.via-button:hover:not(:disabled) {
+  border-color: var(--via-green-dark);
+  background: var(--via-green-dark);
+}
+
+.via-button-secondary {
+  border: 1px solid #b9bdc1;
+  background: transparent;
+  color: var(--via-text);
+}
+
+.via-button-secondary:hover:not(:disabled) {
+  background: #e3e6e8;
+}
+
+.via-button:disabled,
+.via-button-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.via-button-large {
+  min-height: 50px;
+  padding: 12px 22px;
+  font-size: 19px;
+}
+
+.via-button-small {
+  min-height: 36px;
+  padding: 6px 12px;
+  font-size: 15px;
+}
+
+.via-page button:focus-visible,
+.via-page a:focus-visible {
+  outline: 3px solid var(--ep-dark);
+  outline-offset: 2px;
+}
+
+.via-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 40px;
+  padding-top: 32px;
+  border-top: 1px solid var(--via-line);
+}
+
+/* ---------- Small screens ---------- */
+
+@media (max-width: 860px) {
+  .via-page {
+    --via-gutter: 16px;
+  }
+
+  .via-content {
+    padding-top: 24px;
+    padding-bottom: 24px;
+  }
+
+  .via-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .via-step {
+    width: 88px;
+    font-size: 13px;
+  }
+
+  .via-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+}
