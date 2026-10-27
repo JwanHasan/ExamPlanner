@@ -55,9 +55,9 @@ builder.Services.AddScoped<IUserRepo, UserRepo>();
 
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IExcelImportParser, ExcelImportParser>();
-//builder.Services.AddScoped<IImportService, ImportService>();
+builder.Services.AddScoped<IImportService, ImportService>();
 
-// ---------------- Authentication: JWT in the "Authorization: Bearer" header (API_CONTRACT.md 3.2) ----------------
+// Authentication: JWT in the "Authorization: Bearer" header (API_CONTRACT.md 3.2) 
 var jwt = builder.Configuration.GetSection(JwtSettings.Section).Get<JwtSettings>() ?? new JwtSettings();
 jwt.Validate();
 
