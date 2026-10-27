@@ -2,9 +2,17 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../api/features/auth/AuthContext.tsx";
-import { getErrorMessage } from "../api/authApi";
+import { getCurrentUser, getErrorMessage } from "../api/authApi";
 import viaLogo from "./Assets/via-logo.png";
 import "./Themes/Login.css";
+
+// Where each role lands after logging in. Exam planners ("Admin" in the token) go to the main page.
+// Teachers (and, for now, students) have no page of their own yet: the notification page does not
+// exist, so they land on the logged-in placeholder. Change OTHER_HOME when that page is added.
+const ADMIN_HOME = "/Main";
+const OTHER_HOME = "/plan";
+
+const homeFor = (role: string | undefined) => (role === "Admin" ? ADMIN_HOME : OTHER_HOME);
 
 const Login = () => {
     const [email, setEmail] = useState("");
@@ -22,7 +30,8 @@ const Login = () => {
 
         try {
             await signIn({ email: email.trim(), password });
-            navigate("/plan");
+            // signIn has stored the token in the cookie, so the role can be read back from it.
+            navigate(homeFor(getCurrentUser()?.role));
         } catch (err) {
             setError(getErrorMessage(err));
         } finally {

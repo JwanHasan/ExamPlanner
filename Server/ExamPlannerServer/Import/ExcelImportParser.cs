@@ -8,7 +8,7 @@ public class ExcelImportParser : IExcelImportParser
     private const string SystemColumnPrefix = "(Skal ikke ændres)";
 
     // Every column the import needs, written the way the headers look AFTER Normalize()
-    // (no "(Skal ikke ændres)" prefix). Columns are found by these names, never by position,
+    // (no "(Skal ikke ændres)" prefix). Columns are found by these names, not by position,
     // so a re-export with reordered or extra columns still works.
     private const string ColId = "Planlægningsuddannelseselement";
     private const string ColChecksum = "Kontrolsum for række";
@@ -50,7 +50,7 @@ public class ExcelImportParser : IExcelImportParser
         }
         catch (Exception ex)
         {
-            result.Errors.Add($"The file could not be read as an Excel (.xlsx) workbook: {ex.Message}");
+            result.Issues.Add(new ParseIssue(0, $"The file could not be read as an Excel (.xlsx) workbook: {ex.Message}"));
             return result;
         }
 
@@ -58,8 +58,9 @@ public class ExcelImportParser : IExcelImportParser
         {
             var found = FindImportTable(workbook, result);
             if (found is null)
-                return result; // the reason is in result.Errors
+                return result; // the reason is in result.Issues
 
+            result.SheetName = found.Value.Table.Worksheet.Name;
             ReadRows(found.Value.Table, found.Value.Columns, result);
         }
 
@@ -86,9 +87,9 @@ public class ExcelImportParser : IExcelImportParser
                 fewestMissing = missing;
         }
 
-        result.Errors.Add(fewestMissing is null
+        result.Issues.Add(new ParseIssue(0, fewestMissing is null
             ? "No table was found in the workbook."
-            : $"Required column(s) missing: {string.Join(", ", fewestMissing)}");
+            : $"Required column(s) missing: {string.Join(", ", fewestMissing)}"));
         return null;
     }
 
@@ -162,7 +163,7 @@ public class ExcelImportParser : IExcelImportParser
             }
 
             if (reader.Problems.Count > 0)
-                result.Errors.Add($"Row {parsed.SourceRowNumber}: {string.Join("; ", reader.Problems)}");
+                result.Issues.Add(new ParseIssue(parsed.SourceRowNumber, string.Join("; ", reader.Problems)));
             else
                 result.Rows.Add(parsed);
         }
