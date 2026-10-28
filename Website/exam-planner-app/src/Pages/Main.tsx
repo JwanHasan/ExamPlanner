@@ -30,6 +30,9 @@ const Main = () => {
                     <button className="main-button">
                         Scan for issues with current plan
                     </button>
+                    <button className="main-button" onClick={() => navigate("/imported-data")}>
+                        View imported data
+                    </button>
 
                     <div className="main-actions-row">
                         <button className="main-button main-button-small" onClick={() => navigate("/import")}>

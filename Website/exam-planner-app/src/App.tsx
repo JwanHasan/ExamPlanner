@@ -1,12 +1,13 @@
 import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
-import Login from "./Pages/Login.tsx";
-import Main from "./Pages/Main.tsx";
 import { AuthProvider } from "./api/features/auth/AuthContext.tsx";
 import { RequireAuth } from "./api/features/auth/RequireAuth.tsx";
-import "./App.css";
+import Login from "./Pages/Login.tsx";
+import Main from "./Pages/Main.tsx";
 import EditPlan from "./Pages/EditPlan.tsx";
 import CreatePlan from "./Pages/CreatePlan.tsx";
 import ImportPage from "./Pages/Import/ImportPage.tsx";
+import ImportedDataPage from "./Pages/ImportedDataPage.tsx";
+import "./App.css";
 
 function App() {
     return (
@@ -22,6 +23,8 @@ function App() {
                     <Route path="/CreatePlan" element={<CreatePlan />} />
 
                     <Route path="/import" element={<RequireAuth><ImportPage /></RequireAuth>} />
+
+                    <Route path="/imported-data" element={<RequireAuth><ImportedDataPage /></RequireAuth>} />
 
                     <Route
                         path="/plan"

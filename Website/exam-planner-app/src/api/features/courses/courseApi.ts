@@ -1,7 +1,7 @@
 import api from "../../axiosInstance.ts";
 import type {
     Course,
-    UpdateCourseNotesRequest
+    UpdateCourseRequest,
 } from "./courseTypes.ts";
 
 export const getCourses = async (): Promise<Course[]> => {
@@ -9,9 +9,9 @@ export const getCourses = async (): Promise<Course[]> => {
     return response.data;
 };
 
-export const updateCourseNotes = async (
+export const updateCourse = async (
     courseId: number,
-    request: UpdateCourseNotesRequest
+    request: UpdateCourseRequest
 ): Promise<Course> => {
     const response = await api.patch<Course>(
         `/courses/${courseId}`,

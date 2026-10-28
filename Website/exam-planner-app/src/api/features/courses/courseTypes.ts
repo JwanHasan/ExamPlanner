@@ -8,6 +8,9 @@ export interface Course {
     classCount: number;
 }
 
-export interface UpdateCourseNotesRequest {
+export interface UpdateCourseRequest {
+    name: string;
+    sueCode: string;
     notes: string | null;
+    classCount: number;
 }
