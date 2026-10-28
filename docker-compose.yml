@@ -56,6 +56,12 @@ services:
         condition: service_healthy
       migrations:
         condition: service_completed_successfully
-
+  website:
+    build:
+      context: ./Website/exam-planner-app
+      dockerfile: Dockerfile
+    image: exam-planner-website:${APP_VERSION:-dev}
+    ports:
+      - "4040:4040"
 volumes:
   postgres_data:
