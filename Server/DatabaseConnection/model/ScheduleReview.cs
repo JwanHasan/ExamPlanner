@@ -7,6 +7,6 @@ public class ScheduleReview
     public bool Completed{get;set;}= false;
     public string Remarks{get;set;}="";
 
-    public Schedule Schedule {get;set;}= new();
-    public Teacher Teacher {get;set;}= new();
+    public Schedule Schedule {get;set;}= null!;
+    public Teacher Teacher {get;set;}= null!;
 }

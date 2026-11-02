@@ -14,11 +14,11 @@ public class RoomRepo:IRoomRepo
         _context=context;
     }
 
-    public async Task<Room> AddAsync(int capacity, string name)
+    public async Task<Room> AddAsync(int capacity,string name,string Campus)
     {
         var a= new Room
         {
-            Capacity=capacity, Name=name
+            Capacity=capacity, Name=name,Campus = Campus
         };
         await _context.Room.AddAsync(a);
         await SaveAsync();
@@ -46,12 +46,13 @@ public class RoomRepo:IRoomRepo
         await _context.SaveChangesAsync();
     }
 
-    public async Task<Room?> UpdateAsync(int id, int capacity, string name)
+    public async Task<Room?> UpdateAsync(int id, int capacity, string name,string Campus)
     {
         var u= await GetbyIdAsync(id);
             if(u is null) return null;
         u.Capacity= capacity;
         u.Name=name;
+        u.Campus=Campus;
         await SaveAsync();
         return u;
     }

@@ -4,9 +4,9 @@ namespace DatabaseConnection.repo;
 public interface ICourseRepo
 {
     Task<List<Course>> GetAllAsync();
-    Task<Course> AddCourseAsync(string SueCode,string Prefix,string name, int Semester,int ects, int PriorityTier);
-    Task<Course> UpdateCourseByIdAsync(int id,string SueCode,string Prefix,string name, int Semester,int ects, int PriorityTier);
-    Task<Course> UpdateCourseBySuecodeAsync(string SueCode,string Prefix,string name, int Semester,int ects, int PriorityTier);
+    Task<Course> AddCourseAsync(string SueCode,string Prefix,string name, int Semester,int ects, int PriorityTier,string Campus);
+    Task<Course?> UpdateCourseByIdAsync(int id,string SueCode,string Prefix,string name, int Semester,int ects, int PriorityTier,string Campus);
+    Task<Course?> UpdateCourseBySuecodeAsync(string SueCode,string Prefix,string name, int Semester,int ects, int PriorityTier,string Campus);
     Task<int?> GetCourseIdBySuecodeAsync(string suecode);
     Task<Course?> GetCourseByIdAsync(int id );
     Task<Course?> GetCourseBySueCodeAsync(string SueCode );

@@ -43,12 +43,20 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<StudentExamAssignment>().HasKey(s=> new{s.StudentId,s.ExamSessionId});
         modelBuilder.Entity<TeacherAssignment>().HasKey(s=> new{s.ExamSessionId,s.TeacherId});
         modelBuilder.Entity<ScheduleReview>().HasKey(s=> new{s.ScheduleId,s.TeacherId});
+        modelBuilder.Entity<CourseTeacher>().HasKey(s=> new{s.CourseId,s.TeacherId});
+
+
 
 
 
 
         modelBuilder.Entity<Course>()
         .HasMany(c=> c.Classes)
+        .WithOne(o=> o.Course)
+        .HasForeignKey(o=>o.CourseId);
+
+        modelBuilder.Entity<Course>()
+        .HasMany(c=> c.CourseTeachers)
         .WithOne(o=> o.Course)
         .HasForeignKey(o=>o.CourseId);
 
@@ -75,6 +83,9 @@ public class AppDbContext : DbContext
         .HasForeignKey<Teacher>(x=> x.UserId);
 
         modelBuilder.Entity<Teacher>().HasMany(x=> x.TeacherConstraints)
+        .WithOne(x=> x.Teacher).HasForeignKey(x=> x.TeacherId);
+
+        modelBuilder.Entity<Teacher>().HasMany(x=> x.CourseTeachers)
         .WithOne(x=> x.Teacher).HasForeignKey(x=> x.TeacherId);
 
         modelBuilder.Entity<Teacher>().HasMany(x=> x.TeacherAssignments)

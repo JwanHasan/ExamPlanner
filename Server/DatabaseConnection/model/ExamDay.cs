@@ -10,5 +10,5 @@ public class ExamDay
     public ExamDayType ExamDayType {get;set;}
     public bool Usable{get;set;} = false;
 
-    public Schedule Schedule{get;set;} = new Schedule{};
+    public Schedule Schedule{get;set;} = null!;
 }

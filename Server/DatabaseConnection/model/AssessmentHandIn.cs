@@ -7,6 +7,6 @@ public class AssessmentHandIn
     public int Part {get;set;}
     public string Note{get;set;} ="";
 
-    public AssessmentEvent AssessmentEvent {get;set;} = new AssessmentEvent{};
+    public AssessmentEvent AssessmentEvent {get;set;} = null!;
     
 }
