@@ -65,9 +65,6 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Course>()
         .HasMany(o=> o.AssessmentEvents)
         .WithOne(c=>c.Course).HasForeignKey(o=>o.CourseId);
-        modelBuilder.Entity<Course>()
-        .HasMany(o=> o.CourseTeachers)
-        .WithOne(c=>c.Course).HasForeignKey(o=>o.CourseId);
 
 
         modelBuilder.Entity<Enrollment>().HasOne(c => c.Course)
@@ -98,9 +95,6 @@ public class AppDbContext : DbContext
         .WithOne(x=> x.Teacher).HasForeignKey(x=> x.TeacherId);
 
         modelBuilder.Entity<Teacher>().HasMany(x=> x.ScheduleReviewss)
-        .WithOne(x=> x.Teacher).HasForeignKey(x=> x.TeacherId);
-
-        modelBuilder.Entity<Teacher>().HasMany(x=> x.CourseTeachers)
         .WithOne(x=> x.Teacher).HasForeignKey(x=> x.TeacherId);
 
 
