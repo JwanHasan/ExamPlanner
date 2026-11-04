@@ -1,8 +1,5 @@
 import api from "../../axiosInstance.ts";
-import type {
-    Course,
-    UpdateCourseRequest,
-} from "./courseTypes.ts";
+import type {Course, UpdateCourseRequest,} from "./courseTypes.ts";
 
 export const getCourses = async (): Promise<Course[]> => {
     const response = await api.get<Course[]>("/courses");

@@ -1,33 +1,70 @@
-import {
-    useEffect,
-    useState
-} from "react";
-
-import {
-    useNavigate
-} from "react-router-dom";
-
-import {
-    useAuth
-} from "../api/features/auth/AuthContext.tsx";
-
-import {
-    getCourses,
-    updateCourse
-} from "../api/features/courses/courseApi.ts";
-
-import type {
-    Course
-} from "../api/features/courses/courseTypes.ts";
-
-import {
-    getErrorMessage
-} from "../api/errorHandler.ts";
-
-import viaLogo
-    from "./Assets/via-logo-small.png";
-
+import {useEffect, useState} from "react";
+import {useNavigate} from "react-router-dom";
+import {useAuth} from "../api/features/auth/useAuth.ts";
+import {getPlanningEducationElements} from "../api/features/planningElements/planningElementApi.ts";
+import {getErrorMessage} from "../api/errorHandler.ts";
+import type {PlanningEducationElement} from "../api/features/planningElements/planningElementTypes.ts";
+import viaLogo from "./Assets/via-logo-small.png";
 import "./Themes/ImportedDataPage.css";
+
+const assessmentForms = (
+    element: PlanningEducationElement
+): string => {
+
+    const forms: string[] = [];
+
+    if (
+        element.completionAssessment
+    )
+    {
+        forms.push(
+            "Completion"
+        );
+    }
+
+    if (
+        element.combinedWrittenOral
+    )
+    {
+        forms.push(
+            "Combined written/oral"
+        );
+    }
+
+    if (element.oral)
+    {
+        forms.push(
+            "Oral"
+        );
+    }
+
+    if (
+        element.practicalExam
+    )
+    {
+        forms.push(
+            "Practical"
+        );
+    }
+
+    if (element.project)
+    {
+        forms.push(
+            "Project"
+        );
+    }
+
+    if (element.written)
+    {
+        forms.push(
+            "Written"
+        );
+    }
+
+    return forms.length > 0
+        ? forms.join(", ")
+        : "—";
+};
 
 const ImportedDataPage = () => {
     const navigate =
@@ -39,10 +76,12 @@ const ImportedDataPage = () => {
         useAuth();
 
     const [
-        courses,
-        setCourses
+        elements,
+        setElements
     ] =
-        useState<Course[]>([]);
+        useState<
+            PlanningEducationElement[]
+        >([]);
 
     const [
         loading,
@@ -51,50 +90,8 @@ const ImportedDataPage = () => {
         useState(true);
 
     const [
-        loadError,
-        setLoadError
-    ] =
-        useState<string | null>(
-            null
-        );
-
-    const [
-        selectedCourse,
-        setSelectedCourse
-    ] =
-        useState<Course | null>(
-            null
-        );
-
-    const [
-        editName,
-        setEditName
-    ] =
-        useState("");
-
-    const [
-        editSueCode,
-        setEditSueCode
-    ] =
-        useState("");
-
-    const [
-        saving,
-        setSaving
-    ] =
-        useState(false);
-
-    const [
-        saveError,
-        setSaveError
-    ] =
-        useState<string | null>(
-            null
-        );
-
-    const [
-        successMessage,
-        setSuccessMessage
+        error,
+        setError
     ] =
         useState<string | null>(
             null
@@ -106,50 +103,45 @@ const ImportedDataPage = () => {
 
     useEffect(
         () => {
-
             let cancelled =
                 false;
-
-            getCourses()
+            getPlanningEducationElements()
                 .then(
                     result => {
-
-                        if (cancelled) {
+                        if (cancelled)
+                        {
                             return;
                         }
-
-                        setCourses(result);
-
-                        setLoadError(null);
+                        setElements(
+                            result
+                        );
+                        setError(null);
                     }
                 )
                 .catch(
-                    error => {
-
-                        if (cancelled) {
+                    loadError => {
+                        if (cancelled)
+                        {
                             return;
                         }
-
-                        setLoadError(
+                        setError(
                             getErrorMessage(
-                                error
+                                loadError
                             )
                         );
                     }
                 )
                 .finally(
                     () => {
-
-                        if (cancelled) {
-                            return;
+                        if (!cancelled)
+                        {
+                            setLoading(
+                                false
+                            );
                         }
-
-                        setLoading(false);
                     }
                 );
-
             return () => {
-
                 cancelled =
                     true;
             };
@@ -157,170 +149,32 @@ const ImportedDataPage = () => {
         []
     );
 
-    const retryLoadCourses =
+    const retry =
         async () => {
-
             setLoading(true);
-
-            setLoadError(null);
-
-            setSuccessMessage(null);
+            setError(null);
 
             try {
-
                 const result =
-                    await getCourses();
+                    await getPlanningEducationElements();
 
-                setCourses(result);
-
-            } catch (error) {
-
-                setLoadError(
+                setElements(
+                    result
+                );
+            } catch (loadError) {
+                setError(
                     getErrorMessage(
-                        error
+                        loadError
                     )
                 );
-
             } finally {
-
                 setLoading(false);
             }
         };
 
-    const beginEdit = (
-        course: Course
-    ) => {
-
-        setSelectedCourse(
-            course
-        );
-
-        setEditName(
-            course.name
-        );
-
-        setEditSueCode(
-            course.sueCode
-        );
-
-        setSaveError(null);
-
-        setSuccessMessage(null);
-    };
-
-    const cancelEdit = () => {
-
-        setSelectedCourse(null);
-
-        setEditName("");
-
-        setEditSueCode("");
-
-        setSaveError(null);
-    };
-
-    const saveCourse =
-        async () => {
-
-            if (!selectedCourse) {
-                return;
-            }
-
-            const name =
-                editName.trim();
-
-            const sueCode =
-                editSueCode.trim();
-
-            if (!name) {
-
-                setSaveError(
-                    "Course name must not be empty."
-                );
-
-                return;
-            }
-
-            if (!sueCode) {
-
-                setSaveError(
-                    "SUE code must not be empty."
-                );
-
-                return;
-            }
-
-
-            setSaving(true);
-
-            setSaveError(null);
-
-            setSuccessMessage(null);
-
-
-            try {
-
-                const updated =
-                    await updateCourse(
-                        selectedCourse.id,
-                        {
-                            name,
-                            sueCode,
-
-                            notes:
-                            selectedCourse.notes,
-
-                            classCount:
-                            selectedCourse.classCount
-                        }
-                    );
-
-                setCourses(
-                    current =>
-                        current.map(
-                            course =>
-                                course.id ===
-                                updated.id
-                                    ? updated
-                                    : course
-                        )
-                );
-
-                setSelectedCourse(
-                    null
-                );
-
-                setEditName("");
-
-                setEditSueCode("");
-
-                setSuccessMessage(
-                    `Course "${updated.sueCode}" was updated successfully.`
-                );
-
-            } catch (error) {
-
-                setSaveError(
-                    getErrorMessage(
-                        error
-                    )
-                );
-
-            } finally {
-
-                setSaving(false);
-            }
-        };
-
     return (
-        <main
-            className="imported-data-page"
-        >
-
-            <header
-                className="imported-data-topbar"
-            >
-
+        <main className="imported-data-page">
+            <header className="imported-data-topbar">
                 <button
                     type="button"
                     className="imported-data-brand"
@@ -331,36 +185,23 @@ const ImportedDataPage = () => {
                             )
                     }
                 >
-
                     <img
                         src={viaLogo}
                         alt="VIA University College"
                     />
-
                     <span>
                         Exam Plan
                     </span>
-
                 </button>
-
-                <div
-                    className="imported-data-topbar-right"
-                >
-
+                <div className="imported-data-topbar-right">
                     {user && (
-
-                        <span
-                            className="imported-data-user"
-                        >
+                        <span className="imported-data-user">
                             {
                                 user.name ||
                                 user.email
                             }
                         </span>
-
                     )}
-
-
                     <button
                         type="button"
                         className="imported-secondary-button"
@@ -373,157 +214,87 @@ const ImportedDataPage = () => {
                     >
                         Back to main page
                     </button>
-
                 </div>
-
             </header>
-
-            <div
-                className="imported-data-title"
-            >
-
+            <div className="imported-data-title">
                 <div>
-
-                    <p
-                        className="imported-data-eyebrow"
-                    >
+                    <p className="imported-data-eyebrow">
                         Imported data
                     </p>
-
                     <h1>
-                        Courses
+                        Planning education elements
                     </h1>
-
                     <p>
-                        View courses that have
-                        been imported into the
-                        Exam Planner database.
+                        These are the records
+                        created by the Excel import.
+                        Administrators can edit the
+                        stored planning data.
                     </p>
-
                 </div>
-
                 {!loading &&
-                    !loadError && (
-
-                        <span
-                            className="imported-data-count"
-                        >
+                    !error && (
+                        <span className="imported-data-count">
                         {
-                            courses.length
+                            elements.length
                         }
                             {" "}
-                            course
+                            record
                             {
-                                courses.length === 1
+                                elements.length === 1
                                     ? ""
                                     : "s"
                             }
                     </span>
-
                     )}
-
             </div>
-
-            <section
-                className={
-                    `imported-data-layout ${
-                        selectedCourse
-                            ? "has-editor"
-                            : ""
-                    }`
-                }
-            >
-
-                <div
-                    className="imported-data-card"
-                >
-
-                    {successMessage && (
-
-                        <p
-                            className="imported-success"
-                            role="status"
-                        >
-                            {
-                                successMessage
-                            }
-                        </p>
-
-                    )}
-
+            <section className="imported-data-layout">
+                <div className="imported-data-card">
                     {!isAdmin && (
-
-                        <p
-                            className="imported-info"
-                        >
-                            You can view imported
-                            courses. Editing is
-                            available to
-                            administrators.
+                        <p className="imported-info">
+                            You can view the
+                            imported data.
+                            Editing is available
+                            to administrators.
                         </p>
-
                     )}
-
                     {loading && (
-
-                        <p
-                            className="imported-state"
-                        >
+                        <div className="imported-state">
                             Loading imported data...
-                        </p>
-
+                        </div>
                     )}
-
                     {!loading &&
-                        loadError && (
-
-                            <div
-                                className="imported-state"
-                            >
-
+                        error && (
+                            <div className="imported-state">
                                 <p
                                     className="imported-error"
                                     role="alert"
                                 >
-                                    {
-                                        loadError
-                                    }
+                                    {error}
                                 </p>
-
-
                                 <button
                                     type="button"
                                     className="imported-primary-button"
                                     onClick={
                                         () =>
-                                            void retryLoadCourses()
+                                            void retry()
                                     }
                                 >
                                     Try again
                                 </button>
-
                             </div>
-
                         )}
-
                     {!loading &&
-                        !loadError &&
-                        courses.length === 0 && (
-
-                            <div
-                                className="imported-state"
-                            >
-
+                        !error &&
+                        elements.length === 0 && (
+                            <div className="imported-state">
                                 <h2>
-                                    No imported courses
+                                    No imported data found
                                 </h2>
-
                                 <p>
-                                    Import data before
-                                    attempting to view
-                                    or edit courses.
+                                    Import the planning
+                                    element spreadsheet
+                                    first.
                                 </p>
-
                                 <button
                                     type="button"
                                     className="imported-primary-button"
@@ -536,320 +307,124 @@ const ImportedDataPage = () => {
                                 >
                                     Go to Import Data
                                 </button>
-
                             </div>
-
                         )}
-
                     {!loading &&
-                        !loadError &&
-                        courses.length > 0 && (
-
-                            <div
-                                className="imported-table-wrap"
-                            >
-
-                                <table
-                                    className="imported-table"
-                                >
-
+                        !error &&
+                        elements.length > 0 && (
+                            <div className="imported-table-wrap">
+                                <table className="imported-table">
                                     <thead>
-
                                     <tr>
-
                                         <th>
-                                            SUE Code
+                                            Prefix
                                         </th>
-
+                                        <th>
+                                            Nickname
+                                        </th>
                                         <th>
                                             Name
                                         </th>
-
-                                        <th>
-                                            Semester
-                                        </th>
-
                                         <th>
                                             ECTS
                                         </th>
-
                                         <th>
-                                            Classes
+                                            Start
                                         </th>
-
+                                        <th>
+                                            End
+                                        </th>
+                                        <th>
+                                            Assessment
+                                        </th>
+                                        <th>
+                                            Forms
+                                        </th>
                                         {isAdmin && (
-
                                             <th>
                                                 Action
                                             </th>
-
                                         )}
-
                                     </tr>
-
                                     </thead>
-
                                     <tbody>
-
                                     {
-                                        courses.map(
-                                            course => (
-
+                                        elements.map(
+                                            element => (
                                                 <tr
                                                     key={
-                                                        course.id
+                                                        element.id
                                                     }
                                                 >
-
                                                     <td>
                                                         {
-                                                            course.sueCode
+                                                            element.prefix ||
+                                                            "—"
                                                         }
                                                     </td>
-
                                                     <td>
                                                         {
-                                                            course.name
+                                                            element.nickname
                                                         }
                                                     </td>
-
                                                     <td>
                                                         {
-                                                            course.semester
+                                                            element.name
                                                         }
                                                     </td>
-
                                                     <td>
                                                         {
-                                                            course.ects
+                                                            element.ects
                                                         }
                                                     </td>
-
                                                     <td>
                                                         {
-                                                            course.classCount
+                                                            element.startDate
                                                         }
                                                     </td>
-
+                                                    <td>
+                                                        {
+                                                            element.endDate
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        {
+                                                            element.assessmentType
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        {
+                                                            assessmentForms(
+                                                                element
+                                                            )
+                                                        }
+                                                    </td>
                                                     {isAdmin && (
-
                                                         <td>
-
                                                             <button
                                                                 type="button"
                                                                 className="imported-edit-button"
                                                                 onClick={
                                                                     () =>
-                                                                        beginEdit(
-                                                                            course
+                                                                        navigate(
+                                                                            `/imported-data/${element.id}/edit`
                                                                         )
                                                                 }
                                                             >
                                                                 Edit
                                                             </button>
-
                                                         </td>
-
                                                     )}
-
                                                 </tr>
-
                                             )
                                         )
                                     }
-
                                     </tbody>
-
                                 </table>
-
                             </div>
-
                         )}
-
                 </div>
-
-                {selectedCourse &&
-                    isAdmin && (
-
-                        <aside
-                            className={
-                                "imported-data-card imported-editor"
-                            }
-                        >
-
-                            <h2>
-                                Edit Course
-                            </h2>
-
-                            <form
-                                onSubmit={
-                                    event => {
-
-                                        event.preventDefault();
-
-                                        void saveCourse();
-                                    }
-                                }
-                            >
-
-                                <label
-                                    className="imported-field"
-                                >
-
-                                <span>
-                                    SUE Code
-                                </span>
-
-                                    <input
-                                        type="text"
-                                        value={
-                                            editSueCode
-                                        }
-                                        onChange={
-                                            event =>
-                                                setEditSueCode(
-                                                    event
-                                                        .target
-                                                        .value
-                                                )
-                                        }
-                                        disabled={
-                                            saving
-                                        }
-                                    />
-
-                                </label>
-
-                                <label
-                                    className="imported-field"
-                                >
-
-                                <span>
-                                    Name
-                                </span>
-
-                                    <input
-                                        type="text"
-                                        value={
-                                            editName
-                                        }
-                                        onChange={
-                                            event =>
-                                                setEditName(
-                                                    event
-                                                        .target
-                                                        .value
-                                                )
-                                        }
-                                        disabled={
-                                            saving
-                                        }
-                                    />
-
-                                </label>
-
-                                <div
-                                    className="imported-readonly-grid"
-                                >
-
-                                    <div>
-
-                                    <span>
-                                        Semester
-                                    </span>
-
-                                        <strong>
-                                            {
-                                                selectedCourse.semester
-                                            }
-                                        </strong>
-
-                                    </div>
-
-                                    <div>
-
-                                    <span>
-                                        ECTS
-                                    </span>
-
-                                        <strong>
-                                            {
-                                                selectedCourse.ects
-                                            }
-                                        </strong>
-
-                                    </div>
-
-                                    <div>
-
-                                    <span>
-                                        Classes
-                                    </span>
-
-                                        <strong>
-                                            {
-                                                selectedCourse.classCount
-                                            }
-                                        </strong>
-
-                                    </div>
-
-                                </div>
-
-                                {saveError && (
-
-                                    <p
-                                        className="imported-error"
-                                        role="alert"
-                                    >
-                                        {
-                                            saveError
-                                        }
-                                    </p>
-
-                                )}
-
-                                <div
-                                    className="imported-editor-actions"
-                                >
-
-                                    <button
-                                        type="button"
-                                        className="imported-secondary-button"
-                                        onClick={
-                                            cancelEdit
-                                        }
-                                        disabled={
-                                            saving
-                                        }
-                                    >
-                                        Cancel
-                                    </button>
-
-                                    <button
-                                        type="submit"
-                                        className="imported-primary-button"
-                                        disabled={
-                                            saving
-                                        }
-                                    >
-                                        {
-                                            saving
-                                                ? "Saving..."
-                                                : "Save changes"
-                                        }
-                                    </button>
-
-                                </div>
-
-                            </form>
-
-                        </aside>
-
-                    )}
-
             </section>
-
         </main>
     );
 };

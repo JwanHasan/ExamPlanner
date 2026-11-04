@@ -1,8 +1,7 @@
 import { useRef, useState } from "react";
 import type { ChangeEvent, DragEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../../api/features/auth/AuthContext.tsx";
-import { useImport } from "../../api/features/imports/useImport";
+import {useAuth} from "../../api/features/auth/useAuth.ts";import { useImport } from "../../api/features/imports/useImport";
 import { ALLOWED_EXTENSIONS, checkFile, formatSize, progressLabel } from "../../api/features/imports/importUtils";
 import type { IssueFilter } from "../../api/features/imports/importUtils";
 import { FileIcon } from "./Icons.tsx";

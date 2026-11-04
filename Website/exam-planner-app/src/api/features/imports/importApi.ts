@@ -1,7 +1,6 @@
 import api from "../../axiosInstance.ts";
 import type { ImportResult } from "./importTypes";
 
-
 export const uploadImport = async (
     file: File,
     onProgress?: (percent: number) => void

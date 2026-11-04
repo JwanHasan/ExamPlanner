@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../api/features/auth/AuthContext.tsx"
+import {useAuth} from "../api/features/auth/useAuth.ts";
 import viaLogo from "./Assets/via-logo-small.png";
 import campusBackground from "./Assets/campus-background-transparent.png";
 import "./Themes/Main.css";

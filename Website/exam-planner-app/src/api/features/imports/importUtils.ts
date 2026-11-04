@@ -9,7 +9,6 @@ export interface ImportStatus {
     text: string;
 }
 
-
 export const MAX_ISSUES_SHOWN = 200;
 
 export const COUNT_LABELS: Record<keyof ImportCounts, string> = {
