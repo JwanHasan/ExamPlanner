@@ -11,6 +11,6 @@ public class Class
 
 // relation class can have 1 course and course can have many classes 
 
-public Course Course {get;set;} = new Course();
+public Course Course {get;set;}=null!;
 // relation enrollment has 1 class and class has 0 or  many enrollment
 }

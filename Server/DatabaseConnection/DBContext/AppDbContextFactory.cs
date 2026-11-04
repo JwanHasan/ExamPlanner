@@ -3,11 +3,30 @@ namespace DatabaseConnection.DBContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using DatabaseConnection.model;
+using DotNetEnv;
 
 public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
 {
     public AppDbContext CreateDbContext(string [] args)
     {
+         // Search the current directory and its parent directories for .env
+        var directory = new DirectoryInfo(Directory.GetCurrentDirectory());
+
+        while (directory != null &&
+               !File.Exists(Path.Combine(directory.FullName, ".env")))
+        {
+            directory = directory.Parent;
+        }
+
+        if (directory == null)
+        {
+            throw new FileNotFoundException(
+                "Could not find .env. Make sure it exists in your project or a parent directory.");
+        }
+
+        // Load environment variables from the discovered .env file
+        var envPath = Path.Combine(directory.FullName, ".env");
+        Env.Load(envPath);
         var optionsBuilder= new DbContextOptionsBuilder<AppDbContext>();
         var host = Environment.GetEnvironmentVariable("DB_HOST");
         var port = Environment.GetEnvironmentVariable("DB_PORT");

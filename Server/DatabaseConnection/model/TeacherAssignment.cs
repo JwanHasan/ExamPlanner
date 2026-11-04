@@ -10,6 +10,6 @@ public class TeacherAssignment
     public int TeacherId{get;set;}
     public TeacherRole Role{get;set;}
 
-    public Teacher Teacher{get;set;}= new Teacher();
-    public ExamSession ExamSession {get;set;} = new ExamSession();
+    public Teacher Teacher{get;set;}= null!;
+    public ExamSession ExamSession {get;set;} = null!;
 }

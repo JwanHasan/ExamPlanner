@@ -5,9 +5,9 @@ namespace DatabaseConnection.repo;
 
 public interface IRoomRepo
 {
-    Task<Room> AddAsync(int capacity,string name);
+    Task<Room> AddAsync(int capacity,string name,string Campus);
 
-    Task<Room?> UpdateAsync(int id, int capacity,string name);
+    Task<Room?> UpdateAsync(int id, int capacity,string name,string Campus);
 
     Task<Room?> GetbyIdAsync(int id);
 

@@ -43,7 +43,7 @@ public class AssessmentEventRepo:IAssessmentEventRepo
             .Where(x=> x.Id==id).Select(x=> x.Course).FirstAsync();
     }
 
-    public async Task<PlanningEducationElement> GetEducationElementAsync(int id)
+    public async Task<PlanningEducationElement?> GetEducationElementAsync(int id)
     {
         return await _context.AssessmentEvent
             .Where(x=> x.Id==id).Select(x=> x.PlanningEducationElement).FirstAsync();

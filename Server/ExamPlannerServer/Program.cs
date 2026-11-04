@@ -52,6 +52,9 @@ builder.Services.AddScoped<ITeacherAssignmentRepo, TeacherAssignmentRepo>();
 builder.Services.AddScoped<ITeacherConstraintRepo, TeacherConstraintRepo>();
 builder.Services.AddScoped<ITeacherRepo, TeacherRepo>();
 builder.Services.AddScoped<IUserRepo, UserRepo>();
+builder.Services.AddScoped<ICourseTeacherRepo, CourseTeacherRepo>();
+
+
 
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IExcelImportParser, ExcelImportParser>();

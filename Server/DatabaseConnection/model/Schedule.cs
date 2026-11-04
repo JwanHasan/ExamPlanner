@@ -8,7 +8,7 @@ public class Schedule
 
     public ICollection<ExamSession>? ExamSessions{get;set;}
     public ICollection<ScheduleReview>? ScheduleReviews{get;set;}
-    public ICollection<ExamDay> ExamDays{get;set;} = new List<ExamDay>();
+    public ICollection<ExamDay> ExamDays{get;set;} = null!;
 
     
 }

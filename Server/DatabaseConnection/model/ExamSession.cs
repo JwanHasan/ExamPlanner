@@ -8,7 +8,7 @@ public class ExamSession
     public DateOnly Date{get;set;}
     public bool LockDate{get;set;}
 
-    public Room Room {get;set;} = new Room{}; 
+    public Room Room {get;set;} = null!;
     public ICollection<StudentExamAssignment>? StudentExamAssignments{get;set;}
     public ICollection<TeacherAssignment>? TeacherAssignments{get;set;}
     public AssessmentEvent AssessmentEvent{get;set;}= new();

@@ -6,6 +6,6 @@ public class StudentExamAssignment
     public int ExamSessionId{get;set;}
     public bool ExtraTime{get;set;}
 
-    public Student Student{get;set;} = new Student();
-    public ExamSession ExamSession {get;set;} = new ExamSession();
+    public Student Student{get;set;} = null!;
+    public ExamSession ExamSession {get;set;} = null!;
 }
