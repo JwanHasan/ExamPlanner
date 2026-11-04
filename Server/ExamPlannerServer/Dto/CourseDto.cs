@@ -10,4 +10,5 @@ public class CourseDto
     public string? Notes { get; set; }
     public int ClassCount { get; set; }
     
+    
 }
