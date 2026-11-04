@@ -25,6 +25,6 @@ public class PlanningEducationElement
     public bool Project{get;set;}
     public bool Written{get;set;}
 
-    public AssessmentEvent AssessmentEvent{get;set;} = new();
+    public AssessmentEvent? AssessmentEvent{get;set;}
     
 }
