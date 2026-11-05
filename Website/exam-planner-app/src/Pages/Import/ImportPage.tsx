@@ -1,14 +1,15 @@
 import { useRef, useState } from "react";
 import type { ChangeEvent, DragEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../../api/features/auth/AuthContext.tsx";
+import { useNavigate } from "react-router-dom";
 import { useImport } from "../../api/features/imports/useImport";
 import { ALLOWED_EXTENSIONS, checkFile, formatSize, progressLabel } from "../../api/features/imports/importUtils";
 import type { IssueFilter } from "../../api/features/imports/importUtils";
 import { FileIcon } from "./Icons.tsx";
 import StepIndicator from "./StepIndicator.tsx";
 import ImportResult from "./ImportResult.tsx";
-import viaLogo from "../Assets/via-logo-small.png";
+import FilePreview from "./FilePreview.tsx";
+import TopBar from "../Shared/TopBar.tsx";
+import "../Themes/MitVia.css";
 import "../Themes/ImportPage.css";
 
 const STEPS = ["Choose file", "Import", "Result"];
@@ -20,7 +21,6 @@ const INTRO: Record<number, { title: string; text: string }> = {
 };
 
 const ImportPage = () => {
-    const { user } = useAuth();
     const navigate = useNavigate();
     const importer = useImport();
     const fileInput = useRef<HTMLInputElement>(null);
@@ -29,6 +29,7 @@ const ImportPage = () => {
     const [fileError, setFileError] = useState<string | null>(null);
     const [dragging, setDragging] = useState(false);
     const [filter, setFilter] = useState<IssueFilter>("all");
+    const [previewOpen, setPreviewOpen] = useState(false);
 
     const { busy, progress, fileName, result, error } = importer.state;
     const step = busy ? 2 : result || error ? 3 : 1;
@@ -65,6 +66,11 @@ const ImportPage = () => {
         void importer.start(file);
     };
 
+    const importFromPreview = () => {
+        setPreviewOpen(false);
+        startImport();
+    };
+
     const importAnother = () => {
         importer.close();
         setFile(null);
@@ -74,17 +80,7 @@ const ImportPage = () => {
     return (
         <div className="via-page">
             {/* Top bar */}
-            <header className="via-topbar">
-                <Link className="via-brand" to="/Main">
-                    <img src={viaLogo} alt="VIA University College" />
-                    <span>Exam Plan</span>
-                </Link>
-                {user && (
-                    <span className="via-user" title={user.email}>
-                        {user.name || user.email}
-                    </span>
-                )}
-            </header>
+            <TopBar />
 
             {/* Title bar */}
             <div className="via-titlebar">
@@ -117,6 +113,13 @@ const ImportPage = () => {
                                                 <span className="via-file-name">{file.name}</span>
                                                 <span className="via-file-size">{formatSize(file.size)}</span>
                                             </div>
+                                            <button
+                                                type="button"
+                                                className="via-button-secondary via-button-small via-file-view"
+                                                onClick={() => setPreviewOpen(true)}
+                                            >
+                                                View
+                                            </button>
                                             <button
                                                 type="button"
                                                 className="via-file-remove"
@@ -200,6 +203,11 @@ const ImportPage = () => {
                     )}
                 </footer>
             </main>
+
+            {/* File preview */}
+            {previewOpen && file && (
+                <FilePreview file={file} onClose={() => setPreviewOpen(false)} onImport={importFromPreview} />
+            )}
         </div>
     );
 };
