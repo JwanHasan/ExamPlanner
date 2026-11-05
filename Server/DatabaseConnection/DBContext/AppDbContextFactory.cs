@@ -18,15 +18,12 @@ public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
             directory = directory.Parent;
         }
 
-        if (directory == null)
+        // A .env file is optional: on a developer machine it supplies the settings, but in Docker there is
+        // none (the settings are passed in as real environment variables), so no file is not an error.
+        if (directory != null)
         {
-            throw new FileNotFoundException(
-                "Could not find .env. Make sure it exists in your project or a parent directory.");
+            Env.Load(Path.Combine(directory.FullName, ".env"));
         }
-
-        // Load environment variables from the discovered .env file
-        var envPath = Path.Combine(directory.FullName, ".env");
-        Env.Load(envPath);
         var optionsBuilder= new DbContextOptionsBuilder<AppDbContext>();
         var host = Environment.GetEnvironmentVariable("DB_HOST");
         var port = Environment.GetEnvironmentVariable("DB_PORT");

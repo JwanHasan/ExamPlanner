@@ -9,10 +9,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ExamPlannerServer.controller;
 
-/// <summary>
-/// Courses from the database, through the teammates' CourseRepo and ClassRepo.
+/// Courses from the database, through the CourseRepo and ClassRepo.
 /// Not part of API_CONTRACT.md yet; it uses the contract's /api/v1 base path and error shape.
-/// </summary>
+/// 
 [ApiController]
 [Route("api/v1/courses")]
 [Authorize]
@@ -67,7 +66,11 @@ public class CoursesController : ControllerBase
             return NotFound(new ApiError(ErrorCodes.CourseNotFound, $"Course {id} does not exist."));
 
         var updated = await _courses.UpdateCourseByIdAsync(id, dto.SueCode.Trim(), course.Prefix, dto.Name.Trim(),
-            course.Semester, course.ECTS, course.PriorityTier);
+            course.Semester, course.ECTS, course.PriorityTier, course.Campus);
+
+        // The repo answers null when the course is gone (for example deleted by someone else in between).
+        if (updated is null)
+            return NotFound(new ApiError(ErrorCodes.CourseNotFound, $"Course {id} does not exist."));
 
         // Counted after saving, so no classes are loaded while the course is being saved.
         return ToDto(updated, await ClassCountAsync(id));
