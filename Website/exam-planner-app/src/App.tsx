@@ -18,34 +18,28 @@ function App()
                 <Routes>
                     <Route
                         path="/"
-                        element={
-                            <Login />
+                        element={<Login />
                         }
                     />
+
                     <Route
                         path="/Main"
-                        element={
-                            <RequireAuth>
-                                <Main />
-                            </RequireAuth>
+                        element={<Main />
                         }
                     />
+
                     <Route
                         path="/EditPlan"
-                        element={
-                            <RequireAuth>
-                                <EditPlan />
-                            </RequireAuth>
+                        element={<EditPlan />
                         }
                     />
+
                     <Route
                         path="/CreatePlan"
-                        element={
-                            <RequireAuth>
-                                <CreatePlan />
-                            </RequireAuth>
+                        element={<CreatePlan />
                         }
                     />
+
                     <Route
                         path="/import"
                         element={
@@ -54,6 +48,7 @@ function App()
                             </RequireAuth>
                         }
                     />
+
                     <Route
                         path="/imported-data"
                         element={
@@ -62,6 +57,7 @@ function App()
                             </RequireAuth>
                         }
                     />
+
                     <Route
                         path="/imported-data/:id/edit"
                         element={
@@ -70,6 +66,7 @@ function App()
                             </RequireAuth>
                         }
                     />
+
                     <Route
                         path="/plan"
                         element={
