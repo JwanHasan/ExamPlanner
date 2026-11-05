@@ -3,7 +3,7 @@ import { AuthProvider } from "./api/features/auth/AuthContext.tsx";
 import { RequireAuth } from "./api/features/auth/RequireAuth.tsx";
 import Login from "./Pages/Login.tsx";
 import Main from "./Pages/Main.tsx";
-import EditPlan from "./Pages/EditPlan.tsx";
+import EditPlan from "./Pages/EditPlan/EditPlan.tsx";
 import CreatePlan from "./Pages/CreatePlan.tsx";
 import ImportPage from "./Pages/Import/ImportPage.tsx";
 import ImportedDataPage from "./Pages/ImportedDataPage.tsx";
@@ -18,7 +18,7 @@ function App() {
 
                     <Route path="/Main" element={<Main />} />
 
-                    <Route path="/EditPlan" element={<EditPlan />} />
+                    <Route path="/EditPlan" element={<RequireAuth><EditPlan /></RequireAuth>} />
 
                     <Route path="/CreatePlan" element={<CreatePlan />} />
 

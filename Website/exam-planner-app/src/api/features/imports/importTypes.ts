@@ -25,3 +25,22 @@ export interface ImportResult {
     created: ImportCounts;
     issues: ImportIssue[];
 }
+
+// ---------- File preview ----------
+
+export interface PreviewColumn {
+    label: string;
+    system: boolean;
+}
+
+export interface PreviewRow {
+    excelRow: number;
+    cells: string[];
+}
+
+export interface PreviewSheet {
+    name: string;
+    columns: PreviewColumn[];
+    rows: PreviewRow[];
+    totalRows: number;
+}
