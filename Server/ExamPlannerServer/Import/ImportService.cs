@@ -4,7 +4,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ExamPlannerServer.Import;
 
-/// Rows are matched on the id in column A:
+/// Every valid row is saved as a PlanningEducationElement, and also gets a Course and a Class:
+///   Class  = this offering of the course (ClassCode = Kaldenavn), created or updated per row
+///   Course = the subject (programme prefix + code, e.g. IT + ADS1), created once and then left alone
+///            so that what planners edit by hand is never overwritten by a re-import
+///
+/// Planning elements are matched on the id in column A:
 ///   new id -> inserted
 ///   known id, same checksum -> left alone
 ///   known id, new checksum  -> updated
@@ -12,6 +17,15 @@ namespace ExamPlannerServer.Import;
 public class ImportService(IExcelImportParser parser, AppDbContext db, ILogger<ImportService> logger)
     : IImportService
 {
+    private sealed record ValidRow(
+        ParsedPlanningEducationElementRow Row,
+        PlanningEducationElement.Assessment Assessment,
+        string Prefix,
+        string CourseCode);
+
+    private sealed record SaveResult(
+        int Created, int Updated, int Unchanged, int CoursesCreated, int ClassesCreated);
+
     public async Task<ImportResponse> ImportAsync(IFormFile file)
     {
         await using var stream = file.OpenReadStream();
@@ -29,27 +43,32 @@ public class ImportService(IExcelImportParser parser, AppDbContext db, ILogger<I
         var skipped = issues.Count;
 
         // Rows the parser accepted, but whose values do not fit the database.
-        var valid = new List<(ParsedPlanningEducationElementRow Row, PlanningEducationElement.Assessment Assessment)>();
+        var valid = new List<ValidRow>();
         foreach (var row in parsed.Rows)
         {
-            var problem = FindDatabaseProblem(row, out var assessment);
-            if (problem is null)
-            {
-                valid.Add((row, assessment));
-            }
-            else
+            var problem = FindDatabaseProblem(row, out var assessment, out var prefix, out var courseCode);
+            if (problem is not null)
             {
                 issues.Add(new ImportIssue("error", parsed.SheetName, row.SourceRowNumber, problem.Value.Column, problem.Value.Message));
                 skipped++;
+                continue;
             }
+
+            valid.Add(new ValidRow(row, assessment, prefix!, courseCode!));
+
+            // Not a reason to skip the row: the course is saved, only without a campus.
+            if (CourseDerivation.Campus(row.ActivityOffering).Length == 0)
+                issues.Add(new ImportIssue("warning", parsed.SheetName, row.SourceRowNumber, "Aktivitetsudbud",
+                    "No campus found in the text, so the course is saved without a campus."));
         }
 
-        var (created, updated, unchanged) = await SaveAsync(valid);
+        var saved = await SaveAsync(valid);
 
-        var imported = created + updated + unchanged;
+        var imported = saved.Created + saved.Updated + saved.Unchanged;
         logger.LogInformation(
-            "Import of {File}: {Created} created, {Updated} updated, {Unchanged} unchanged, {Skipped} skipped",
-            file.FileName, created, updated, unchanged, skipped);
+            "Import of {File}: {Created} elements created, {Updated} updated, {Unchanged} unchanged, " +
+            "{Courses} courses and {Classes} classes created, {Skipped} rows skipped",
+            file.FileName, saved.Created, saved.Updated, saved.Unchanged, saved.CoursesCreated, saved.ClassesCreated, skipped);
 
         return new ImportResponse
         {
@@ -57,23 +76,31 @@ public class ImportService(IExcelImportParser parser, AppDbContext db, ILogger<I
             TotalRows = imported + skipped,
             ImportedRows = imported,
             SkippedRows = skipped,
-            // A planning element is one offering of a
-            // course (Kaldenavn, start/end date), so new elements are reported as "classes".
-            // Updated and unchanged rows are only in ImportedRows.
-            Created = new ImportCounts { Classes = created },
+            // What the website's result dialog shows: the courses and classes that are new in the database.
+            // Rows that only updated or confirmed existing data count in ImportedRows, not here.
+            Created = new ImportCounts { Courses = saved.CoursesCreated, Classes = saved.ClassesCreated },
             Issues = issues
         };
     }
 
-    // Checks what the database cannot store. Returns null when the row is fine.
+    // Checks what the database cannot store, and works out the course values. Null when the row is fine.
     private static (string Column, string Message)? FindDatabaseProblem(
-        ParsedPlanningEducationElementRow row, out PlanningEducationElement.Assessment assessment)
+        ParsedPlanningEducationElementRow row, out PlanningEducationElement.Assessment assessment,
+        out string? prefix, out string? courseCode)
     {
         assessment = default;
+        prefix = CourseDerivation.Prefix(row.Nickname);
+        courseCode = CourseDerivation.CourseCode(row.Name);
 
         // The database stores ECTS as a whole number.
         if (row.Ects % 1 != 0)
             return ("ECTS", $"ECTS {row.Ects} has decimals, but the database stores whole numbers.");
+
+        if (prefix is null)
+            return ("Kaldenavn", $"'{row.Nickname}' does not start with a two-letter programme prefix.");
+
+        if (courseCode is null)
+            return ("Navn", $"No course code found at the start of '{row.Name}'.");
 
         switch (row.AssessmentType.Trim().ToLowerInvariant())
         {
@@ -88,10 +115,9 @@ public class ImportService(IExcelImportParser parser, AppDbContext db, ILogger<I
         }
     }
 
-    private async Task<(int Created, int Updated, int Unchanged)> SaveAsync(
-        List<(ParsedPlanningEducationElementRow Row, PlanningEducationElement.Assessment Assessment)> valid)
+    private async Task<SaveResult> SaveAsync(List<ValidRow> valid)
     {
-        int created = 0, updated = 0, unchanged = 0;
+        int created = 0, updated = 0, unchanged = 0, coursesCreated = 0, classesCreated = 0;
 
         // One query for all ids in the file. AsNoTracking: we only compare, and updates are written
         // with ExecuteUpdate below, so EF's change tracker is not involved for existing rows.
@@ -101,10 +127,25 @@ public class ImportService(IExcelImportParser parser, AppDbContext db, ILogger<I
             .Where(e => ids.Contains(e.Id))
             .ToDictionaryAsync(e => e.Id);
 
+        // Classes and courses are tracked (they are changed through the normal save below).
+        // A class is found by its code; that is how a row finds its course again after a planner
+        // has edited the course by hand. Only a row with a new class looks for the course by prefix + code.
+        var classCodes = valid.Select(v => v.Row.Nickname).Distinct().ToList();
+        var classes = (await db.Class.Where(c => classCodes.Contains(c.ClassCode)).ToListAsync())
+            .GroupBy(c => c.ClassCode)
+            .ToDictionary(g => g.Key, g => g.OrderBy(c => c.Id).First());
+
+        var prefixes = valid.Select(v => v.Prefix).Distinct().ToList();
+        var codes = valid.Select(v => v.CourseCode).Distinct().ToList();
+        var courses = (await db.Course.Where(c => prefixes.Contains(c.Prefix) && codes.Contains(c.SueCode)).ToListAsync())
+            .GroupBy(c => CourseDerivation.CourseKey(c.Prefix, c.SueCode))
+            .ToDictionary(g => g.Key, g => g.OrderBy(c => c.Id).First());
+
         await using var transaction = await db.Database.BeginTransactionAsync();
 
-        foreach (var (row, assessment) in valid)
+        foreach (var item in valid)
         {
+            var (row, assessment, prefix, courseCode) = item;
             var startDate = DateOnly.FromDateTime(row.StartDate);
             var endDate = DateOnly.FromDateTime(row.EndDate);
             var modifiedAt = AsUtc(row.SourceModifiedAt);
@@ -131,11 +172,8 @@ public class ImportService(IExcelImportParser parser, AppDbContext db, ILogger<I
                     Oral = row.Oral,
                     PracticalExam = row.PracticalExam,
                     Project = row.Project,
-                    Written = row.Written,
-                    // The entity defaults this to "new()", which would make EF also insert an empty
-                    // AssessmentEvent (with no course, so the insert would fail). An element does not
-                    // need an event yet, so it is left empty on purpose.
-                    AssessmentEvent = null!
+                    Written = row.Written
+                    // AssessmentEvent is left empty on purpose: an element does not need an event yet.
                 });
                 created++;
             }
@@ -168,12 +206,56 @@ public class ImportService(IExcelImportParser parser, AppDbContext db, ILogger<I
                         .SetProperty(e => e.Written, row.Written));
                 updated++;
             }
+
+            // Course and class are looked at for EVERY valid row, not only for new or changed elements.
+            // That way a database that was filled by an earlier import (elements only) gets its
+            // courses and classes the next time the same file is imported.
+            var classStart = AsUtc(row.StartDate);
+            var classEnd = AsUtc(row.EndDate);
+
+            if (classes.TryGetValue(row.Nickname, out var existingClass))
+            {
+                // The dates and nickname come from the file, so the file wins. The course is not touched.
+                existingClass.NickName = row.Nickname;
+                existingClass.StartDate = classStart;
+                existingClass.EndDate = classEnd;
+                continue;
+            }
+
+            var key = CourseDerivation.CourseKey(prefix, courseCode);
+            if (!courses.TryGetValue(key, out var course))
+            {
+                course = new Course
+                {
+                    SueCode = courseCode,
+                    Prefix = prefix,
+                    Name = CourseDerivation.CourseName(row.Name),
+                    ECTS = (int)row.Ects,
+                    Campus = CourseDerivation.Campus(row.ActivityOffering)
+                    // Semester and PriorityTier stay 0: they are filled in by hand afterwards.
+                };
+                db.Course.Add(course);
+                courses[key] = course; // later rows of this file with the same course reuse it
+                coursesCreated++;
+            }
+
+            var newClass = new Class
+            {
+                ClassCode = row.Nickname,
+                NickName = row.Nickname,
+                StartDate = classStart,
+                EndDate = classEnd,
+                Course = course
+            };
+            db.Class.Add(newClass);
+            classes[row.Nickname] = newClass;
+            classesCreated++;
         }
 
-        await db.SaveChangesAsync();   // writes the inserts
-        await transaction.CommitAsync(); // inserts and updates become visible together
+        await db.SaveChangesAsync();   // writes the inserts and the class changes
+        await transaction.CommitAsync(); // everything above becomes visible together
 
-        return (created, updated, unchanged);
+        return new SaveResult(created, updated, unchanged, coursesCreated, classesCreated);
     }
 
     // The column in the database is "timestamp with time zone", and Npgsql refuses DateTime values

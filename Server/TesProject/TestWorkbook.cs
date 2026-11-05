@@ -28,19 +28,23 @@ internal static class TestWorkbook
         "Skriftlig"
     ];
 
+    // Used to make class and course codes that no other test row has (see UniqueRow).
+    private static int _counter;
+
     // One valid data row, values in the same order as Headers.
-    public static object?[] ValidRow(Guid? id = null) =>
+    // By default it is the course IT-ADS1 (class IT-ADS1-A25) on campus Horsens.
+    public static object?[] ValidRow(Guid? id = null, string? nickname = null, string? name = null) =>
     [
         (id ?? Guid.NewGuid()).ToString(),
         "checksum-abc",
         new DateTime(2026, 1, 5, 12, 0, 0),
-        "ADS1 Algoritmer og datastrukturer",
-        "IT-ADS1-A25",
+        name ?? "ADS1 Algoritmer og datastrukturer",
+        nickname ?? "IT-ADS1-A25",
         5,
         2,
         new DateTime(2025, 9, 1),
         new DateTime(2026, 1, 31),
-        "Software Technology Engineering - Horsens",
+        "Software Technology Engineering - VIA University College, Campus Horsens",
         "Intern",
         "Nej",
         "7-trin",
@@ -50,6 +54,15 @@ internal static class TestWorkbook
         "Nej",
         "Ja"
     ];
+
+    // A valid row with its own class code AND its own course code, so it never shares a class or a
+    // course with another row. Use it when several rows are saved into the same database and the
+    // test counts what was created.
+    public static object?[] UniqueRow(Guid? id = null)
+    {
+        var n = Interlocked.Increment(ref _counter);
+        return ValidRow(id, nickname: $"IT-U{n}-A25", name: $"U{n} Unique course {n}");
+    }
 
     public static MemoryStream Build(string[] headers, params object?[][] rows)
     {

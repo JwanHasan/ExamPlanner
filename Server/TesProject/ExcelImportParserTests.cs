@@ -26,7 +26,7 @@ public class ExcelImportParserTests
         Assert.Equal(2, row.ExecutionElementCount);
         Assert.Equal(new DateTime(2025, 9, 1), row.StartDate);
         Assert.Equal(new DateTime(2026, 1, 31), row.EndDate);
-        Assert.Equal("Software Technology Engineering - Horsens", row.ActivityOffering);
+        Assert.Equal("Software Technology Engineering - VIA University College, Campus Horsens", row.ActivityOffering);
         Assert.Equal("Intern", row.AssessmentType);
         Assert.False(row.CompletionAssessment);
         Assert.Equal("7-trin", row.GradingScale);

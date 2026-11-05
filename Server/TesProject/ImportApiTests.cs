@@ -62,7 +62,7 @@ public class ImportApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     [Fact]
     public async Task WithoutLogin_Returns401_WithTheContractsErrorBody()
     {
-        var response = await PostImportAsync(Workbook(TestWorkbook.ValidRow()), token: null);
+        var response = await PostImportAsync(Workbook(TestWorkbook.UniqueRow()), token: null);
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         Assert.Equal("UNAUTHORIZED", (await JsonOf(response)).GetProperty("code").GetString());
@@ -71,7 +71,7 @@ public class ImportApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     [Fact]
     public async Task WithAnInvalidToken_Returns401()
     {
-        var response = await PostImportAsync(Workbook(TestWorkbook.ValidRow()), token: "not.a.token");
+        var response = await PostImportAsync(Workbook(TestWorkbook.UniqueRow()), token: "not.a.token");
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -82,7 +82,7 @@ public class ImportApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         var id = Guid.NewGuid();
         var token = await LoginAsync(ApiFactory.TeacherEmail);
 
-        var response = await PostImportAsync(Workbook(TestWorkbook.ValidRow(id)), token: token);
+        var response = await PostImportAsync(Workbook(TestWorkbook.UniqueRow(id)), token: token);
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         Assert.Equal("FORBIDDEN", (await JsonOf(response)).GetProperty("code").GetString());
@@ -97,7 +97,7 @@ public class ImportApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         var ids = new[] { Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid() };
         var token = await PlannerTokenAsync();
 
-        var response = await PostImportAsync(Workbook(ids.Select(id => TestWorkbook.ValidRow(id)).ToArray()), token: token);
+        var response = await PostImportAsync(Workbook(ids.Select(id => TestWorkbook.UniqueRow(id)).ToArray()), token: token);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var json = await JsonOf(response);
@@ -109,7 +109,7 @@ public class ImportApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         Assert.Equal(0, json.GetProperty("skippedRows").GetInt32());
         var created = json.GetProperty("created");
         Assert.Equal(3, created.GetProperty("classes").GetInt32());
-        Assert.Equal(0, created.GetProperty("courses").GetInt32());
+        Assert.Equal(3, created.GetProperty("courses").GetInt32());
         Assert.Equal(0, created.GetProperty("students").GetInt32());
         Assert.Equal(0, created.GetProperty("enrollments").GetInt32());
         Assert.Equal(0, created.GetProperty("lecturers").GetInt32());
@@ -126,7 +126,7 @@ public class ImportApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     [Fact]
     public async Task ImportingTheSameFileTwice_SecondTimeCreatesNothing()
     {
-        var rows = new[] { TestWorkbook.ValidRow(), TestWorkbook.ValidRow() };
+        var rows = new[] { TestWorkbook.UniqueRow(), TestWorkbook.UniqueRow() };
         var ids = rows.Select(r => Guid.Parse((string)r[0]!)).ToArray();
         var token = await PlannerTokenAsync();
 
@@ -142,8 +142,8 @@ public class ImportApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     [Fact]
     public async Task BrokenRow_IsReported_InTheShapeTheWebsiteFiltersOn()
     {
-        var good = TestWorkbook.ValidRow();
-        var bad = TestWorkbook.WithValue(TestWorkbook.ValidRow(), "Startdato", "not a date");
+        var good = TestWorkbook.UniqueRow();
+        var bad = TestWorkbook.WithValue(TestWorkbook.UniqueRow(), "Startdato", "not a date");
         var token = await PlannerTokenAsync();
 
         var response = await PostImportAsync(Workbook(good, bad), token: token);
@@ -190,7 +190,7 @@ public class ImportApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     [Fact]
     public async Task WrongExtension_Returns415_UnsupportedFileType()
     {
-        var response = await PostImportAsync(Workbook(TestWorkbook.ValidRow()), fileName: "export.csv", token: await PlannerTokenAsync());
+        var response = await PostImportAsync(Workbook(TestWorkbook.UniqueRow()), fileName: "export.csv", token: await PlannerTokenAsync());
 
         Assert.Equal(HttpStatusCode.UnsupportedMediaType, response.StatusCode);
         Assert.Equal("UNSUPPORTED_FILE_TYPE", (await JsonOf(response)).GetProperty("code").GetString());
@@ -211,7 +211,7 @@ public class ImportApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     public async Task ExcelFileWithoutTheRequiredColumns_Returns422_NamingTheMissingColumn()
     {
         var headers = TestWorkbook.Headers.Where(h => h != "Kaldenavn").ToArray();
-        var row = TestWorkbook.ValidRow().Where((_, i) => i != 4).ToArray();
+        var row = TestWorkbook.UniqueRow().Where((_, i) => i != 4).ToArray();
         var file = TestWorkbook.Build(headers, row).ToArray();
 
         var response = await PostImportAsync(file, token: await PlannerTokenAsync());
@@ -236,6 +236,7 @@ public class ImportApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         Assert.Equal(108, json.GetProperty("importedRows").GetInt32());
         Assert.Equal(0, json.GetProperty("skippedRows").GetInt32());
         Assert.Equal(108, json.GetProperty("created").GetProperty("classes").GetInt32());
+        Assert.Equal(98, json.GetProperty("created").GetProperty("courses").GetInt32()); // 108 classes of 98 courses
         var rowsAfter = await factory.QueryDatabaseAsync(db => db.PlanningEducationElement.CountAsync());
         Assert.Equal(108, rowsAfter - rowsBefore);
     }
