@@ -1,32 +1,10 @@
-import {
-    useEffect,
-    useState
-} from "react";
-
-import {
-    useNavigate
-} from "react-router-dom";
-
-import {
-    useAuth
-} from "../api/features/auth/AuthContext.tsx";
-
-import {
-    getCourses,
-    updateCourse
-} from "../api/features/courses/courseApi.ts";
-
-import type {
-    Course
-} from "../api/features/courses/courseTypes.ts";
-
-import {
-    getErrorMessage
-} from "../api/errorHandler.ts";
-
-import viaLogo
-    from "./Assets/via-logo-small.png";
-
+import {useEffect, useState} from "react";
+import {useNavigate} from "react-router-dom";
+import {useAuth} from "../api/features/auth/useAuth.ts";
+import {getCourses, updateCourse} from "../api/features/courses/courseApi.ts";
+import type {Course} from "../api/features/courses/courseTypes.ts";
+import {getErrorMessage} from "../api/errorHandler.ts";
+import viaLogo from "./Assets/via-logo-small.png";
 import "./Themes/ImportedDataPage.css";
 
 const ImportedDataPage = () => {
