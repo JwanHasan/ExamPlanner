@@ -9,7 +9,7 @@ public class Course
     public int Semester {get;set;}
     public int ECTS {get;set;}
     public int PriorityTier{get;set;}
-    public required string Campus{get;set;}
+    
     
 
     //relation 1 to 0..* between course and class
