@@ -41,7 +41,7 @@ public class AppDbContext : DbContext
     {
         modelBuilder.Entity<Student>().HasKey(k=> k.Id);
         modelBuilder.Entity<Student>().Property(s=>s.Id).ValueGeneratedNever();
-        modelBuilder.Entity<Enrollment>().HasKey(e=> new{e.StudentId,e.CourseId});
+        modelBuilder.Entity<Enrollment>().HasKey(e=> new{e.StudentId,e.PlanningElementId});
         modelBuilder.Entity<StudentExamAssignment>().HasKey(s=> new{s.StudentId,s.ExamSessionId});
         modelBuilder.Entity<TeacherAssignment>().HasKey(s=> new{s.ExamSessionId,s.TeacherId});
         modelBuilder.Entity<ScheduleReview>().HasKey(s=> new{s.ScheduleId,s.TeacherId});
@@ -62,15 +62,18 @@ public class AppDbContext : DbContext
         .WithOne(o=> o.Course)
         .HasForeignKey(o=>o.CourseId);
 
+
         modelBuilder.Entity<Course>()
-        .HasMany(o=> o.AssessmentEvents)
-        .WithOne(c=>c.Course).HasForeignKey(o=>o.CourseId);
+        .HasMany(c=> c.PlanningEducationElements)
+        .WithOne(o=> o.Course)
+        .HasForeignKey(o=>o.CourseId);
 
+        modelBuilder.Entity<Enrollment>()
+        .HasOne(c=> c.PlanningEducationElement)
+        .WithMany(o=> o.Enrollment)
+        .HasForeignKey(o=>o.PlanningElementId);
 
-        modelBuilder.Entity<Enrollment>().HasOne(c => c.Course)
-        .WithMany(e=> e.Enrollments).HasForeignKey(e=> e.CourseId);
-
-
+        
 
         modelBuilder.Entity<Student>().HasMany(o=> o.Enrollments)
         .WithOne(s=> s.Student).HasForeignKey(s=> s.StudentId);
@@ -80,6 +83,7 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<Student>().HasOne(x=> x.User).WithOne(x=>x.Student)
         .HasForeignKey<Student>(x=> x.UserId);
+        
 
 
         modelBuilder.Entity<Teacher>().HasOne(x=> x.User).WithOne(x=>x.Teacher)
@@ -129,9 +133,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<AssessmentEvent>().HasOne(x=> x.PlanningEducationElement)
         .WithOne(x=> x.AssessmentEvent).HasForeignKey<AssessmentEvent>(x=> x.PlanningElementId);
 
-        modelBuilder.Entity<AssessmentEvent>().HasOne(x=> x.Course)
-        .WithMany(x=> x.AssessmentEvents).HasForeignKey(x=> x.CourseId);
-
+    
     }
 
     

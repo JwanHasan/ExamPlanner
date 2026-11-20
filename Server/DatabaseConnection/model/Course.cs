@@ -15,8 +15,7 @@ public class Course
     //relation 1 to 0..* between course and class
 
     public ICollection<Class>? Classes {get;set;}
-    public ICollection<Enrollment>? Enrollments {get;set;}
-    public ICollection<AssessmentEvent>? AssessmentEvents {get;set;}
+    public ICollection<PlanningEducationElement>? PlanningEducationElements {get;set;}
     public ICollection<CourseTeacher>? CourseTeachers{get;set;}
     
 }

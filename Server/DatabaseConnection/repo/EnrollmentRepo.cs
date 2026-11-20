@@ -12,57 +12,56 @@ public class EnrollmentRepo : IEnrollmentRepo
         _context=context;
     }
 
-    public async Task<Enrollment> AddEnrollmentAsync(int studentId, int courseId)
+    public async Task<Enrollment> AddEnrollmentAsync(int studentId, int PlanningElementId,string hold,int SourceImportId)
     {
         var created = new Enrollment
         {
-            StudentId = studentId, CourseId=courseId
+            StudentId = studentId, PlanningElementId=PlanningElementId,
+            Hold=hold, SourceImportId=SourceImportId
         };
         await _context.Enrollment.AddAsync(created);
         await _context.SaveChangesAsync();
         return created;
     }
 
-    public async Task<bool> DeleteEnrollmentAsync(int studentId, int courseId)
+    public async Task<bool> DeleteEnrollmentAsync(int studentId, int PlanningElementId)
     {
          var isDeleted = await _context.Enrollment
-         .Where(x=> x.StudentId==studentId && x.CourseId == courseId)
+         .Where(x=> x.StudentId==studentId && x.PlanningElementId == PlanningElementId)
         .ExecuteDeleteAsync();
         return isDeleted>0;
     }
 
-    public async Task<List<Course>> GetCoursesByStudentIdAsync(int studentId)
+    public async Task<List<Enrollment>> GetAllAsync()
     {
-        var result = await _context.Enrollment
-        .Where(x=> x.StudentId == studentId)
-        .Select(x=> x.Course).ToListAsync();
-        return result;
+        return await _context.Enrollment.ToListAsync();
     }
 
-    public async Task<List<Student>> GetStudentsByCourseIdAsync(int courseId)
+    public async Task<Enrollment?> GetEnrollmentsAsync(int studentId, int PlanningElementId)
+    {
+        var found= await _context.Enrollment.FirstOrDefaultAsync(x=> x.PlanningElementId==PlanningElementId
+        && x.StudentId==studentId);
+        if(found is null) return null;
+        return found;
+    }
+
+    public async Task<List<Student>> GetStudentsByPlanningIdIdAsync(int PlanningElementId)
     {
         var result = await _context.Enrollment
-        .Where(x=> x.CourseId == courseId)
+        .Where(x=> x.PlanningElementId == PlanningElementId )
         .Select(x=> x.Student).ToListAsync();
         return result;
     }
 
-    public async Task<List<Student>> GetStudentsBySuecodeAsync(string sueCode)
-    {
-        var result = await _context.Enrollment
-        .Where(x=> x.Course.SueCode == sueCode)
-        .Select(x=> x.Student).ToListAsync();
-        return result;
-    }
-
-    public  async Task<Enrollment?> UpdateEnrollmentAsync(int currentStudentId, int currentCourseId, int newStudentId, int newCouseId)
-    {
+        public async Task<Enrollment?> UpdateEnrollmentAsync(int currentStudentId,int oldPlanningElementId,int newStudentId,int newPlanningElementId,string hold,int SourceImportId)
+       {
         
-        var changed= await _context.Enrollment.FirstOrDefaultAsync(x=> x.CourseId==currentCourseId
-        && x.StudentId==currentStudentId);
+        var changed= await GetEnrollmentsAsync(oldPlanningElementId,currentStudentId);
         if(changed is null) return null;
         changed.StudentId= newStudentId;
-        changed.CourseId = newCouseId;
+        changed.PlanningElementId = newPlanningElementId;
+        changed.Hold= hold;
+        changed.SourceImportId = SourceImportId;
         await _context.SaveChangesAsync();
         return changed;
     }
