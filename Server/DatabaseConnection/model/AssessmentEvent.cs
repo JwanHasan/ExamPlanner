@@ -6,7 +6,6 @@ public enum ExamType
 public class AssessmentEvent
 {
     public int Id{get;set;}
-    public int CourseId{get;set;}
     public Guid PlanningElementId{get;set;}
     public ExamType ExamType {get;set;}
     public string Note {get;set;}= "";
@@ -14,8 +13,8 @@ public class AssessmentEvent
 
     public ICollection<ExamSession>? ExamSessions{get;set;}
     public ICollection<AssessmentHandIn>? AssessmentHandIns{get;set;}
-    public Course Course {get;set;}=null!;
-    public PlanningEducationElement? PlanningEducationElement {get;set;}
+    
+    public PlanningEducationElement PlanningEducationElement {get;set;}=null!;
     
 
 }

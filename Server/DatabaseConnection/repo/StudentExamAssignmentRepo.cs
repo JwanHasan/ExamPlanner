@@ -41,10 +41,10 @@ public class StudentExamAssignmentRepo : IStudentExamAssignmentRepo
         return await _context.StudentExamAssignment.ToListAsync();
     }
 
-    public async Task<List<ExamSession>> GetAllExamSessionByStudentId(int studentId)
+    public async Task<ExamSession> GetExamSessionByStudentId(int studentId)
     {
         return await _context.StudentExamAssignment
-        .Where(x=> x.StudentId == studentId).Select(x=> x.ExamSession).ToListAsync();
+        .Where(x=> x.StudentId == studentId).Select(x=> x.ExamSession).FirstAsync();
     }
 
     public async Task<List<Student>> GetAllStudentByExamSessionId(int examSessionId)
@@ -61,7 +61,7 @@ public class StudentExamAssignmentRepo : IStudentExamAssignmentRepo
         return found;
     }
 
-    public async Task<StudentExamAssignment?> UpdateAsync(int studentId, int examSessionId, bool extraTime)
+    public async Task<StudentExamAssignment?> UpdateAsync(int studentId, int examSessionId,int newstudentId, int newSessionId, bool extraTime)
     {
         var update = await GetByIdAsync(studentId,examSessionId);
         if(update is null) return null;
