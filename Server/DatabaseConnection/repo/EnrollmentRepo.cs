@@ -12,7 +12,7 @@ public class EnrollmentRepo : IEnrollmentRepo
         _context=context;
     }
 
-    public async Task<Enrollment> AddEnrollmentAsync(int studentId, int PlanningElementId,string hold,int SourceImportId)
+    public async Task<Enrollment> AddEnrollmentAsync(int studentId, Guid PlanningElementId,string hold,int SourceImportId)
     {
         var created = new Enrollment
         {
@@ -24,7 +24,7 @@ public class EnrollmentRepo : IEnrollmentRepo
         return created;
     }
 
-    public async Task<bool> DeleteEnrollmentAsync(int studentId, int PlanningElementId)
+    public async Task<bool> DeleteEnrollmentAsync(int studentId, Guid PlanningElementId)
     {
          var isDeleted = await _context.Enrollment
          .Where(x=> x.StudentId==studentId && x.PlanningElementId == PlanningElementId)
@@ -37,7 +37,7 @@ public class EnrollmentRepo : IEnrollmentRepo
         return await _context.Enrollment.ToListAsync();
     }
 
-    public async Task<Enrollment?> GetEnrollmentsAsync(int studentId, int PlanningElementId)
+    public async Task<Enrollment?> GetEnrollmentsAsync(int studentId, Guid PlanningElementId)
     {
         var found= await _context.Enrollment.FirstOrDefaultAsync(x=> x.PlanningElementId==PlanningElementId
         && x.StudentId==studentId);
@@ -45,7 +45,7 @@ public class EnrollmentRepo : IEnrollmentRepo
         return found;
     }
 
-    public async Task<List<Student>> GetStudentsByPlanningIdIdAsync(int PlanningElementId)
+    public async Task<List<Student>> GetStudentsByPlanningIdIdAsync(Guid PlanningElementId)
     {
         var result = await _context.Enrollment
         .Where(x=> x.PlanningElementId == PlanningElementId )
@@ -53,10 +53,10 @@ public class EnrollmentRepo : IEnrollmentRepo
         return result;
     }
 
-        public async Task<Enrollment?> UpdateEnrollmentAsync(int currentStudentId,int oldPlanningElementId,int newStudentId,int newPlanningElementId,string hold,int SourceImportId)
+        public async Task<Enrollment?> UpdateEnrollmentAsync(int currentStudentId,Guid oldPlanningElementId,int newStudentId,Guid newPlanningElementId,string hold,int SourceImportId)
        {
         
-        var changed= await GetEnrollmentsAsync(oldPlanningElementId,currentStudentId);
+        var changed= await GetEnrollmentsAsync(currentStudentId,oldPlanningElementId);
         if(changed is null) return null;
         changed.StudentId= newStudentId;
         changed.PlanningElementId = newPlanningElementId;

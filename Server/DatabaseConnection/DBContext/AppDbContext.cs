@@ -150,7 +150,7 @@ public class AppDbContext : DbContext
         .HasForeignKey(x=> x.ScheduleId);
 
         modelBuilder.Entity<ConflictAcknowledgement>().HasOne(x=> x.RuleSetting).WithMany(x=> x.ConflictAcknowledgements)
-        .HasForeignKey(x=> x.RuleKey);
+        .HasForeignKey(x=> x.RuleKeyId);
 
         
 

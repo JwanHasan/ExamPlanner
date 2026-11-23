@@ -6,7 +6,7 @@ namespace DatabaseConnection.model;
 public class Enrollment
 {
     public required int StudentId {get;set;} // PPK, FK
-   public required int PlanningElementId{get;set;}
+   public required Guid PlanningElementId{get;set;}
    public required string Hold{get;set;}
    public int SourceImportId{get;set;}
 
