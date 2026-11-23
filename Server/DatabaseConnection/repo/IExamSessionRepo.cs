@@ -6,13 +6,15 @@ namespace DatabaseConnection.repo;
 
 public interface IExamSessionRepo
 {
-    Task<ExamSession> AddAsyc(int assessmentEventId, int scheduleId, int roomId, DateOnly date, bool LockDate);
+    Task<ExamSession> AddAsyc(int assessmentEventId, int scheduleId, int roomId,int campusId, DateOnly date, bool LockDate,string groupLabel
+    ,TimeOnly startTime, TimeOnly endTime, string rowVersion);
     Task<ExamSession?> GetByIdAsync(int id);
     Task<List<ExamSession>> GetAllAsync();
     Task<List<ExamSession>> GetAllByRoomId(int id);
     Task<List<ExamSession>> GetAllByScheduleId(int id);
     Task<List<ExamSession>> GetAllByAssessmentEventId(int id);
-    Task<ExamSession?> UpdateAsync(int id,int assessmentEventId, int scheduleId, int roomId, DateOnly date, bool LockDate);
+    Task<ExamSession?> UpdateAsync(int id,int assessmentEventId, int scheduleId, int roomId,int campusId, DateOnly date, bool LockDate,string groupLabel
+    ,TimeOnly startTime, TimeOnly endTime, string rowVersion);
     Task<bool> DeleteByIdAsync(int id);
     Task SaveChangesAsync();
 

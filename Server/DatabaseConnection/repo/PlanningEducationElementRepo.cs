@@ -14,11 +14,13 @@ public class PlanningEducationElementRepo:IPlanningEducationElementRepo
         _context=context;
     }
 
-    public async Task<PlanningEducationElement> AddAsync(Guid id,string sourceChecksum, DateTime sourceModifiedAt, string name, string nickname, int ects, int executionElementCount, DateOnly startDate, DateOnly endDate, string activityOffering, string prefix, PlanningEducationElement.Assessment assessmentType, bool completionAssessment, string gradingScale, bool combinedWrittenOral, bool oral, bool practicalExam, bool project, bool written, AssessmentEvent assessmentEvent)
+    public async Task<PlanningEducationElement> AddAsync(Guid id,int CourseId,int campusId,string sourceChecksum, DateTime sourceModifiedAt, string name, string nickname, int ects, int executionElementCount, DateOnly startDate, DateOnly endDate, string activityOffering, string prefix, PlanningEducationElement.Assessment assessmentType, bool completionAssessment, string gradingScale, bool combinedWrittenOral, bool oral, bool practicalExam, bool project, bool written, AssessmentEvent assessmentEvent)
     {
         var element = new PlanningEducationElement
     {
         Id= id,
+        CourseId=CourseId,
+        CampusId=campusId,
         SourceChecksum = sourceChecksum,
         SourceModifiedAt = sourceModifiedAt,
         Name = name,
@@ -66,7 +68,7 @@ public class PlanningEducationElementRepo:IPlanningEducationElementRepo
         await _context.SaveChangesAsync();
     }
 
-    public async Task<PlanningEducationElement?> UpdateByIdAsync(int id, string sourceChecksum, DateTime sourceModifiedAt, string name, string nickname, int ects, int executionElementCount, DateOnly startDate, DateOnly endDate, string activityOffering, string prefix, PlanningEducationElement.Assessment assessmentType, bool completionAssessment, string gradingScale, bool combinedWrittenOral, bool oral, bool practicalExam, bool project, bool written, AssessmentEvent assessmentEvent)
+    public async Task<PlanningEducationElement?> UpdateByIdAsync(int id, int courseId, int campusId, string sourceChecksum, DateTime sourceModifiedAt, string name, string nickname, int ects, int executionElementCount, DateOnly startDate, DateOnly endDate, string activityOffering, string prefix, PlanningEducationElement.Assessment assessmentType, bool completionAssessment, string gradingScale, bool combinedWrittenOral, bool oral, bool practicalExam, bool project, bool written, AssessmentEvent assessmentEvent)
     {
         var element = await GetByIdAsync(id);
 
@@ -76,6 +78,8 @@ public class PlanningEducationElementRepo:IPlanningEducationElementRepo
             $"PlanningEducationElement with ID {id} was not found.");
     }
 
+    element.CourseId=courseId;
+    element.CampusId=campusId;
     element.SourceChecksum = sourceChecksum;
     element.SourceModifiedAt = sourceModifiedAt;
     element.Name = name;

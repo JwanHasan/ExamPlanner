@@ -33,6 +33,7 @@ public class AppDbContext : DbContext
     public DbSet<CourseTeacher> CourseTeacher {get;set;}
     public DbSet<ConflictAcknowledgement> ConflictAcknowledgements {get;set;}
     public DbSet<RuleSetting> RuleSettings {get;set;}
+    public DbSet<Campus> Campuses{get;set;}
 
     
 
@@ -129,6 +130,10 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<ExamSession>().HasOne(x=> x.Room)
         .WithMany(x=> x.ExamSessions).HasForeignKey(x=> x.RoomId);
 
+         modelBuilder.Entity<ExamSession>().HasOne(x=> x.Campus)
+        .WithMany(x=> x.ExamSessions).HasForeignKey(x=> x.CampusId);
+
+
 
         modelBuilder.Entity<AssessmentEvent>().HasMany(x=> x.AssessmentHandIns)
         .WithOne(x=> x.AssessmentEvent).HasForeignKey(x=> x.AssessmentEventId);
@@ -146,6 +151,15 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<ConflictAcknowledgement>().HasOne(x=> x.RuleSetting).WithMany(x=> x.ConflictAcknowledgements)
         .HasForeignKey(x=> x.RuleKey);
+
+        
+
+        modelBuilder.Entity<Room>().HasOne(x=> x.Campus).WithMany(x=> x.Rooms)
+        .HasForeignKey(x=> x.CampusId);
+
+        modelBuilder.Entity<PlanningEducationElement>().HasOne(x=> x.Campus).WithMany(x=> x.PlanningEducationElements)
+        .HasForeignKey(x=> x.CampusId);
+
 
     }
 

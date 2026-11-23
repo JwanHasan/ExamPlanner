@@ -7,6 +7,7 @@ public class PlanningEducationElement
     }
     public Guid Id{get;set;}
     public int CourseId{get;set;}
+    public int CampusId{get;set;}
     public string SourceChecksum{get;set;}= "";
     public DateTime SourceModifiedAt{get;set;}
     public string Name{get;set;}= "";
@@ -29,5 +30,6 @@ public class PlanningEducationElement
     public AssessmentEvent? AssessmentEvent{get;set;}
     public ICollection<Enrollment>? Enrollment{get;set;}
     public Course Course {get;set;}=null!;
+    public Campus Campus{get;set;}=null!;
     
 }
