@@ -2,10 +2,10 @@ namespace DatabaseConnection.model;
 
 public class ConflictAcknowledgement
 {
-    public string Id { get; set; } = string.Empty;
-    public string ScheduleId { get; set; } = string.Empty;
-    public string RuleKey { get; set; } = string.Empty;
-    public string UserId { get; set; } = string.Empty;
+    public int  Id { get; set; }
+    public int ScheduleId { get; set; }
+    public int RuleKeyId { get; set; }
+    public int UserId { get; set; }
     public string FingerPrint { get; set; } = string.Empty;
     public string Reason { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }

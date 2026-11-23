@@ -13,6 +13,19 @@ public class CampusRepo:ICampusRepo
         _context= context;
     }
 
+    public async Task<Campus> CreateAsync(string name, bool isVirtual)
+    {
+        var campus = new Campus
+        {
+            Name = name,
+            IsVirtual = isVirtual
+        };
+
+        _context.Campuses.Add(campus);
+        await _context.SaveChangesAsync();
+        return campus;
+    }
+
     public async Task<bool> DeleteByIdAsync(int id)
     {
         var d = await _context.Campuses.Where(x=> x.Id==id).ExecuteDeleteAsync();

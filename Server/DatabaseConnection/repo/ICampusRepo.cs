@@ -6,6 +6,7 @@ namespace DatabaseConnection.repo;
 
 public interface ICampusRepo
 {
+    Task<Campus> CreateAsync(string name, bool isVirtual);
     Task<Campus?> GetCampusByIdAsyc(int id);
     Task<List<Campus>> GetAllAsync();
     Task<Campus?> UpdateCampusByIdAsync(int id, string name, bool isVirtual);
