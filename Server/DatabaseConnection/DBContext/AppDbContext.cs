@@ -31,6 +31,8 @@ public class AppDbContext : DbContext
     public DbSet<TeacherConstraint> TeacherConstraint {get;set;}
     public DbSet<User> User {get;set;}
     public DbSet<CourseTeacher> CourseTeacher {get;set;}
+    public DbSet<ConflictAcknowledgement> ConflictAcknowledgements {get;set;}
+    public DbSet<RuleSetting> RuleSettings {get;set;}
 
     
 
@@ -46,6 +48,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<TeacherAssignment>().HasKey(s=> new{s.ExamSessionId,s.TeacherId});
         modelBuilder.Entity<ScheduleReview>().HasKey(s=> new{s.ScheduleId,s.TeacherId});
         modelBuilder.Entity<CourseTeacher>().HasKey(s=> new{s.CourseId,s.TeacherId});
+
 
 
 
@@ -133,7 +136,17 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<AssessmentEvent>().HasOne(x=> x.PlanningEducationElement)
         .WithOne(x=> x.AssessmentEvent).HasForeignKey<AssessmentEvent>(x=> x.PlanningElementId);
 
-    
+
+
+        modelBuilder.Entity<ConflictAcknowledgement>().HasOne(x=> x.User).WithMany(x=> x.ConflictAcknowledgement)
+        .HasForeignKey(x=> x.UserId);
+
+        modelBuilder.Entity<ConflictAcknowledgement>().HasOne(x=> x.Schedule).WithMany(x=> x.ConflictAcknowledgements)
+        .HasForeignKey(x=> x.ScheduleId);
+
+        modelBuilder.Entity<ConflictAcknowledgement>().HasOne(x=> x.RuleSetting).WithMany(x=> x.ConflictAcknowledgements)
+        .HasForeignKey(x=> x.RuleKey);
+
     }
 
     

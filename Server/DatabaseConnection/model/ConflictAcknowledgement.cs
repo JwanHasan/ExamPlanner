@@ -12,7 +12,6 @@ public class ConflictAcknowledgement
 
     public Schedule Schedule{get;set;}= null!;
     public RuleSetting RuleSetting {get;set;} = null!;
-
-
+    public User User{get;set;} =null!;
 }
 

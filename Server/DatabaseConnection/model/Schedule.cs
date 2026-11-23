@@ -9,6 +9,7 @@ public class Schedule
     public ICollection<ExamSession>? ExamSessions{get;set;}
     public ICollection<ScheduleReview>? ScheduleReviews{get;set;}
     public ICollection<ExamDay> ExamDays{get;set;} = null!;
+    public ICollection<ConflictAcknowledgement>? ConflictAcknowledgements{get;set;}    
 
     
 }
