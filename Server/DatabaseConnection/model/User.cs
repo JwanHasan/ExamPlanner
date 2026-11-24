@@ -13,4 +13,5 @@ public class User
 
     public Student? Student {get;set;}
     public Teacher? Teacher{get;set;}
+    public ICollection<ConflictAcknowledgement> ConflictAcknowledgement {get;set;}= [];
 }

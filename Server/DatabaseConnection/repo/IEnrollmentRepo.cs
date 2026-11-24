@@ -4,11 +4,11 @@ using DatabaseConnection.model;
 
 public interface IEnrollmentRepo
 {
-    Task<Enrollment> AddEnrollmentAsync(int studentId, int courseId);
-    Task<List<Student>> GetStudentsByCourseIdAsync(int courseId);
-    Task<List<Student>> GetStudentsBySuecodeAsync(string sueCode);
-    Task<List<Course>> GetCoursesByStudentIdAsync(int studentId);
-    Task<Enrollment?> UpdateEnrollmentAsync(int currentStudentId,int currentCourseId,int newStudentId,int newCouseId);
-    Task<bool> DeleteEnrollmentAsync(int studentId,int courseId);
+    Task<List<Enrollment>> GetAllAsync();
+    Task<Enrollment?> GetEnrollmentsAsync(int studentId, Guid PlanningElementId);
+    Task<Enrollment> AddEnrollmentAsync(int studentId, Guid PlanningElementId,string hold,int SourceImportId);
+    Task<List<Student>> GetStudentsByPlanningIdIdAsync(Guid PlanningElementId);
+    Task<Enrollment?> UpdateEnrollmentAsync(int currentStudentId,Guid oldPlanningElementId,int newStudentId,Guid newPlanningElementId,string hold,int SourceImportId);
+    Task<bool> DeleteEnrollmentAsync(int studentId,Guid PlanningElementId);
 
 }

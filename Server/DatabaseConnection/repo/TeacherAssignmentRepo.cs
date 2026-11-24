@@ -79,12 +79,12 @@ public class TeacherAssignmentRepo:ITeacherAssignmentRepo
     }
 
     // update teacher assignment 
-    public async Task<TeacherAssignment?> UpdateAsync(int examsessionId, int teacherId, TeacherRole role)
+    public async Task<TeacherAssignment?> UpdateAsync(int examsessionId, int teacherId,int newexamsessionId, int newteacherId, TeacherRole role)
     {
         var upt=await GetByIdAsync(examsessionId,teacherId);
          if(upt is null ) return null;
-        upt.ExamSessionId = examsessionId;
-        upt.TeacherId = teacherId;
+        upt.ExamSessionId = newexamsessionId;
+        upt.TeacherId = newteacherId;
         upt.Role = role;
         await _context.SaveChangesAsync();
         return upt;

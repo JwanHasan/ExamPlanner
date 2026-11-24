@@ -11,11 +11,11 @@ public class StudentRepo : IStudentRepo
         _context=context;
     }
 
-    public async Task<Student> AddStudentAsync(int id, int userId)
+    public async Task<Student> AddStudentAsync(int id,int userId,int SourceStudentId, int AttemptNo)
     {
         var added= new Student
         {
-            Id= id, UserId= userId
+            Id= id, UserId= userId,SourceStudentId=SourceStudentId,AttemptNo=AttemptNo
         };
         await _context.Student.AddAsync(added);
         await _context.SaveChangesAsync();
@@ -55,11 +55,13 @@ public class StudentRepo : IStudentRepo
         return user;
     }
 
-    public async Task<Student?> UpdateStudentAsync(int id, int userId)
+    public async Task<Student?> UpdateStudentAsync(int id,int userId,int SourceStudentId, int AttemptNo)
     {
         var find = await  _context.Student.FindAsync(id);
         if(find is null) return null;
         find.UserId = userId;
+        find.SourceStudentId=SourceStudentId;
+        find.AttemptNo=AttemptNo;
         await _context.SaveChangesAsync();
         return find;
     }

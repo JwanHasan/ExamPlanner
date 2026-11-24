@@ -23,24 +23,11 @@ public class AssessmentEventRepo:IAssessmentEventRepo
         return await _context.AssessmentEvent.ToListAsync();
     }
 
-    public async Task<List<AssessmentEvent>> GetAllByCourseIdAsync(int id)
-    {
-        return await _context.AssessmentEvent.
-            Where(x=> x.CourseId== id).ToListAsync();
-        
-    }
-
-    
+  
 
     public async Task<AssessmentEvent?> GetByIdAsync(int id)
     {
         return await _context.AssessmentEvent.FindAsync(id);
-    }
-
-    public async Task<Course?> GetCourseAsync(int id)
-    {
-        return await _context.AssessmentEvent
-            .Where(x=> x.Id==id).Select(x=> x.Course).FirstAsync();
     }
 
     public async Task<PlanningEducationElement?> GetEducationElementAsync(int id)
@@ -70,14 +57,14 @@ public class AssessmentEventRepo:IAssessmentEventRepo
     }
 
     public async Task<AssessmentEvent?> UpdateByIdAsync(int id,
-     int courseId, Guid planningEducationElementId, ExamType examType, string note)
+      Guid planningEducationElementId, ExamType examType, string note, int RequiredExamDays)
     {
         var upt= await GetByIdAsync(id);
         if(upt is null) return null;
-        upt.CourseId = courseId;
         upt.PlanningElementId= planningEducationElementId;
         upt.ExamType= examType;
         upt.Note= note;
+        upt.RequiredExamDays=RequiredExamDays;
         await _context.SaveChangesAsync();
         return upt;
     }

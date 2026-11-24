@@ -12,10 +12,10 @@ public class CourseRepo : ICourseRepo
     {
         _context= context;
     }
-    public async Task<Course> AddCourseAsync(string SueCode,string Prefix,string name, int Semester,int ects, int PriorityTier,string Campus)
+    public async Task<Course> AddCourseAsync(string SueCode,string Prefix,string name, int Semester,int ects, int PriorityTier)
     {
         var course= new Course{SueCode = SueCode, Prefix = Prefix, Name= name,
-        Semester = Semester, ECTS= ects, PriorityTier = PriorityTier,Campus=Campus };
+        Semester = Semester, ECTS= ects, PriorityTier = PriorityTier};
         await _context.Course.AddAsync( course);
         await SaveChangesAsync();
         return course;
@@ -48,7 +48,7 @@ public class CourseRepo : ICourseRepo
         return course;
     }
 
-    public async Task<Course?> UpdateCourseBySuecodeAsync(string SueCode,string Prefix,string name, int Semester,int ects, int PriorityTier,string Campus)
+    public async Task<Course?> UpdateCourseBySuecodeAsync(string SueCode,string Prefix,string name, int Semester,int ects, int PriorityTier)
     {
         var found = await GetCourseBySueCodeAsync(SueCode);
         if(found is null) return null;
@@ -58,13 +58,12 @@ public class CourseRepo : ICourseRepo
         found.Semester = Semester;
         found.ECTS =ects;
         found.PriorityTier = PriorityTier;
-        found.Campus = Campus;
         await SaveChangesAsync();
         return found;
 
 
     }
-    public async Task<Course?> UpdateCourseByIdAsync(int id,string SueCode,string Prefix,string name, int Semester,int ects, int PriorityTier,string Campus)
+    public async Task<Course?> UpdateCourseByIdAsync(int id,string SueCode,string Prefix,string name, int Semester,int ects, int PriorityTier)
     {
         var found = await GetCourseByIdAsync(id);
         if(found is null) return null;;
@@ -74,7 +73,6 @@ public class CourseRepo : ICourseRepo
         found.Semester = Semester;
         found.ECTS =ects;
         found.PriorityTier = PriorityTier;
-        found.Campus=Campus;
         await SaveChangesAsync();
         return found;
     }

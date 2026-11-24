@@ -5,9 +5,10 @@ public class Student
 {
     public int Id {get;set;}
     public int UserId{get;set;}
+    public int SourceStudentId{get;set;}
+    public int AttemptNo{get;set;}
 
     public ICollection<Enrollment>? Enrollments {get;set;}
-    
     public User User {get;set;} = null!;
     public ICollection<StudentExamAssignment>? StudentExamAssignment {get;set;}
 

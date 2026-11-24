@@ -14,11 +14,13 @@ public class ExamSessionRepo:IExamSessionRepo
         _context=context;
     }
 
-    public async Task<ExamSession> AddAsyc(int assessmentEventId, int scheduleId, int roomId, DateOnly date, bool LockDate)
+    public async Task<ExamSession> AddAsyc(int assessmentEventId, int scheduleId, int roomId,int campusId, DateOnly date, bool LockDate,string groupLabel
+    ,TimeOnly startTime, TimeOnly endTime, string rowVersion)
     {
         var n= new ExamSession{ AsseessmenEventId = assessmentEventId,
-                                ScheduleId = scheduleId, RoomId = roomId,
-                                 Date= date, LockDate = LockDate};
+                                ScheduleId = scheduleId, RoomId = roomId,CampusId=campusId,
+                                 Date= date, LockDate = LockDate,GroupLabel=groupLabel, StartTime=startTime
+                                 ,EndTime=endTime,RowVersion=rowVersion};
         await _context.AddAsync(n);
         await SaveChangesAsync();
         return n;
@@ -60,15 +62,23 @@ public class ExamSessionRepo:IExamSessionRepo
         await _context.SaveChangesAsync();
     }
 
-    public async Task<ExamSession?> UpdateAsync(int id,int assessmentEventId, int scheduleId, int roomId, DateOnly date, bool LockDate)
+    public async Task<ExamSession?> UpdateAsync(int id,int assessmentEventId, int scheduleId, int roomId,int campusId, DateOnly date, bool LockDate
+    ,string groupLabel,TimeOnly startTime, TimeOnly endTime, string rowVersion)
     {
         var u = await GetByIdAsync(id);
             if(u is null) return null;
         u.AsseessmenEventId = assessmentEventId;
         u.ScheduleId = scheduleId;
         u.RoomId = roomId;
+        u.CampusId=campusId;
         u.Date= date;
         u.LockDate = LockDate;
+        u.GroupLabel=groupLabel;
+        u.StartTime=startTime;
+        u.EndTime=endTime;
+        u.RowVersion=rowVersion;
+
+
         await SaveChangesAsync();
         return u;
     }
