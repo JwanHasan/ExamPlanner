@@ -4,10 +4,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ExamPlannerServer.Import;
 
-/// Every valid row is saved as a PlanningEducationElement, and also gets a Course and a Class:
-///   Class  = this offering of the course (ClassCode = Kaldenavn), created or updated per row
+/// Every valid row is saved as a PlanningEducationElement that belongs to a Course and a Campus, and also gets a Class:
+///   Campus = where it is taught (from Aktivitetsudbud), created once and then reused
 ///   Course = the subject (programme prefix + code, e.g. IT + ADS1), created once and then left alone
 ///            so that what planners edit by hand is never overwritten by a re-import
+///   Class  = this offering of the course (ClassCode = Kaldenavn), created or updated per row
 ///
 /// Planning elements are matched on the id in column A:
 ///   new id -> inserted
@@ -21,7 +22,8 @@ public class ImportService(IExcelImportParser parser, AppDbContext db, ILogger<I
         ParsedPlanningEducationElementRow Row,
         PlanningEducationElement.Assessment Assessment,
         string Prefix,
-        string CourseCode);
+        string CourseCode,
+        string CampusName);
 
     private sealed record SaveResult(
         int Created, int Updated, int Unchanged, int CoursesCreated, int ClassesCreated);
@@ -46,7 +48,7 @@ public class ImportService(IExcelImportParser parser, AppDbContext db, ILogger<I
         var valid = new List<ValidRow>();
         foreach (var row in parsed.Rows)
         {
-            var problem = FindDatabaseProblem(row, out var assessment, out var prefix, out var courseCode);
+            var problem = FindDatabaseProblem(row, out var assessment, out var prefix, out var courseCode, out var campusName);
             if (problem is not null)
             {
                 issues.Add(new ImportIssue("error", parsed.SheetName, row.SourceRowNumber, problem.Value.Column, problem.Value.Message));
@@ -54,12 +56,7 @@ public class ImportService(IExcelImportParser parser, AppDbContext db, ILogger<I
                 continue;
             }
 
-            valid.Add(new ValidRow(row, assessment, prefix!, courseCode!));
-
-            // Not a reason to skip the row: the course is saved, only without a campus.
-            if (CourseDerivation.Campus(row.ActivityOffering).Length == 0)
-                issues.Add(new ImportIssue("warning", parsed.SheetName, row.SourceRowNumber, "Aktivitetsudbud",
-                    "No campus found in the text, so the course is saved without a campus."));
+            valid.Add(new ValidRow(row, assessment, prefix!, courseCode!, campusName));
         }
 
         var saved = await SaveAsync(valid);
@@ -83,14 +80,15 @@ public class ImportService(IExcelImportParser parser, AppDbContext db, ILogger<I
         };
     }
 
-    // Checks what the database cannot store, and works out the course values. Null when the row is fine.
+    // Checks what the database cannot store, and works out the course and campus values. Null when the row is fine.
     private static (string Column, string Message)? FindDatabaseProblem(
         ParsedPlanningEducationElementRow row, out PlanningEducationElement.Assessment assessment,
-        out string? prefix, out string? courseCode)
+        out string? prefix, out string? courseCode, out string campusName)
     {
         assessment = default;
         prefix = CourseDerivation.Prefix(row.Nickname);
         courseCode = CourseDerivation.CourseCode(row.Name);
+        campusName = CourseDerivation.Campus(row.ActivityOffering);
 
         // The database stores ECTS as a whole number.
         if (row.Ects % 1 != 0)
@@ -101,6 +99,10 @@ public class ImportService(IExcelImportParser parser, AppDbContext db, ILogger<I
 
         if (courseCode is null)
             return ("Navn", $"No course code found at the start of '{row.Name}'.");
+
+        // A planning element must belong to a campus, so a row without one cannot be saved.
+        if (campusName.Length == 0)
+            return ("Aktivitetsudbud", "No campus found at the end of the text (\", Campus ...\"), and a planning element needs one.");
 
         switch (row.AssessmentType.Trim().ToLowerInvariant())
         {
@@ -143,18 +145,60 @@ public class ImportService(IExcelImportParser parser, AppDbContext db, ILogger<I
 
         await using var transaction = await db.Database.BeginTransactionAsync();
 
+        // Campuses are few, so they are saved first: the planning elements below point at them
+        // (and the updates need their ids). They are still part of the transaction.
+        var campuses = (await db.Campuses.ToListAsync())
+            .GroupBy(c => c.Name, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.OrderBy(c => c.Id).First(), StringComparer.OrdinalIgnoreCase);
+        foreach (var name in valid.Select(v => v.CampusName).Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            if (campuses.ContainsKey(name))
+                continue;
+
+            // IsVirtual stays false: the export does not say, so nothing is guessed.
+            var campus = new Campus { Name = name, IsVirtual = false };
+            db.Campuses.Add(campus);
+            campuses[name] = campus;
+        }
+        await db.SaveChangesAsync();
+
         foreach (var item in valid)
         {
-            var (row, assessment, prefix, courseCode) = item;
+            var (row, assessment, prefix, courseCode, campusName) = item;
             var startDate = DateOnly.FromDateTime(row.StartDate);
             var endDate = DateOnly.FromDateTime(row.EndDate);
             var modifiedAt = AsUtc(row.SourceModifiedAt);
+            var campusId = campuses[campusName].Id;
+
+            // The row's course. Through its class if it has one (so a course a planner edited is still found),
+            // otherwise by prefix + code, otherwise a new course.
+            classes.TryGetValue(row.Nickname, out var existingClass);
+            Course? course = null;
+            if (existingClass is null)
+            {
+                var key = CourseDerivation.CourseKey(prefix, courseCode);
+                if (!courses.TryGetValue(key, out course))
+                {
+                    course = new Course
+                    {
+                        SueCode = courseCode,
+                        Prefix = prefix,
+                        Name = CourseDerivation.CourseName(row.Name),
+                        ECTS = (int)row.Ects
+                        // Semester and PriorityTier stay 0: they are filled in by hand afterwards.
+                    };
+                    db.Course.Add(course);
+                    courses[key] = course; // later rows of this file with the same course reuse it
+                    coursesCreated++;
+                }
+            }
 
             if (!existing.TryGetValue(row.PlanningElementId, out var current))
             {
-                db.PlanningEducationElement.Add(new PlanningEducationElement
+                var element = new PlanningEducationElement
                 {
                     Id = row.PlanningElementId,
+                    CampusId = campusId,
                     SourceChecksum = row.SourceChecksum,
                     SourceModifiedAt = modifiedAt,
                     Name = row.Name,
@@ -174,7 +218,15 @@ public class ImportService(IExcelImportParser parser, AppDbContext db, ILogger<I
                     Project = row.Project,
                     Written = row.Written
                     // AssessmentEvent is left empty on purpose: an element does not need an event yet.
-                });
+                };
+
+                // A course that is new has no id yet, so it is linked as an object; EF saves it first.
+                if (existingClass is not null)
+                    element.CourseId = existingClass.CourseId;
+                else
+                    element.Course = course!;
+
+                db.PlanningEducationElement.Add(element);
                 created++;
             }
             else if (current.SourceChecksum == row.SourceChecksum)
@@ -183,10 +235,11 @@ public class ImportService(IExcelImportParser parser, AppDbContext db, ILogger<I
             }
             else
             {
-                // Overwrites only what the file provides. Prefix (filled in by hand) is not touched.
+                // Overwrites only what the file provides. Prefix (filled in by hand) and the course are not touched.
                 await db.PlanningEducationElement
                     .Where(e => e.Id == row.PlanningElementId)
                     .ExecuteUpdateAsync(s => s
+                        .SetProperty(e => e.CampusId, campusId)
                         .SetProperty(e => e.SourceChecksum, row.SourceChecksum)
                         .SetProperty(e => e.SourceModifiedAt, modifiedAt)
                         .SetProperty(e => e.Name, row.Name)
@@ -207,13 +260,12 @@ public class ImportService(IExcelImportParser parser, AppDbContext db, ILogger<I
                 updated++;
             }
 
-            // Course and class are looked at for EVERY valid row, not only for new or changed elements.
-            // That way a database that was filled by an earlier import (elements only) gets its
-            // courses and classes the next time the same file is imported.
+            // Class is looked at for EVERY valid row, not only for new or changed elements.
+            // That way a database that was filled by an earlier import gets its classes the next time the same file is imported.
             var classStart = AsUtc(row.StartDate);
             var classEnd = AsUtc(row.EndDate);
 
-            if (classes.TryGetValue(row.Nickname, out var existingClass))
+            if (existingClass is not null)
             {
                 // The dates and nickname come from the file, so the file wins. The course is not touched.
                 existingClass.NickName = row.Nickname;
@@ -222,30 +274,13 @@ public class ImportService(IExcelImportParser parser, AppDbContext db, ILogger<I
                 continue;
             }
 
-            var key = CourseDerivation.CourseKey(prefix, courseCode);
-            if (!courses.TryGetValue(key, out var course))
-            {
-                course = new Course
-                {
-                    SueCode = courseCode,
-                    Prefix = prefix,
-                    Name = CourseDerivation.CourseName(row.Name),
-                    ECTS = (int)row.Ects,
-                    Campus = CourseDerivation.Campus(row.ActivityOffering)
-                    // Semester and PriorityTier stay 0: they are filled in by hand afterwards.
-                };
-                db.Course.Add(course);
-                courses[key] = course; // later rows of this file with the same course reuse it
-                coursesCreated++;
-            }
-
             var newClass = new Class
             {
                 ClassCode = row.Nickname,
                 NickName = row.Nickname,
                 StartDate = classStart,
                 EndDate = classEnd,
-                Course = course
+                Course = course!
             };
             db.Class.Add(newClass);
             classes[row.Nickname] = newClass;

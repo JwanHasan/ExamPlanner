@@ -41,6 +41,21 @@ public class ImportServiceTests
         return await context.Course.AsNoTracking().OrderBy(c => c.Prefix).ThenBy(c => c.SueCode).ToListAsync();
     }
 
+    private static async Task<List<Campus>> CampusesAsync(TestDatabase db)
+    {
+        await using var context = db.NewContext();
+        // Sorted here and not in the query: a database with Danish settings sorts "Aarhus" after "Horsens" ("Aa" counts as "Å").
+        var campuses = await context.Campuses.AsNoTracking().ToListAsync();
+        return campuses.OrderBy(c => c.Name, StringComparer.Ordinal).ToList();
+    }
+
+    // The element together with the campus it points at.
+    private static async Task<PlanningEducationElement> RowWithCampusAsync(TestDatabase db, Guid id)
+    {
+        await using var context = db.NewContext();
+        return await context.PlanningEducationElement.Include(e => e.Campus).AsNoTracking().SingleAsync(e => e.Id == id);
+    }
+
     private static async Task<List<Class>> ClassesAsync(TestDatabase db)
     {
         await using var context = db.NewContext();
@@ -121,14 +136,14 @@ public class ImportServiceTests
     {
         await using var db = await TestDatabase.CreateAsync(kind);
 
-        await ImportAsync(db, TestWorkbook.Build(TestWorkbook.ValidRow()));
+        var id = Guid.NewGuid();
+        await ImportAsync(db, TestWorkbook.Build(TestWorkbook.ValidRow(id)));
 
         var course = Assert.Single(await CoursesAsync(db));
         Assert.Equal("ADS1", course.SueCode);                        // first word of Navn
         Assert.Equal("IT", course.Prefix);                           // first two letters of Kaldenavn
         Assert.Equal("Algoritmer og datastrukturer", course.Name);   // Navn without the code
         Assert.Equal(5, course.ECTS);
-        Assert.Equal("Horsens", course.Campus);                      // from the end of Aktivitetsudbud
         Assert.Equal(0, course.Semester);                            // filled in by hand later
         Assert.Equal(0, course.PriorityTier);
 
@@ -138,6 +153,80 @@ public class ImportServiceTests
         Assert.Equal(course.Id, theClass.CourseId);
         Assert.Equal(new DateTime(2025, 9, 1).Ticks, theClass.StartDate.Ticks);
         Assert.Equal(new DateTime(2026, 1, 31).Ticks, theClass.EndDate.Ticks);
+
+        // The planning element belongs to the course, and to the campus taken from the end of Aktivitetsudbud.
+        var element = await RowWithCampusAsync(db, id);
+        Assert.Equal(course.Id, element.CourseId);
+        Assert.Equal("Horsens", element.Campus.Name);
+        Assert.False(element.Campus.IsVirtual);
+    }
+
+    [Theory]
+    [MemberData(nameof(Databases))]
+    public async Task RowsOnTheSameCampus_ShareOneCampus(DbKind kind)
+    {
+        await using var db = await TestDatabase.CreateAsync(kind);
+        var aarhus = TestWorkbook.WithValue(TestWorkbook.UniqueRow(), "Aktivitetsudbud", "Global Business - VIA University College, Campus Aarhus C");
+
+        await ImportAsync(db, TestWorkbook.Build(TestWorkbook.UniqueRow(), TestWorkbook.UniqueRow(), aarhus));
+
+        Assert.Equal(["Aarhus C", "Horsens"], (await CampusesAsync(db)).Select(c => c.Name));
+        await using var context = db.NewContext();
+        Assert.Equal(2, await context.PlanningEducationElement.CountAsync(e => e.Campus.Name == "Horsens"));
+        Assert.Equal(1, await context.PlanningEducationElement.CountAsync(e => e.Campus.Name == "Aarhus C"));
+    }
+
+    [Theory]
+    [MemberData(nameof(Databases))]
+    public async Task ExistingCampus_IsReused_EvenWhenCapitalisedDifferently(DbKind kind)
+    {
+        await using var db = await TestDatabase.CreateAsync(kind);
+        await using (var context = db.NewContext())
+        {
+            context.Campuses.Add(new Campus { Name = "horsens", IsVirtual = true });
+            await context.SaveChangesAsync();
+        }
+        var id = Guid.NewGuid();
+
+        await ImportAsync(db, TestWorkbook.Build(TestWorkbook.ValidRow(id)));
+
+        var campus = Assert.Single(await CampusesAsync(db)); // no second "Horsens" was added
+        var element = await RowWithCampusAsync(db, id);
+        Assert.Equal(campus.Id, element.CampusId);
+        Assert.True(element.Campus.IsVirtual);                // and the existing row was left as it was
+    }
+
+    [Theory]
+    [MemberData(nameof(Databases))]
+    public async Task ReImport_DoesNotAddCampusesAgain(DbKind kind)
+    {
+        await using var db = await TestDatabase.CreateAsync(kind);
+        var rows = new[] { TestWorkbook.UniqueRow(), TestWorkbook.UniqueRow() };
+
+        await ImportAsync(db, TestWorkbook.Build(rows));
+        await ImportAsync(db, TestWorkbook.Build(rows));
+
+        Assert.Single(await CampusesAsync(db));
+    }
+
+    [Theory]
+    [MemberData(nameof(Databases))]
+    public async Task ChangedRow_MovesItsElementToTheNewCampus_AndKeepsTheCourse(DbKind kind)
+    {
+        await using var db = await TestDatabase.CreateAsync(kind);
+        var id = Guid.NewGuid();
+        var row = TestWorkbook.ValidRow(id);
+        await ImportAsync(db, TestWorkbook.Build(row));
+        var courseBefore = Assert.Single(await CoursesAsync(db));
+
+        var moved = TestWorkbook.WithValue(row, "Kontrolsum for række", "moved");
+        moved = TestWorkbook.WithValue(moved, "Aktivitetsudbud", "Software Technology Engineering - VIA University College, Campus Aarhus C");
+        await ImportAsync(db, TestWorkbook.Build(moved));
+
+        var element = await RowWithCampusAsync(db, id);
+        Assert.Equal("Aarhus C", element.Campus.Name);
+        Assert.Equal(courseBefore.Id, element.CourseId);                 // the course does not change
+        Assert.Equal(["Aarhus C", "Horsens"], (await CampusesAsync(db)).Select(c => c.Name));
     }
 
     [Theory]
@@ -285,44 +374,68 @@ public class ImportServiceTests
 
     [Theory]
     [MemberData(nameof(Databases))]
-    public async Task DatabaseFilledByAnEarlierImport_GetsItsCoursesAndClassesOnTheNextImport(DbKind kind)
+    public async Task MissingClass_IsRecreatedOnTheNextImport_WithoutTouchingTheCourseOrTheElement(DbKind kind)
     {
-        // Before courses and classes were created, imports saved planning elements only. The same file
-        // imported again must fill the gap, even though no element has changed.
+        // The class is looked at for every row, not only for new or changed elements, so a class that
+        // went missing is put back by importing the same file again, even though no element has changed.
         await using var db = await TestDatabase.CreateAsync(kind);
-        var row = TestWorkbook.ValidRow();
+        var id = Guid.NewGuid();
+        var row = TestWorkbook.ValidRow(id);
         await ImportAsync(db, TestWorkbook.Build(row));
+        var courseBefore = Assert.Single(await CoursesAsync(db));
 
         await using (var context = db.NewContext())
         {
             await context.Class.ExecuteDeleteAsync();
-            await context.Course.ExecuteDeleteAsync();
         }
 
         var response = await ImportAsync(db, TestWorkbook.Build(row));
 
-        Assert.Equal(1, response.Created.Courses);
+        Assert.Equal(0, response.Created.Courses);
         Assert.Equal(1, response.Created.Classes);
-        Assert.Single(await CoursesAsync(db));
-        Assert.Single(await ClassesAsync(db));
-        Assert.Single(await RowsAsync(db));
+        Assert.Equal(courseBefore.Id, Assert.Single(await ClassesAsync(db)).CourseId);
+        Assert.Equal(courseBefore.Id, Assert.Single(await CoursesAsync(db)).Id);
+        Assert.Equal(id, Assert.Single(await RowsAsync(db)).Id);
     }
 
     [Theory]
     [MemberData(nameof(Databases))]
-    public async Task MissingCampus_StillImports_AsAWarning(DbKind kind)
+    public async Task NewElementWithAnExistingClass_IsLinkedToThatClassesCourse(DbKind kind)
     {
+        // Two different planning elements (different ids) with the same Kaldenavn share one class.
+        // The second element must point at the course the class already has.
+        await using var db = await TestDatabase.CreateAsync(kind);
+        var first = Guid.NewGuid();
+        var second = Guid.NewGuid();
+        await ImportAsync(db, TestWorkbook.Build(TestWorkbook.ValidRow(first)));
+        var course = Assert.Single(await CoursesAsync(db));
+
+        await ImportAsync(db, TestWorkbook.Build(TestWorkbook.ValidRow(second)));
+
+        Assert.Single(await CoursesAsync(db));
+        Assert.Single(await ClassesAsync(db));
+        Assert.Equal(course.Id, (await RowAsync(db, second)).CourseId);
+    }
+
+    [Theory]
+    [MemberData(nameof(Databases))]
+    public async Task MissingCampus_IsSkipped_BecauseAnElementNeedsOne(DbKind kind)
+    {
+        // A planning element must belong to a campus, so a row without one cannot be saved
+        // (it used to be saved with an empty campus, before the campus moved to the element).
         await using var db = await TestDatabase.CreateAsync(kind);
         var row = TestWorkbook.WithValue(TestWorkbook.ValidRow(), "Aktivitetsudbud", "A programme with no campus in its name");
 
         var response = await ImportAsync(db, TestWorkbook.Build(row));
 
-        Assert.Equal(1, response.ImportedRows);
-        Assert.Equal(0, response.SkippedRows); // a warning is not a skipped row
+        Assert.Equal(0, response.ImportedRows);
+        Assert.Equal(1, response.SkippedRows);
         var issue = Assert.Single(response.Issues);
-        Assert.Equal("warning", issue.Severity);
+        Assert.Equal("error", issue.Severity);
         Assert.Equal("Aktivitetsudbud", issue.Column);
-        Assert.Equal("", Assert.Single(await CoursesAsync(db)).Campus);
+        Assert.Empty(await RowsAsync(db));
+        Assert.Empty(await CoursesAsync(db));
+        Assert.Empty(await CampusesAsync(db)); // not even an empty campus is left behind
     }
 
     [Theory]
@@ -562,7 +675,9 @@ public class ImportServiceTests
 
         var changed = TestWorkbook.WithValue(TestWorkbook.ValidRow(existingId), "Kontrolsum for række", "new");
         changed = TestWorkbook.WithValue(changed, "Navn", "ADS1 changed before the failure");
+        // The failing row also needs a campus that does not exist yet, so we can see it is rolled back too.
         var poison = TestWorkbook.WithValue(TestWorkbook.UniqueRow(), "Navn", "boom");
+        poison = TestWorkbook.WithValue(poison, "Aktivitetsudbud", "Software Engineering - VIA University College, Campus Viborg");
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() => ImportAsync(db, TestWorkbook.Build(changed, poison)));
 
@@ -572,6 +687,7 @@ public class ImportServiceTests
         Assert.Single(await RowsAsync(db));
         Assert.Single(await CoursesAsync(db));   // no course was added for the failed row
         Assert.Single(await ClassesAsync(db));
+        Assert.Equal("Horsens", Assert.Single(await CampusesAsync(db)).Name); // and no campus either
     }
 
     // ---------- the real export ----------
@@ -602,9 +718,16 @@ public class ImportServiceTests
 
         var courses = await CoursesAsync(db);
         Assert.Equal(98, courses.Count);
-        Assert.Equal(76, courses.Count(c => c.Campus == "Horsens"));   // first row of each course decides
-        Assert.Equal(22, courses.Count(c => c.Campus == "Aarhus C"));
         Assert.DoesNotContain(courses, c => c.Prefix.Length != 2 || c.SueCode.Length == 0 || c.Name.Length == 0);
+
+        // The campus is on the element, and the same course can run on two campuses (as MA-MAT1 does).
+        Assert.Equal(["Aarhus C", "Horsens"], (await CampusesAsync(db)).Select(c => c.Name));
+        await using (var context = db.NewContext())
+        {
+            Assert.Equal(83, await context.PlanningEducationElement.CountAsync(e => e.Campus.Name == "Horsens"));
+            Assert.Equal(25, await context.PlanningEducationElement.CountAsync(e => e.Campus.Name == "Aarhus C"));
+            Assert.Equal(0, await context.PlanningEducationElement.CountAsync(e => e.CourseId == 0));
+        }
         Assert.Contains(courses, c => c.Prefix == "IT" && c.SueCode == "ADS1" && c.Name == "Algoritmer og datastrukturer");
         Assert.Equal(108, (await ClassesAsync(db)).Count);
 

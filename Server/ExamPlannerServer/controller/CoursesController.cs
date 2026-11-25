@@ -66,7 +66,7 @@ public class CoursesController : ControllerBase
             return NotFound(new ApiError(ErrorCodes.CourseNotFound, $"Course {id} does not exist."));
 
         var updated = await _courses.UpdateCourseByIdAsync(id, dto.SueCode.Trim(), course.Prefix, dto.Name.Trim(),
-            course.Semester, course.ECTS, course.PriorityTier, course.Campus);
+            course.Semester, course.ECTS, course.PriorityTier);
 
         // The repo answers null when the course is gone (for example deleted by someone else in between).
         if (updated is null)
