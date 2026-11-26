@@ -26,7 +26,8 @@ internal static class StudentWorkbook
         "Præfix"
     ];
 
-    private static int _counter;
+    // Generated student numbers start high, so they can never be the same students as in the real Opslagsark (1-1154).
+    private static int _counter = 100000;
 
     // One valid row, values in the same order as Headers.
     public static object?[] ValidRow(
