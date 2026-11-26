@@ -8,8 +8,8 @@ public sealed class RealExportFactAttribute : FactAttribute
 {
     public RealExportFactAttribute()
     {
-        if (!File.Exists(ExcelTest.path))
-            Skip = $"Real export not found at {ExcelTest.path}";
+        if (!File.Exists(ExcelTest.Path))
+            Skip = $"Real export not found at {ExcelTest.Path}";
     }
 }
 
@@ -18,7 +18,7 @@ public class RealExportTests
     // FileShare.ReadWrite lets us read the file even while it is open in Excel
     // (Excel locks it; File.OpenRead would throw "being used by another process").
     private static FileStream OpenExport() =>
-        new(ExcelTest.path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+        new(ExcelTest.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 
     [RealExportFact]
     public void RealExport_IsParsedWithoutErrors()

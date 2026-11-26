@@ -243,7 +243,7 @@ public class ImportApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
 
     private static async Task<byte[]> ReadRealExportAsync()
     {
-        await using var file = new FileStream(ExcelTest.path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+        await using var file = new FileStream(ExcelTest.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
         using var copy = new MemoryStream();
         await file.CopyToAsync(copy);
         return copy.ToArray();

@@ -1,35 +1,48 @@
-using System;
-using System.Diagnostics.CodeAnalysis;
 using DatabaseConnection.DBContext;
 using DatabaseConnection.model;
 using Microsoft.EntityFrameworkCore;
 
 namespace DatabaseConnection.repo;
 
-public class ExamSessionRepo:IExamSessionRepo
+public class ExamSessionRepo : IExamSessionRepo
 {
     private readonly AppDbContext _context;
+
     public ExamSessionRepo(AppDbContext context)
     {
-        _context=context;
+        _context = context;
     }
 
-    public async Task<ExamSession> AddAsyc(int assessmentEventId, int scheduleId, int roomId,int campusId, DateOnly date, bool LockDate,string groupLabel
-    ,TimeOnly startTime, TimeOnly endTime, string rowVersion)
+    public async Task<ExamSession> AddAsync( int assessmentEventId, int scheduleId, int? roomId, int campusId, DateOnly date, bool LockDate, string groupLabel,
+        TimeOnly? startTime, TimeOnly? endTime, string rowVersion
+    )
     {
-        var n= new ExamSession{ AsseessmenEventId = assessmentEventId,
-                                ScheduleId = scheduleId, RoomId = roomId,CampusId=campusId,
-                                 Date= date, LockDate = LockDate,GroupLabel=groupLabel, StartTime=startTime
-                                 ,EndTime=endTime,RowVersion=rowVersion};
-        await _context.AddAsync(n);
+        var session = new ExamSession
+        {
+            AsseessmenEventId = assessmentEventId,
+            ScheduleId = scheduleId,
+            RoomId = roomId,
+            CampusId = campusId,
+            Date = date,
+            LockDate = LockDate,
+            GroupLabel = groupLabel,
+            StartTime = startTime,
+            EndTime = endTime,
+            RowVersion = rowVersion
+        };
+
+        await _context.AddAsync(session);
         await SaveChangesAsync();
-        return n;
+        return session;
     }
 
     public async Task<bool> DeleteByIdAsync(int id)
     {
-        var d= await _context.ExamSession.Where(x=> x.Id==id).ExecuteDeleteAsync();
-        return d>0;
+        var deleted = await _context.ExamSession
+            .Where(x => x.Id == id)
+            .ExecuteDeleteAsync();
+
+        return deleted > 0;
     }
 
     public async Task<List<ExamSession>> GetAllAsync()
@@ -39,17 +52,23 @@ public class ExamSessionRepo:IExamSessionRepo
 
     public async Task<List<ExamSession>> GetAllByAssessmentEventId(int id)
     {
-        return await _context.ExamSession.Where(x=> x.AsseessmenEventId == id).ToListAsync();
+        return await _context.ExamSession
+            .Where(x => x.AsseessmenEventId == id)
+            .ToListAsync();
     }
 
     public async Task<List<ExamSession>> GetAllByRoomId(int id)
     {
-        return await _context.ExamSession.Where(x=> x.RoomId == id).ToListAsync();
+        return await _context.ExamSession
+            .Where(x => x.RoomId == id)
+            .ToListAsync();
     }
 
     public async Task<List<ExamSession>> GetAllByScheduleId(int id)
     {
-        return await _context.ExamSession.Where(x=> x.ScheduleId == id).ToListAsync();
+        return await _context.ExamSession
+            .Where(x => x.ScheduleId == id)
+            .ToListAsync();
     }
 
     public async Task<ExamSession?> GetByIdAsync(int id)
@@ -62,24 +81,31 @@ public class ExamSessionRepo:IExamSessionRepo
         await _context.SaveChangesAsync();
     }
 
-    public async Task<ExamSession?> UpdateAsync(int id,int assessmentEventId, int scheduleId, int roomId,int campusId, DateOnly date, bool LockDate
-    ,string groupLabel,TimeOnly startTime, TimeOnly endTime, string rowVersion)
+    public async Task<ExamSession?> UpdateAsync(
+        int id, int assessmentEventId, int scheduleId, int? roomId, int campusId, DateOnly date, bool LockDate, string groupLabel,
+        TimeOnly? startTime, TimeOnly? endTime, string rowVersion
+    )
     {
-        var u = await GetByIdAsync(id);
-            if(u is null) return null;
-        u.AsseessmenEventId = assessmentEventId;
-        u.ScheduleId = scheduleId;
-        u.RoomId = roomId;
-        u.CampusId=campusId;
-        u.Date= date;
-        u.LockDate = LockDate;
-        u.GroupLabel=groupLabel;
-        u.StartTime=startTime;
-        u.EndTime=endTime;
-        u.RowVersion=rowVersion;
+        var session = await GetByIdAsync(id);
 
+        if (session is null)
+        {
+            return null;
+        }
+
+        session.AsseessmenEventId = assessmentEventId;
+        session.ScheduleId = scheduleId;
+        session.RoomId = roomId;
+        session.CampusId = campusId;
+        session.Date = date;
+        session.LockDate = LockDate;
+        session.GroupLabel = groupLabel;
+        session.StartTime = startTime;
+        session.EndTime = endTime;
+        session.RowVersion = rowVersion;
 
         await SaveChangesAsync();
-        return u;
+
+        return session;
     }
 }

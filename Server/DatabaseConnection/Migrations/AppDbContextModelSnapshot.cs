@@ -156,6 +156,10 @@ namespace DatabaseConnection.Migrations
                     b.Property<int>("ScheduleId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("SnapshotJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
 
@@ -163,9 +167,10 @@ namespace DatabaseConnection.Migrations
 
                     b.HasIndex("RuleKeyId");
 
-                    b.HasIndex("ScheduleId");
-
                     b.HasIndex("UserId");
+
+                    b.HasIndex("ScheduleId", "FingerPrint")
+                        .IsUnique();
 
                     b.ToTable("ConflictAcknowledgements");
                 });
@@ -285,7 +290,7 @@ namespace DatabaseConnection.Migrations
                     b.Property<DateOnly>("Date")
                         .HasColumnType("date");
 
-                    b.Property<TimeOnly>("EndTime")
+                    b.Property<TimeOnly?>("EndTime")
                         .HasColumnType("time without time zone");
 
                     b.Property<string>("GroupLabel")
@@ -295,17 +300,18 @@ namespace DatabaseConnection.Migrations
                     b.Property<bool>("LockDate")
                         .HasColumnType("boolean");
 
-                    b.Property<int>("RoomId")
+                    b.Property<int?>("RoomId")
                         .HasColumnType("integer");
 
                     b.Property<string>("RowVersion")
+                        .IsConcurrencyToken()
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("ScheduleId")
                         .HasColumnType("integer");
 
-                    b.Property<TimeOnly>("StartTime")
+                    b.Property<TimeOnly?>("StartTime")
                         .HasColumnType("time without time zone");
 
                     b.HasKey("Id");
@@ -331,7 +337,7 @@ namespace DatabaseConnection.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("AssessmenType")
+                    b.Property<int>("AssessmentType")
                         .HasColumnType("integer");
 
                     b.Property<int>("CampusId")
@@ -340,7 +346,7 @@ namespace DatabaseConnection.Migrations
                     b.Property<bool>("CombinedWrittenOral")
                         .HasColumnType("boolean");
 
-                    b.Property<bool>("CompletionAssesment")
+                    b.Property<bool>("CompletionAssessment")
                         .HasColumnType("boolean");
 
                     b.Property<int>("CourseId")
@@ -363,7 +369,7 @@ namespace DatabaseConnection.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Nickmane")
+                    b.Property<string>("Nickname")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -402,6 +408,40 @@ namespace DatabaseConnection.Migrations
                     b.ToTable("PlanningEducationElement");
                 });
 
+            modelBuilder.Entity("DatabaseConnection.model.PlanningEventFacts", b =>
+                {
+                    b.Property<int>("AssessmentEventId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("AvoidDatesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("AvoidWeekdaysJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool?>("CoTaught")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool?>("GraduatingStudents")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("HoldsJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool?>("LargeClass")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool?>("SmallSemester")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("AssessmentEventId");
+
+                    b.ToTable("PlanningEventFacts");
+                });
+
             modelBuilder.Entity("DatabaseConnection.model.Room", b =>
                 {
                     b.Property<int>("Id")
@@ -438,11 +478,17 @@ namespace DatabaseConnection.Migrations
                     b.Property<bool>("Enabled")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("RuleKey")
+                        .HasColumnType("text");
+
                     b.Property<string>("Severity")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("RuleKey")
+                        .IsUnique();
 
                     b.ToTable("RuleSettings");
                 });
@@ -465,6 +511,40 @@ namespace DatabaseConnection.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Schedule");
+                });
+
+            modelBuilder.Entity("DatabaseConnection.model.ScheduleEditAudit", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AfterJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("BeforeJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ScheduleId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ScheduleId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ScheduleEditAudits");
                 });
 
             modelBuilder.Entity("DatabaseConnection.model.ScheduleReview", b =>
@@ -750,9 +830,7 @@ namespace DatabaseConnection.Migrations
 
                     b.HasOne("DatabaseConnection.model.Room", "Room")
                         .WithMany("ExamSessions")
-                        .HasForeignKey("RoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("RoomId");
 
                     b.HasOne("DatabaseConnection.model.Schedule", "Schedule")
                         .WithMany("ExamSessions")
@@ -788,6 +866,17 @@ namespace DatabaseConnection.Migrations
                     b.Navigation("Course");
                 });
 
+            modelBuilder.Entity("DatabaseConnection.model.PlanningEventFacts", b =>
+                {
+                    b.HasOne("DatabaseConnection.model.AssessmentEvent", "AssessmentEvent")
+                        .WithOne()
+                        .HasForeignKey("DatabaseConnection.model.PlanningEventFacts", "AssessmentEventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AssessmentEvent");
+                });
+
             modelBuilder.Entity("DatabaseConnection.model.Room", b =>
                 {
                     b.HasOne("DatabaseConnection.model.Campus", "Campus")
@@ -797,6 +886,21 @@ namespace DatabaseConnection.Migrations
                         .IsRequired();
 
                     b.Navigation("Campus");
+                });
+
+            modelBuilder.Entity("DatabaseConnection.model.ScheduleEditAudit", b =>
+                {
+                    b.HasOne("DatabaseConnection.model.Schedule", null)
+                        .WithMany()
+                        .HasForeignKey("ScheduleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("DatabaseConnection.model.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("DatabaseConnection.model.ScheduleReview", b =>
