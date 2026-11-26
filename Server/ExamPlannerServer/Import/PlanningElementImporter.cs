@@ -221,10 +221,12 @@ public class PlanningElementImporter(IExcelImportParser parser, AppDbContext db,
                 };
 
                 // A course that is new has no id yet, so it is linked as an object; EF saves it first.
-                if (existingClass is not null)
+                if (existingClass is null)
+                    element.Course = course!;
+                else if (existingClass.CourseId != 0)
                     element.CourseId = existingClass.CourseId;
                 else
-                    element.Course = course!;
+                    element.Course = existingClass.Course; // a class made earlier in THIS import has no id yet: link the object
 
                 db.PlanningEducationElement.Add(element);
                 created++;

@@ -163,6 +163,27 @@ public class ImportServiceTests
 
     [Theory]
     [MemberData(nameof(Databases))]
+    public async Task TwoElementsWithTheSameKaldenavnInOneFile_ShareTheClassAndItsCourse(DbKind kind)
+    {
+        // The second row finds the class that the first row has just created. That class has no id in the
+        // database yet, so the second element has to be linked to its course as an object, not by an id of 0.
+        await using var db = await TestDatabase.CreateAsync(kind);
+        var first = Guid.NewGuid();
+        var second = Guid.NewGuid();
+
+        var response = await ImportAsync(db, TestWorkbook.Build(
+            TestWorkbook.ValidRow(first, nickname: "IT-TWIN1-A25"),
+            TestWorkbook.ValidRow(second, nickname: "IT-TWIN1-A25")));
+
+        Assert.Equal(2, response.ImportedRows);
+        Assert.Equal(1, response.Created.Classes);                 // one shared class...
+        var course = Assert.Single(await CoursesAsync(db));         // ...of one course
+        Assert.Equal(course.Id, (await RowAsync(db, first)).CourseId);
+        Assert.Equal(course.Id, (await RowAsync(db, second)).CourseId);
+    }
+
+    [Theory]
+    [MemberData(nameof(Databases))]
     public async Task RowsOnTheSameCampus_ShareOneCampus(DbKind kind)
     {
         await using var db = await TestDatabase.CreateAsync(kind);
