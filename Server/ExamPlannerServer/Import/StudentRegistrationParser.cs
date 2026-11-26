@@ -10,7 +10,7 @@ public class StudentRegistrationParser : IStudentRegistrationParser
     private const string ColRegistrationId = "Gennemførelsesuddannelseselement";
     // Public: the importer recognises an Opslagsark by this column.
     public const string ColStudent = "Anonymt Student-ID";
-    private const string ColElementNickname = "Kaldenavn (Planlægningsuddannelseselement)";
+    public const string ColElementNickname = "Kaldenavn (Planlægningsuddannelseselement)";
     private const string ColElementName = "Planlægningsuddannelseselement";
     private const string ColHold = "Hold";
     private const string ColAttempts = "Antal forsøg";

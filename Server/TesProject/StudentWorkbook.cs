@@ -81,3 +81,15 @@ public sealed class RealOpslagsarkFactAttribute : FactAttribute
             Skip = $"Real Opslagsark not found at {OpslagsarkFile.Path}";
     }
 }
+
+// For tests that need BOTH real files: the planning-element export (see ExcelTest.path) and the Opslagsark.
+public sealed class RealBothFilesFactAttribute : FactAttribute
+{
+    public RealBothFilesFactAttribute()
+    {
+        if (!File.Exists(OpslagsarkFile.Path))
+            Skip = $"Real Opslagsark not found at {OpslagsarkFile.Path}";
+        else if (!File.Exists(ExcelTest.path))
+            Skip = $"Real planning-element export not found at {ExcelTest.path}";
+    }
+}
