@@ -58,7 +58,9 @@ builder.Services.AddScoped<ICourseTeacherRepo, CourseTeacherRepo>();
 
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IExcelImportParser, ExcelImportParser>();
+builder.Services.AddScoped<IStudentRegistrationParser, StudentRegistrationParser>();
 builder.Services.AddScoped<PlanningElementImporter>();
+builder.Services.AddScoped<StudentRegistrationImporter>();
 builder.Services.AddScoped<IImportService, ImportService>();
 
 // Authentication: JWT in the "Authorization: Bearer" header (API_CONTRACT.md 3.2) 

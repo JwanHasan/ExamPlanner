@@ -42,6 +42,10 @@ internal static class ExcelTable
         return false;
     }
 
+    // True when some table in the workbook has this column. Used to tell which kind of file was uploaded.
+    public static bool HasColumn(XLWorkbook workbook, string column) =>
+        workbook.Worksheets.SelectMany(ws => ws.Tables).Any(table => MapColumns(table).ContainsKey(column));
+
     // header name -> column number inside the table (1-based, which is what row.Cell(n) expects)
     private static Dictionary<string, int> MapColumns(IXLTable table)
     {

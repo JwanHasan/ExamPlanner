@@ -19,8 +19,7 @@ public class ImportServiceTests
     private static async Task<ImportResponse> ImportAsync(TestDatabase db, Stream workbook, string fileName = "export.xlsx")
     {
         await using var context = db.NewContext();
-        var service = new ImportService(
-            new PlanningElementImporter(new ExcelImportParser(), context, NullLogger<PlanningElementImporter>.Instance));
+        var service = TestServices.ImportService(context);
         return await service.ImportAsync(new FormFile(workbook, 0, workbook.Length, "file", fileName));
     }
 
