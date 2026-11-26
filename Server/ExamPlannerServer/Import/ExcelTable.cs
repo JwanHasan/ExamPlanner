@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using ClosedXML.Excel;
 
 namespace ExamPlannerServer.Import;
@@ -53,12 +54,16 @@ internal static class ExcelTable
         return map;
     }
 
-    // Trims, and removes the "(Skal ikke ændres)" prefix from the system columns.
+    // Trims, removes the "(Skal ikke ændres)" prefix from the system columns, and collapses a repeated
+    // bracket: Dynamics writes "Kaldenavn (Planlægningsuddannelseselement) (Planlægningsuddannelseselement)"
+    // for a column that comes from a related record, and we call it "Kaldenavn (Planlægningsuddannelseselement)".
     private static string Normalize(string header)
     {
         var text = header.Trim();
         if (text.StartsWith(SystemColumnPrefix, StringComparison.OrdinalIgnoreCase))
             text = text[SystemColumnPrefix.Length..].Trim();
-        return text;
+        return RepeatedBracket.Replace(text, "$1");
     }
+
+    private static readonly Regex RepeatedBracket = new(@"(\([^)]+\))(?:\s*\1)+", RegexOptions.Compiled);
 }
