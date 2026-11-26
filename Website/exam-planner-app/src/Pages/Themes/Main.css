@@ -1,14 +1,15 @@
 .main-page {
-  min-height: 100dvh;
-  background: rgba(255, 255, 255, 0.2) center / cover no-repeat;
+  --page-pad: 3vw;
+  --grid-gap: 3vw;
+  --label-size: clamp(1rem, 1.7vw, 1.8rem);
+  --line: #000000;
+  --accent: #7a1f3d;
+
+  min-height: 1px;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  font-family: sans-serif;
-}
-
-.main-header {
-    padding: .00001% 1% .00001%;
+  background: #ffffff center / cover no-repeat;
 }
 
 .main-logo {
@@ -20,85 +21,121 @@
 }
 
 .main-panel {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6vmin;
-  padding: 40px 5vmin;
-  background: rgba(28, 33, 29, 0.86);
-  backdrop-filter: blur(6px);
-  box-shadow: 0 18px 48px rgba(20, 30, 24, 0.28);
-}
-
-.main-actions {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  width: 50%;
-  max-width: 1000px;
-}
-
-.main-actions-row {
-  display: flex;
-  gap: 16px;
-}
-
-.main-button {
-  padding: 3%;
-  font-family: sans-serif;
-  font-size: 250%;
-  line-height: 90%;
-  color: #f6f5f0;
-  background: rgba(245, 245, 245, 0.5);
-  border: 3px solid #f6f5f0;
-  border-radius: 6px;
-  cursor: pointer;
-  text-align: center;
-}
-
-.main-actions-row .main-button {
-  flex: 1;
-  text-align: center;
-}
-
-.main-button:hover {
-  background: rgba(245, 245, 245, 0.75);
-}
-
-.main-button:focus-visible {
-  outline: 3px solid #7a1f3d;
-  outline-offset: 2px;
+  gap: 50px;
+  padding: 30px;
 }
 
 .main-welcome {
+  order: -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  width: fit-content;
+  max-width: 100%;
   margin: 0;
-  font-size: 900%;
+  padding-bottom: 1px;
+  font-size: 75px;
   font-weight: bold;
-  line-height: 1.1;
-  color: #f6f5f0;
-  text-align: right;
-  white-space: nowrap;
-  font-family: sans-serif;
+  line-height: 1;
+  color: var(--line);
+  border-bottom: 5px solid var(--line);
 }
 
-@media (max-width: 720px) {
-  .main-panel {
-    flex-direction: column-reverse;
-    align-items: stretch;
-    text-align: center;
+.main-actions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(24px, 4.5vw, 80px) var(--grid-gap);
+}
+
+.main-actions-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--grid-gap);
+}
+
+.main-actions-row > :nth-child(1) {
+  grid-column: 2;
+}
+
+.main-actions-row > :nth-child(2) {
+  grid-column: 3;
+}
+
+.main-button {
+  box-sizing: border-box;
+  padding: 6px 8px;
+  font: inherit;
+  font-size: 40px;
+  font-weight: bold;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--line);
+  background: #ffffff;
+  border: 3px solid var(--line);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.main-actions > .main-button {
+  display: flex;
+  flex-direction: column;
+  padding: 0 8px 8px;
+  overflow: hidden;
+}
+
+.main-actions > .main-button::before {
+  content: "";
+  display: block;
+  align-self: stretch;
+  margin: 0 -8px 8px;
+  aspect-ratio: 1 / 1;
+  background: #c9ccc9 center / cover no-repeat;
+  border-bottom: 3px solid var(--line);
+}
+
+.main-actions > .main-button:nth-child(1)::before { background-image: url("../Assets/create-calendar.png"); }
+.main-actions > .main-button:nth-child(2)::before { background-image: url("../Assets/edit-calendar.png"); }
+.main-actions > .main-button:nth-child(3)::before { background-image: url("../Assets/scanning-issues.png"); }
+.main-actions > .main-button:nth-child(4)::before { background-image: url("../Assets/view-data.png"); }
+
+
+.main-button:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(20, 30, 24, 0.3);
+}
+
+.main-button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .main-button {
+    transition: none;
   }
 
-  .main-actions {
-    max-width: none;
+  .main-button:hover {
+    transform: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .main-page {
+    --grid-gap: 4vw;
   }
 
-  .main-welcome {
-    text-align: center;
-    white-space: normal;
-    font-size: 10vmin;
-  }
-
+  .main-actions,
   .main-actions-row {
-    flex-direction: column;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .main-actions-row > :nth-child(1),
+  .main-actions-row > :nth-child(2) {
+    grid-column: auto;
   }
 }

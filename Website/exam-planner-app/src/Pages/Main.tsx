@@ -22,16 +22,16 @@ const Main = () => {
             <section className="main-panel">
                 <div className="main-actions">
                     <button className="main-button" onClick={() => navigate("/CreatePlan")}>
-                        Create new exam plan
+                        Create plan
                     </button>
                     <button className="main-button" onClick={() => navigate("/EditPlan")}>
-                        Edit current exam plan
+                        Edit plan
                     </button>
                     <button className="main-button">
-                        Scan for issues with current plan
+                        Scan plan
                     </button>
                     <button className="main-button" onClick={() => navigate("/imported-data")}>
-                        View imported data
+                        View data
                     </button>
 
                     <div className="main-actions-row">
@@ -45,9 +45,7 @@ const Main = () => {
                 </div>
 
                 <h1 className="main-welcome">
-                    Welcome,
-                    <br />
-                    {name}!
+                    Welcome, {name}!
                 </h1>
             </section>
         </main>
