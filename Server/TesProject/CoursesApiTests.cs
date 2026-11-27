@@ -106,7 +106,7 @@ public class CoursesApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     // ---------- editing (a planner corrects a course on the Imported data page) ----------
 
     [Fact]
-    public async Task Planner_CanEditNameAndCode_AndTheCampusSurvives()
+    public async Task Planner_CanEditNameAndCode_AndTheRestSurvives()
     {
         var planner = await TokenAsync(ApiFactory.PlannerEmail);
         var imported = await ImportOneCourseAsync(planner, TestWorkbook.UniqueRow());
@@ -120,12 +120,15 @@ public class CoursesApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         Assert.Equal("Renamed by a planner", json.GetProperty("name").GetString());
         Assert.Equal("NEW1", json.GetProperty("sueCode").GetString());
 
-        // What the planner did not change is still there. Campus is a required column, and the update
-        // has to carry it along (it was missing from the call once, and the API did not even build).
+        // What the planner did not change is still there: the rest of the course, and the planning
+        // element that belongs to it (with its campus).
         var course = await factory.QueryDatabaseAsync(db => db.Course.SingleAsync(c => c.Id == id));
-        Assert.Equal("Horsens", course.Campus);
         Assert.Equal("IT", course.Prefix);
         Assert.Equal(5, course.ECTS);
+
+        var element = await factory.QueryDatabaseAsync(db =>
+            db.PlanningEducationElement.Include(e => e.Campus).SingleAsync(e => e.CourseId == id));
+        Assert.Equal("Horsens", element.Campus.Name);
     }
 
     [Fact]

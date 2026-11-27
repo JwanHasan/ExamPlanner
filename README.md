@@ -13,9 +13,10 @@ build exam schedules from it.
 - **Login** with email and password. The API issues a JWT; the website keeps it in a cookie.
 - **Roles.** Exam planners (called `Admin` in the API) can import and edit. Teachers and students can log in
   but have no features of their own yet.
-- **Excel import.** A planner uploads the export from the university's system. Every row becomes a planning
-  element, a course and a class. Bad rows are skipped and reported with their row number; the rest is
-  imported. Importing the same file again is safe. See [Importing data](#importing-data).
+- **Excel import.** A planner uploads one of two kinds of file from the university's system. The planning-element
+  export gives planning elements, courses, classes and campuses. The Opslagsark gives students and their
+  enrollments. Bad rows are skipped and reported with their row number; the rest is imported. Importing the
+  same file again is safe. See [Importing data](#importing-data).
 - **Imported data page.** Lists the imported courses and lets a planner correct a course's name and code.
 - **Calendar pages** (create and edit a plan). These are user-interface work for the scheduling that is
   still to be built on the backend.
@@ -164,25 +165,57 @@ supply your own `Jwt__Key` and seed values as environment variables.
 
 ## Importing data
 
-Log in as a planner, open the import page and upload the Excel export from the university's system
-(the "Planlægningsuddannelseselement" view). Only `.xlsx` and `.xlsm` files up to 25 MB are accepted.
+Log in as a planner, open the import page and upload an Excel file from the university's system. Only `.xlsx` and
+`.xlsm` files up to 25 MB are accepted. There are two kinds of file, and **the order matters**:
 
-**How the file is read**
+1. **The planning-element export** (the "Planlægningsuddannelseselement" view) first.
+2. **The Opslagsark** (students and their enrollments) second, because its rows can only be imported on planning
+   elements that are already in the database.
+
+You use the same upload for both. The server looks at the columns: a file with an `Anonymt Student-ID` column is
+an Opslagsark, anything else is read as a planning-element export (and if a column is missing, the message
+names it).
+
+**How the files are read**
 
 - The data table is found by its column names, not by position or sheet name, so a re-export with reordered
-  or extra columns still works. The required columns are listed in
-  `Server/ExamPlannerServer/Import/ExcelImportParser.cs`.
+  or extra columns still works. The required columns are listed in the parsers:
+  `Server/ExamPlannerServer/Import/ExcelImportParser.cs` and `StudentRegistrationParser.cs`.
 - The Excel file itself is never stored; only its data is.
+
+### The planning-element export
 
 **What each row becomes**
 
 | Result | Where it comes from |
 |---|---|
-| Planning element | A copy of the row, identified by the id in column A. If the row's checksum changed since the last import, the element is updated. |
+| Planning element | A copy of the row, identified by the id in column A. If the row's checksum changed since the last import, the element is updated. It belongs to one course and one campus. |
+| Campus | The end of `Aktivitetsudbud` (`..., Campus Horsens`). Created once and then reused. A row without a campus is skipped, because a planning element needs one. |
 | Class | One per row. Class code and nickname = `Kaldenavn`; dates from the file. |
-| Course | Programme prefix = the first two letters of `Kaldenavn`. Code = the first word of `Navn`, up to a hyphen. Name = `Navn` without that code. Campus = the end of `Aktivitetsudbud` (`..., Campus Horsens`). Two rows are the same course when prefix and code match. |
+| Course | Programme prefix = the first two letters of `Kaldenavn`. Code = the first word of `Navn`, up to a hyphen. Name = `Navn` without that code. Two rows are the same course when prefix and code match. |
 
 The derivation rules live in one file: `Server/ExamPlannerServer/Import/CourseDerivation.cs`.
+
+### The Opslagsark (students and enrollments)
+
+The sheet "Data fra esas" has one row per student per planning element.
+
+| Result | Where it comes from |
+|---|---|
+| Enrollment | One per row: the student on the planning element, with the student's `Hold`. |
+| Student | One per student, however many rows they have. Matched on the number in `Anonymt Student-ID` (`STU-0001` is student 1). |
+| User | Each new student also gets a user with the Student role and **no password**, because a student needs one in the database. The login code refuses accounts without a password, so these accounts can never log in. |
+
+- **A row finds its planning element by `Kaldenavn`** (capitalisation does not matter), because the sheet has no
+  element id. Rows whose element is not in the database are skipped, and a skipped row saves nothing, not even its
+  student. They are reported once per missing element ("Import the planning-element export first"), not once per row.
+  Importing the Opslagsark again after the elements exist imports them.
+- **Attempts:** the database keeps one `Antal forsøg` per student, but the sheet has one per row. The highest is
+  saved, and one warning says how many students had rows that disagreed.
+- **Re-importing** creates nobody and nothing twice. The sheet decides a student's attempt number and an
+  enrollment's `Hold`.
+- The `Semester` and `Præfix` columns are not read. `Semester` describes the student's situation, not the element,
+  and the prefix is worked out from `Kaldenavn`.
 
 **Rules to know**
 
@@ -203,7 +236,7 @@ decides what to do from `code`. The full contract is in [`Docs/API_CONTRACT.md`]
 |---|---|---|
 | `POST /auth/login` | anyone | Log in; returns `accessToken` and the user |
 | `GET /auth/me` | logged in | The current user |
-| `POST /imports` | Admin | Upload and import the Excel file (`multipart/form-data`, field `file`) |
+| `POST /imports` | Admin | Upload and import an Excel file: the planning-element export or the Opslagsark, recognised by its columns (`multipart/form-data`, field `file`) |
 | `GET /courses`, `GET /courses/{id}` | logged in | The imported courses, with their class count |
 | `PATCH /courses/{id}` | Admin | Correct a course's name and code |
 
@@ -234,9 +267,10 @@ temporary databases (each test gets its own and removes it afterwards; local nor
 $env:EXAMPLANNER_TEST_PG = "Host=localhost;Port=5432;Username=postgres;Password=your-password;Database=postgres"
 ```
 
-A few tests read a real export from disk. They skip themselves if the file is missing. The path is the constant
-`path` in `Server/TesProject/ExcelTest.cs`; set it to where your copy of the export is (do not commit exports that
-contain real data).
+A few tests read the real files from disk. They skip themselves if a file is missing. The path of the
+planning-element export is the constant `path` in `Server/TesProject/ExcelTest.cs`, and the path of the Opslagsark
+is `Path` in `OpslagsarkFile` (`Server/TesProject/StudentWorkbook.cs`); set them to where your copies are (do not
+commit files that contain real data).
 
 The CI workflow builds the API and the website on every pull request. It runs `dotnet test` inside
 `Server/ExamPlannerServer`, which has no tests of its own, so `Server/TesProject` is currently run locally.
@@ -271,8 +305,12 @@ For the website: `npm run lint` and `npm run build` (in `Website/exam-planner-ap
 
 - **Planned, not built:** schedule generation, conflict detection, rescheduling, student and examiner
   assignment, re-exam eligibility, schedule approval and export (all described in the API contract).
-- **Import:** it creates courses, classes and planning elements. It does not yet create the exam records
-  (assessment events), and the export contains no teacher data. A course that runs on two campuses keeps the
-  campus of the first row that mentions it.
+- **Import:** the planning-element export creates courses, classes, campuses and planning elements, and the
+  Opslagsark creates students and enrollments. The exam records (assessment events) are not created yet, and
+  neither file contains teacher data.
+- **Opslagsark:** the database keeps one attempt number per student, so the highest is saved (the sheet has one
+  per enrollment). Enrollments are saved with `SourceImportId` 0, because there is no import history yet, and a
+  new campus is saved with `IsVirtual` false, because the files do not say. Rows on planning elements that are
+  not in the database are skipped.
 - **Roles:** teachers and students can log in, but only planners have features. After login a planner lands on
   the main page; other roles land on a placeholder page until their pages exist.

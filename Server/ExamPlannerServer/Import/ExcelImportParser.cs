@@ -4,10 +4,7 @@ namespace ExamPlannerServer.Import;
 
 public class ExcelImportParser : IExcelImportParser
 {
-    // Prefix the Dynamics export puts in front of its three system columns.
-    private const string SystemColumnPrefix = "(Skal ikke ændres)";
-
-    // Every column the import needs, written the way the headers look AFTER Normalize()
+    // Every column the import needs, written the way the headers look AFTER normalising
     // (no "(Skal ikke ændres)" prefix). Columns are found by these names, not by position,
     // so a re-export with reordered or extra columns still works.
     private const string ColId = "Planlægningsuddannelseselement";
@@ -56,62 +53,17 @@ public class ExcelImportParser : IExcelImportParser
 
         using (workbook)
         {
-            var found = FindImportTable(workbook, result);
-            if (found is null)
-                return result; // the reason is in result.Issues
+            if (!ExcelTable.TryFind(workbook, RequiredColumns, out var found, out var error))
+            {
+                result.Issues.Add(new ParseIssue(0, error!));
+                return result;
+            }
 
-            result.SheetName = found.Value.Table.Worksheet.Name;
-            ReadRows(found.Value.Table, found.Value.Columns, result);
+            result.SheetName = found!.Table.Worksheet.Name;
+            ReadRows(found.Table, found.Columns, result);
         }
 
         return result;
-    }
-
-    // Looks through every table on every sheet (sheet names and positions are not trusted)
-    // and returns the first one that has all required columns.
-    private static (IXLTable Table, Dictionary<string, int> Columns)? FindImportTable(
-        XLWorkbook workbook, ParseResult result)
-    {
-        List<string>? fewestMissing = null;
-
-        foreach (var table in workbook.Worksheets.SelectMany(ws => ws.Tables))
-        {
-            var columns = MapColumns(table);
-            var missing = RequiredColumns.Where(c => !columns.ContainsKey(c)).ToList();
-
-            if (missing.Count == 0)
-                return (table, columns);
-
-            // Remember the closest candidate so the error message is useful.
-            if (fewestMissing is null || missing.Count < fewestMissing.Count)
-                fewestMissing = missing;
-        }
-
-        result.Issues.Add(new ParseIssue(0, fewestMissing is null
-            ? "No table was found in the workbook."
-            : $"Required column(s) missing: {string.Join(", ", fewestMissing)}"));
-        return null;
-    }
-
-    // header name -> column number inside the table (1-based, which is what row.Cell(n) expects)
-    private static Dictionary<string, int> MapColumns(IXLTable table)
-    {
-        var map = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-        var headers = table.HeadersRow().Cells().ToList();
-
-        for (var i = 0; i < headers.Count; i++)
-            map.TryAdd(Normalize(headers[i].GetString()), i + 1);
-
-        return map;
-    }
-
-    // Trims, and removes the "(Skal ikke ændres)" prefix from the three system columns.
-    private static string Normalize(string header)
-    {
-        var text = header.Trim();
-        if (text.StartsWith(SystemColumnPrefix, StringComparison.OrdinalIgnoreCase))
-            text = text[SystemColumnPrefix.Length..].Trim();
-        return text;
     }
 
     private static void ReadRows(IXLTable table, Dictionary<string, int> columns, ParseResult result)
@@ -166,77 +118,6 @@ public class ExcelImportParser : IExcelImportParser
                 result.Issues.Add(new ParseIssue(parsed.SourceRowNumber, string.Join("; ", reader.Problems)));
             else
                 result.Rows.Add(parsed);
-        }
-    }
-
-    // Reads typed values out of one row's cells and records a problem instead of throwing
-    // when a value is missing or of the wrong type.
-    private sealed class RowReader(IXLRangeRow row, Dictionary<string, int> columns)
-    {
-        public List<string> Problems { get; } = new();
-
-        private IXLCell Cell(string column) => row.Cell(columns[column]);
-
-        public string Text(string column)
-        {
-            var text = Cell(column).GetString().Trim();
-            if (text.Length == 0)
-                Problems.Add($"{column}: value is missing");
-            return text;
-        }
-
-        public Guid Guid(string column)
-        {
-            var text = Cell(column).GetString().Trim();
-            if (System.Guid.TryParse(text, out var value))
-                return value;
-            Problems.Add($"{column}: '{text}' is not a valid id");
-            return default;
-        }
-
-        // Only accepts cells Excel itself holds as dates. The display text is never parsed,
-        // because its format depends on the machine's language settings.
-        public DateTime Date(string column)
-        {
-            var cell = Cell(column);
-            if (cell.DataType == XLDataType.DateTime)
-                return cell.GetDateTime();
-            Problems.Add($"{column}: '{cell.GetString()}' is not a date");
-            return default;
-        }
-
-        public decimal Decimal(string column)
-        {
-            var cell = Cell(column);
-            if (cell.DataType == XLDataType.Number)
-                return (decimal)cell.GetDouble();
-            Problems.Add($"{column}: '{cell.GetString()}' is not a number");
-            return default;
-        }
-
-        public int Int(string column)
-        {
-            var cell = Cell(column);
-            if (cell.DataType == XLDataType.Number)
-            {
-                var number = cell.GetDouble();
-                if (number >= 0 && number % 1 == 0)
-                    return (int)number;
-            }
-            Problems.Add($"{column}: '{cell.GetString()}' is not a whole number");
-            return default;
-        }
-
-        // "Ja" / "Nej" (any capitalisation, surrounding spaces ignored); anything else is a problem.
-        public bool Bool(string column)
-        {
-            var text = Cell(column).GetString().Trim();
-            if (text.Equals("Ja", StringComparison.OrdinalIgnoreCase))
-                return true;
-            if (text.Equals("Nej", StringComparison.OrdinalIgnoreCase))
-                return false;
-            Problems.Add($"{column}: '{text}' is not Ja or Nej");
-            return default;
         }
     }
 }

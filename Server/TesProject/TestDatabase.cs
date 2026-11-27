@@ -62,6 +62,14 @@ public sealed class TestDatabase : IAsyncDisposable
         _sqlite = new SqliteConnection("DataSource=:memory:");
         await _sqlite.OpenAsync();
 
+        // SQLite does not enforce foreign keys unless asked to (PostgreSQL always does). Without this, a row
+        // pointing at a course or campus that does not exist would pass the SQLite tests and only fail on PostgreSQL.
+        await using (var pragma = _sqlite.CreateCommand())
+        {
+            pragma.CommandText = "PRAGMA foreign_keys = ON;";
+            await pragma.ExecuteNonQueryAsync();
+        }
+
         Options = new DbContextOptionsBuilder<AppDbContext>().UseSqlite(_sqlite).Options;
 
         await using var context = NewContext();
