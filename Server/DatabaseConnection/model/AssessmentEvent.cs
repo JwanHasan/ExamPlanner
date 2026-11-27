@@ -1,0 +1,20 @@
+namespace DatabaseConnection.model;
+public enum ExamType
+{
+    Oral,Written,Sep
+}
+public class AssessmentEvent
+{
+    public int Id{get;set;}
+    public Guid PlanningElementId{get;set;}
+    public ExamType ExamType {get;set;}
+    public string Note {get;set;}= "";
+    public int RequiredExamDays{get;set;}
+
+    public ICollection<ExamSession>? ExamSessions{get;set;}
+    public ICollection<AssessmentHandIn>? AssessmentHandIns{get;set;}
+    
+    public PlanningEducationElement PlanningEducationElement {get;set;}=null!;
+    
+
+}

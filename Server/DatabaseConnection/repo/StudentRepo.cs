@@ -1,49 +1,68 @@
-using System.Security.Cryptography.X509Certificates;
-using System.Xml.Schema;
+using DatabaseConnection.DBContext;
 using DatabaseConnection.model;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
 
+namespace DatabaseConnection.repo;
 public class StudentRepo : IStudentRepo
 {
     private readonly AppDbContext _context;
-
-    public StudentRepo(AppDbContext context)
+     public StudentRepo(AppDbContext context)
     {
-        _context= context;
-    }
-    public async Task AddAsync(Student student)
-    {
-         await _context.Student.AddAsync(student);
-         await SaveChangesAsync();
-         
+        _context=context;
     }
 
-    public async Task DeleteByIdAsync(int id)
+    public async Task<Student> AddStudentAsync(int id,int userId,int SourceStudentId, int AttemptNo)
     {
-        var student = await  GetByIdAsync(id);
-         _context.Student.Remove(student);
+        var added= new Student
+        {
+            Id= id, UserId= userId,SourceStudentId=SourceStudentId,AttemptNo=AttemptNo
+        };
+        await _context.Student.AddAsync(added);
+        await _context.SaveChangesAsync();
+        return added;
     }
 
-    public async Task<List<Student>> GetAllAsync()
+    public async Task<bool> DeleteStudentByIdAsync(int id)
     {
-       return await _context.Student.ToListAsync();
+        var deleted = await _context.Student.Where(x=> x.Id==id).ExecuteDeleteAsync();
+        return deleted>0;
+    }
+
+    public async Task<List<Enrollment>?> GetEnrollmentByStudentIdAsync(int id)
+    {
+        var list = await  _context.Student
+        .Where(x=> x.Id==id).Select(x=> x.Enrollments)
+        .FirstOrDefaultAsync();
+        
+        return list?.ToList();
+            
         
     }
 
-    public async Task<Student?> GetByIdAsync(int id)
+    public async Task<List<StudentExamAssignment>?> GetStudentExamAsssignmentByIdAsync(int id)
     {
-        var result = await _context.Student.FirstOrDefaultAsync(x => x.Id == id);
-        return result;
+        var collection = await _context.Student
+        .Where(x=> x.Id==id).Select(x=> x.StudentExamAssignment)
+        .FirstOrDefaultAsync();
+        
+        return collection?.ToList();
+
     }
 
-    public async Task SaveChangesAsync()
+    public async Task<User> GetUserByStudentIdAsync(int id)
     {
-       await  _context.SaveChangesAsync();
+        var user = await  _context.Student.Where(x=> x.Id==id).Select(x=> x.User).FirstAsync();
+        return user;
     }
 
-    public Task UpdtadecByIdAsync(int id)
+    public async Task<Student?> UpdateStudentAsync(int id,int userId,int SourceStudentId, int AttemptNo)
     {
-        throw new NotImplementedException();
+        var find = await  _context.Student.FindAsync(id);
+        if(find is null) return null;
+        find.UserId = userId;
+        find.SourceStudentId=SourceStudentId;
+        find.AttemptNo=AttemptNo;
+        await _context.SaveChangesAsync();
+        return find;
     }
 }

@@ -1,0 +1,52 @@
+import api, { TOKEN_COOKIE } from "./axiosInstance.ts";
+import Cookies from "js-cookie";
+import { decodeToken, isExpired } from "./jwtUtils";
+import type { AuthUser, LoginRequest, LoginResponse } from "./authTypes";
+
+export { getErrorMessage } from "./errorHandler";
+
+
+export const login = async (credentials: LoginRequest): Promise<AuthUser> => {
+    // The token is in "accessToken" (API_CONTRACT.md 5.1)
+    const response = await api.post<LoginResponse>("/auth/login", credentials);
+    const token = response.data.accessToken;
+
+    const payload = decodeToken(token);
+    if (!payload) {
+        throw new Error("The server returned a token that could not be read.");
+    }
+
+    Cookies.set(TOKEN_COOKIE, token, {
+        sameSite: "Lax",
+        secure: window.location.protocol === "https:",
+        expires: 1
+    });
+
+    return {
+        email: payload.email ?? credentials.email,
+        name: payload.name ?? "",
+        role: payload.role ?? "planner"
+    };
+};
+
+export const logout = (): void => {
+    Cookies.remove(TOKEN_COOKIE);
+};
+
+
+export const getCurrentUser = (): AuthUser | null => {
+    const token = Cookies.get(TOKEN_COOKIE);
+    if (!token) return null;
+
+    const payload = decodeToken(token);
+    if (!payload || isExpired(payload)) {
+        Cookies.remove(TOKEN_COOKIE);
+        return null;
+    }
+
+    return {
+        role: payload.role ?? "",
+        email: payload.email ?? "",
+        name: payload.name ?? ""
+    };
+};
