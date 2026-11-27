@@ -132,6 +132,10 @@ else
 
 await AdminSeeder.SeedAsync(app.Services, app.Configuration, app.Logger);
 
+// A teacher and a student account for trying the access tiers. Never outside development.
+if (app.Environment.IsDevelopment())
+    await DevAccountSeeder.SeedAsync(app.Services, app.Configuration, app.Logger);
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

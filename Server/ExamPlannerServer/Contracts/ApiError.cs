@@ -32,4 +32,9 @@ public static class ErrorCodes
 
     // Courses (not in the contract yet; named like CLASS_NOT_FOUND in section 7.2)
     public const string CourseNotFound = "COURSE_NOT_FOUND";
+
+    // Students and planning elements (STUDENT_NOT_FOUND and EXAM_NOT_FOUND are in sections 8.2 and 9.2)
+    public const string StudentNotFound = "STUDENT_NOT_FOUND";
+    public const string PlanningElementNotFound = "PLANNING_ELEMENT_NOT_FOUND";
+    public const string ExamNotFound = "EXAM_NOT_FOUND";
 }

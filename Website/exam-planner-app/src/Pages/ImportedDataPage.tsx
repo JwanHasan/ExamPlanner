@@ -34,7 +34,8 @@ const ImportedDataPage = () => {
         useNavigate();
 
     const {
-        user
+        user,
+        signOut
     } =
         useAuth();
 
@@ -364,14 +365,33 @@ const ImportedDataPage = () => {
                     <button
                         type="button"
                         className="imported-secondary-button"
-                        onClick={
-                            () =>
-                                navigate(
-                                    "/Main"
-                                )
-                        }
+                        onClick={() => navigate("/exam-notes")}
                     >
-                        Back to main page
+                        Exam notes
+                    </button>
+
+                    {/* Only planners have a main page; teachers start here. */}
+                    {isAdmin && (
+                        <button
+                            type="button"
+                            className="imported-secondary-button"
+                            onClick={
+                                () =>
+                                    navigate(
+                                        "/Main"
+                                    )
+                            }
+                        >
+                            Back to main page
+                        </button>
+                    )}
+
+                    <button
+                        type="button"
+                        className="imported-secondary-button"
+                        onClick={() => { signOut(); navigate("/"); }}
+                    >
+                        Log out
                     </button>
 
                 </div>

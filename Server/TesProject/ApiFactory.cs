@@ -20,6 +20,8 @@ public sealed class ApiFactory : WebApplicationFactory<ExcelImportParser>, IAsyn
 {
     public const string PlannerEmail = "planner@test.dk";   // listed in Auth:AdminEmails, so the API role is "Admin"
     public const string TeacherEmail = "teacher@test.dk";   // an ordinary teacher
+    public const string StudentEmail = "student@test.dk";   // a student with a login (and no enrollments yet)
+    public const int StudentNumber = 900001;                // that student's number; no test file uses it
     public const string Password = "Test-Passw0rd!";
 
     private readonly SqliteConnection _connection = new("DataSource=:memory:");
@@ -57,7 +59,7 @@ public sealed class ApiFactory : WebApplicationFactory<ExcelImportParser>, IAsyn
         await _connection.OpenAsync();
 
         // Building the host (first use of Services) runs Program.cs. After that the tables are created
-        // and two accounts are added: a planner (Admin in the API) and an ordinary teacher.
+        // and three accounts are added: a planner (Admin in the API), an ordinary teacher and a student.
         using var scope = Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         await db.Database.EnsureCreatedAsync();
@@ -69,6 +71,10 @@ public sealed class ApiFactory : WebApplicationFactory<ExcelImportParser>, IAsyn
             user.HashedPassword = hasher.HashPassword(user, Password);
             db.User.Add(user);
         }
+
+        var studentUser = new User { Email = StudentEmail, Name = "Test Student", Role = Role.Student };
+        studentUser.HashedPassword = hasher.HashPassword(studentUser, Password);
+        db.Student.Add(new Student { Id = StudentNumber, User = studentUser, SourceStudentId = StudentNumber });
 
         await db.SaveChangesAsync();
     }

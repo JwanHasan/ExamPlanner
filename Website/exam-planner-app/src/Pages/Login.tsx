@@ -3,16 +3,9 @@ import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../api/features/auth/AuthContext.tsx";
 import { getCurrentUser, getErrorMessage } from "../api/authApi";
+import { homeFor } from "../api/features/auth/roles.ts";
 import viaLogo from "./Assets/via-logo.png";
 import "./Themes/Login.css";
-
-// Where each role lands after logging in. Exam planners ("Admin" in the token) go to the main page.
-// Teachers (and, for now, students) have no page of their own yet: the notification page does not
-// exist, so they land on the logged-in placeholder. Change OTHER_HOME when that page is added.
-const ADMIN_HOME = "/Main";
-const OTHER_HOME = "/plan";
-
-const homeFor = (role: string | undefined) => (role === "Admin" ? ADMIN_HOME : OTHER_HOME);
 
 const Login = () => {
     const [email, setEmail] = useState("");
@@ -82,10 +75,6 @@ const Login = () => {
                     <a className="login-help" href="#/reset-password">
                         I don't remember my email or password
                     </a>
-                    <button className="temp-button" onClick={() => navigate("/Main")}>
-                        Temporary button to go to the main page while backend don't have shit
-                    </button>
-
                 </form>
             </section>
         </main>

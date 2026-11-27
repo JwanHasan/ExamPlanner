@@ -11,13 +11,14 @@ build exam schedules from it.
 ## What works today
 
 - **Login** with email and password. The API issues a JWT; the website keeps it in a cookie.
-- **Roles.** Exam planners (called `Admin` in the API) can import and edit. Teachers and students can log in
-  but have no features of their own yet.
+- **Access tiers.** See [Who can do what](#who-can-do-what): planners can do everything, teachers can read
+  everything and write exam notes, students see only their own courses.
 - **Excel import.** A planner uploads one of two kinds of file from the university's system. The planning-element
   export gives planning elements, courses, classes and campuses. The Opslagsark gives students and their
   enrollments. Bad rows are skipped and reported with their row number; the rest is imported. Importing the
   same file again is safe. See [Importing data](#importing-data).
 - **Imported data page.** Lists the imported courses and lets a planner correct a course's name and code.
+- **Exam notes** (planners and teachers) and **My courses** (students) pages.
 - **Calendar pages** (create and edit a plan). These are user-interface work for the scheduling that is
   still to be built on the backend.
 
@@ -105,7 +106,7 @@ Everyday commands:
 
 ### Option 2: Run the parts 
 
-Need the .NET 10 SDK, Node.js, and a PostgreSQL server you can create a database in.
+Need the .NET 10 SDK, Node.js 20.19 or newer (Vite 8 needs it), and a PostgreSQL server you can create a database in.
 
 **1. Create or update the database.** The migrations read the connection from environment variables
 (or from a `.env` file in the repository root):
@@ -157,11 +158,38 @@ Open the address Vite prints (normally <http://localhost:5173>).
 | `Jwt:Key` | Signing key for login tokens, at least 32 characters. **Never commit a real key**; set `Jwt__Key` in production. |
 | `Auth:AdminEmails` | The accounts that get the `Admin` (exam planner) role. |
 | `Seed:AdminEmail`, `Seed:AdminPassword`, `Seed:AdminName` | An account created at startup if it does not exist. |
+| `Seed:TeacherEmail`, `Seed:TeacherPassword` | A teacher account for testing. Development only. |
+| `Seed:StudentEmail`, `Seed:StudentPassword`, `Seed:StudentNumber` | A student account for testing, for the student with that number. Development only. |
 
-`appsettings.Development.json` contains a development-only planner account and signing key so that a fresh
-checkout can log in straight away. Look in that file for the account (`test.planner@via.dk`). It applies only
-when `ASPNETCORE_ENVIRONMENT` is `Development`, which is what Docker Compose sets. In any real deployment,
-supply your own `Jwt__Key` and seed values as environment variables.
+`appsettings.Development.json` contains development-only accounts (a planner, a teacher and a student) and a signing
+key so that a fresh checkout can log in straight away. Look in that file for them (`test.planner@via.dk`,
+`test.teacher@via.dk`, `test.student@via.dk`). The teacher and student accounts are only ever created when
+`ASPNETCORE_ENVIRONMENT` is `Development`, which is what Docker Compose sets. In any real deployment, supply your
+own `Jwt__Key` and seed values as environment variables.
+
+The development student is the student with `Seed:StudentNumber` (2, that is `STU-0002`), so after importing the
+Opslagsark that account shows that student's courses.
+
+## Who can do what
+
+The role is in the login token, and **the API checks it on every request** (the website only hides what you cannot use).
+
+| | Planner (`Admin`) | Teacher | Student |
+|---|---|---|---|
+| Import files | yes | no | no |
+| Read courses, planning elements and students | yes | yes | no |
+| Write or delete the teacher note on an exam | yes | yes | no |
+| Edit a course; delete courses, planning elements and students | yes | no | no |
+| Read their own courses (`/students/me`) | no | no | yes |
+
+- A planner is an account listed in `Auth:AdminEmails`. Teachers and students have the role stored on their account.
+- **Students cannot log in yet** unless an account has a password: imported students have none. Only the
+  development student account can sign in.
+- **A teacher note belongs to an exam.** No exams are created yet, so for now planning elements show "No exam yet"
+  and have no note to edit.
+- **Deleting takes dependants with it.** Deleting a course also deletes its classes, planning elements, their
+  enrollments and exams. Deleting a student also deletes their enrollments and account. Importing the same file
+  again brings deleted rows back.
 
 ## Importing data
 
@@ -237,8 +265,17 @@ decides what to do from `code`. The full contract is in [`Docs/API_CONTRACT.md`]
 | `POST /auth/login` | anyone | Log in; returns `accessToken` and the user |
 | `GET /auth/me` | logged in | The current user |
 | `POST /imports` | Admin | Upload and import an Excel file: the planning-element export or the Opslagsark, recognised by its columns (`multipart/form-data`, field `file`) |
-| `GET /courses`, `GET /courses/{id}` | logged in | The imported courses, with their class count |
+| `GET /courses`, `GET /courses/{id}` | Admin, Teacher | The imported courses, with their class count |
 | `PATCH /courses/{id}` | Admin | Correct a course's name and code |
+| `DELETE /courses/{id}` | Admin | Delete a course and everything under it |
+| `POST /courses/import` | Admin | Only reads a planning-element export and counts its rows; saves nothing |
+| `GET /planning-elements` | Admin, Teacher | Planning elements with their course, campus and teacher note |
+| `PUT /planning-elements/{id}/note` | Admin, Teacher | Write the teacher note on the element's exam (`{ "note": "..." }`, up to 2000 characters) |
+| `DELETE /planning-elements/{id}/note` | Admin, Teacher | Empty the teacher note; the exam stays |
+| `DELETE /planning-elements/{id}` | Admin | Delete a planning element, its enrollments and its exam |
+| `GET /students`, `GET /students/{id}` | Admin, Teacher | Students |
+| `GET /students/me` | Student | The logged-in student and their own enrollments |
+| `DELETE /students/{id}` | Admin | Delete a student, their enrollments and their account |
 
 ## Database
 
@@ -259,7 +296,7 @@ dotnet test Server/TesProject
 ```
 
 The backend tests cover the Excel reader, the import service against a database, the controllers, and the
-whole API over HTTP (login, roles, import, courses). By default the database tests run on in-memory SQLite.
+whole API over HTTP (login, access tiers, import, courses). By default the database tests run on in-memory SQLite.
 To run them on real PostgreSQL too, give the tests a connection to a server where they may create and drop
 temporary databases (each test gets its own and removes it afterwards; local normal database is never used):
 
@@ -312,5 +349,7 @@ For the website: `npm run lint` and `npm run build` (in `Website/exam-planner-ap
   per enrollment). Enrollments are saved with `SourceImportId` 0, because there is no import history yet, and a
   new campus is saved with `IsVirtual` false, because the files do not say. Rows on planning elements that are
   not in the database are skipped.
-- **Roles:** teachers and students can log in, but only planners have features. After login a planner lands on
-  the main page; other roles land on a placeholder page until their pages exist.
+- **Access tiers:** teacher notes can only be written on exams that exist, and no exams are created yet. Students
+  and teachers have no way to get an account apart from the development ones. Deleting is available in the API only;
+  the website has no delete buttons yet. Planners can edit a course's name and code and the teacher notes, but not
+  the other imported fields.

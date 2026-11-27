@@ -14,7 +14,7 @@ namespace ExamPlannerServer.controller;
 /// 
 [ApiController]
 [Route("api/v1/courses")]
-[Authorize]
+[Authorize(Roles = ApiRoles.Staff)] // students only see their own information (GET /students/me)
 public class CoursesController : ControllerBase
 {
     private readonly ICourseRepo _courses;
@@ -76,9 +76,22 @@ public class CoursesController : ControllerBase
         return ToDto(updated, await ClassCountAsync(id));
     }
 
+    // DELETE /api/v1/courses/5  (only the exam planners delete). The course's classes and planning elements,
+    // and their enrollments and exams, go with it (database cascade).
+    [HttpDelete("{id:int}")]
+    [Authorize(Roles = ApiRoles.Admin)]
+    public async Task<IActionResult> DeleteCourse(int id)
+    {
+        if (!await _courses.DeleteAsync(id))
+            return NotFound(new ApiError(ErrorCodes.CourseNotFound, $"Course {id} does not exist."));
+
+        return NoContent();
+    }
+
     // POST /api/v1/courses/import  -> only reads the planning-element export and reports
     // how many rows it understood. It saves nothing; the real import is POST /api/v1/imports.
     [HttpPost("import")]
+    [Authorize(Roles = ApiRoles.Admin)]
     public async Task<IActionResult> ImportCourses(IFormFile? file)
     {
         if (file is null || file.Length == 0)

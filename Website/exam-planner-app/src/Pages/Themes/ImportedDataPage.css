@@ -84,6 +84,12 @@
     font-size: 38px;
 }
 
+/* This page is always light, so its headings must not follow the dark-mode colour of the global stylesheet. */
+.imported-data-page h1,
+.imported-data-page h2 {
+    color: #202521;
+}
+
 .imported-data-title p {
     margin: 0;
 
