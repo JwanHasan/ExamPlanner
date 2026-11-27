@@ -1,42 +1,58 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import type { ReactNode } from "react";
-import { getCurrentUser, login as loginRequest, logout as logoutRequest } from "../../authApi.ts";
-import type { AuthUser, LoginRequest } from "../../authTypes.ts";
+import {useMemo, useState} from "react";
+import type {ReactNode} from "react";
+import {getCurrentUser, login as loginRequest, logout as logoutRequest} from "../../authApi.ts";
+import type {AuthUser} from "../../authTypes.ts";
+import {AuthContext} from "./authContextDefinition.ts";
+import type {AuthContextValue} from "./authContextDefinition.ts";
 
-interface AuthContextValue {
-    user: AuthUser | null;
-    ready: boolean;
-    signIn: (credentials: LoginRequest) => Promise<void>;
-    signOut: () => void;
-}
+export const AuthProvider = (
+    {
+        children
+    }: {
+        children: ReactNode;
+    }
+) => {
 
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
-
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    const [user, setUser] = useState<AuthUser | null>(null);
-    const [ready, setReady] = useState(false);
-
-    // Restore the session from the cookie on first load.
-    useEffect(() => {
-        setUser(getCurrentUser());
-        setReady(true);
-    }, []);
-
-    const value = useMemo<AuthContextValue>(() => ({
+    const [
         user,
-        ready,
-        signIn: async credentials => setUser(await loginRequest(credentials)),
-        signOut: () => {
-            logoutRequest();
-            setUser(null);
-        }
-    }), [user, ready]);
+        setUser
+    ] =
+        useState<AuthUser | null>(
+            () => getCurrentUser()
+        );
+    
+    const value =
+        useMemo<AuthContextValue>(
+            () => ({
+                user,
+                ready: true,
 
-    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
+                signIn:
+                    async credentials => {
+                        const authenticatedUser =
+                            await loginRequest(
+                                credentials
+                            );
+                        setUser(
+                            authenticatedUser
+                        );
+                    },
 
-export const useAuth = (): AuthContextValue => {
-    const context = useContext(AuthContext);
-    if (!context) throw new Error("useAuth must be used inside AuthProvider");
-    return context;
+                signOut: () => {
+                    logoutRequest();
+                    setUser(null);
+                }
+            }),
+            [
+                user
+            ]
+        );
+    
+    return (
+        <AuthContext.Provider
+            value={value}
+        >
+            {children}
+        </AuthContext.Provider>
+    );
 };
